@@ -1,1 +1,1 @@
-console.log("i am ts");
+export * from './Widget';

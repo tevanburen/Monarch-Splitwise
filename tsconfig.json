@@ -1,7 +1,16 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
-    "allowJs": false,
-    "module": "NodeNext"
-  }
+    "baseUrl": ".",
+    "target": "ES6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src"]
 }
