@@ -1,4 +1,4 @@
-import { Paper, Stack, styled } from '@mui/material';
+import { Paper, styled, Typography } from '@mui/material';
 
 const StyledWidget = styled(Paper)(({ theme }) => ({
   bottom: theme.spacing(1),
@@ -12,7 +12,7 @@ export const Widget = () => {
   console.log('hello world');
   return (
     <StyledWidget elevation={3}>
-      <Stack spacing={1}>Hello world</Stack>
+      <Typography>Hello world</Typography>
     </StyledWidget>
   );
 };
