@@ -15,12 +15,12 @@ export interface TvbRow {
 }
 
 export interface MonarchRow {
-  Date: Date;
+  Date: string;
   Merchant: 'Splitwise';
   Category: 'Uncategorized';
   Account: string;
   'Original Statement': '';
-  Notes: '';
+  Notes: string;
   Amount: number;
   Tags: '';
 }
