@@ -21,7 +21,16 @@ export const tmpDriver = async (file: File) => {
   console.log(monarchArr);
 
   // write to a file
-  const newFile = rowsToCsv(monarchArr, 'test.csv');
+  const newFile = rowsToCsv(monarchArr, 'test.csv', [
+    'Date',
+    'Merchant',
+    'Category',
+    'Account',
+    'Original Statement',
+    'Notes',
+    'Amount',
+    'Tags',
+  ] satisfies (keyof MonarchRow)[]);
   console.log(newFile);
 
   // drop it in
@@ -65,8 +74,15 @@ const tvbToMonarch = (rows: TvbRow[], accountName: string): MonarchRow[] => {
 
 const dateToString = (date: Date): string => date.toISOString().split('T')[0];
 
-const rowsToCsv = (rows: unknown[], fileName: string): File => {
-  const worksheet = XLSX.utils.json_to_sheet(rows);
+const rowsToCsv = (
+  rows: unknown[],
+  fileName: string,
+  columns?: string[]
+): File => {
+  const worksheet = XLSX.utils.json_to_sheet(rows, {
+    header: columns,
+    skipHeader: false,
+  });
   const csv = XLSX.utils.sheet_to_csv(worksheet);
   return new File([csv], fileName, {
     type: 'text/csv',
