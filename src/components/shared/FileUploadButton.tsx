@@ -1,9 +1,9 @@
 // import { CloudUploadRounded } from '@mui/icons-material';
 import { Button, styled } from '@mui/material';
-import { inputId } from '@/components';
 
 export interface FileUploadButtonProps {
   onUpload?: (files: File[]) => void | Promise<void>;
+  id?: string;
 }
 
 const VisuallyHiddenInput = styled('input')({
@@ -22,7 +22,7 @@ const acceptedFileTypes: Record<string, string> = {
   'text/csv': 'csv',
 };
 
-export const FileUploadButton = ({ onUpload }: FileUploadButtonProps) => {
+export const FileUploadButton = ({ onUpload, id }: FileUploadButtonProps) => {
   return (
     <Button
       {...{
@@ -52,7 +52,7 @@ export const FileUploadButton = ({ onUpload }: FileUploadButtonProps) => {
           event.target.value = '';
         }}
         multiple
-        id={inputId}
+        id={id}
       />
     </Button>
   );

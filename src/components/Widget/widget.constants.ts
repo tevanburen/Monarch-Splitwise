@@ -1,1 +1,1 @@
-export const inputId = 'MonarchSplitwiseInput';
+export const widgetInputId = 'MonarchSplitwiseInput';

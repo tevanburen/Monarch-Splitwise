@@ -1,5 +1,5 @@
 import { Paper, styled, Typography } from '@mui/material';
-import { FileUploadButton } from '@/components';
+import { FileUploadButton, widgetInputId } from '@/components';
 import { tmpDriver } from './widget.methods';
 
 const StyledWidget = styled(Paper)(({ theme }) => ({
@@ -18,6 +18,7 @@ export const Widget = () => {
         onUpload={(files) => {
           files.forEach(tmpDriver);
         }}
+        id={widgetInputId}
       />
     </StyledWidget>
   );
