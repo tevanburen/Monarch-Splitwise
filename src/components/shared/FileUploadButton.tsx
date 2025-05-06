@@ -1,5 +1,6 @@
 // import { CloudUploadRounded } from '@mui/icons-material';
 import { Button, styled } from '@mui/material';
+import { inputId } from '@/components';
 
 export interface FileUploadButtonProps {
   onUpload?: (files: File[]) => void | Promise<void>;
@@ -18,8 +19,6 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const acceptedFileTypes: Record<string, string> = {
-  'application/vnd.ms-excel': 'xls',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
   'text/csv': 'csv',
 };
 
@@ -53,6 +52,7 @@ export const FileUploadButton = ({ onUpload }: FileUploadButtonProps) => {
           event.target.value = '';
         }}
         multiple
+        id={inputId}
       />
     </Button>
   );
