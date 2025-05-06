@@ -2,17 +2,17 @@ import * as XLSX from 'xlsx';
 import { MonarchRow, SplitwiseRow, TvbRow } from './widget.types';
 
 export const tmpDriver = async (file: File) => {
-  const splitwiseArr = await csvToJson<SplitwiseRow>(file);
+  const splitwiseArr = await csvToRows<SplitwiseRow>(file);
   // need to remove the "total balance" row
-  console.log(splitwiseArr);
   splitwiseArr.pop();
   const tvbArr = splitwiseToTvb(splitwiseArr, 'Thomas Van Buren');
-  console.log(tvbArr);
   const monarchArr = tvbToMonarch(tvbArr, 'The Upper');
   console.log(monarchArr);
+  const newFile = rowsToCsv(monarchArr, 'test.csv');
+  console.log(newFile);
 };
 
-const csvToJson = async <R>(file: File): Promise<R[]> => {
+const csvToRows = async <R>(file: File): Promise<R[]> => {
   const workbook = XLSX.read(await file.arrayBuffer(), { cellDates: true });
 
   const arr = XLSX.utils.sheet_to_json(
@@ -46,3 +46,11 @@ const tvbToMonarch = (rows: TvbRow[], accountName: string): MonarchRow[] => {
 };
 
 const dateToString = (date: Date): string => date.toISOString().split('T')[0];
+
+const rowsToCsv = (rows: unknown[], fileName: string): File => {
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const csv = XLSX.utils.sheet_to_csv(worksheet);
+  return new File([csv], fileName, {
+    type: 'text/csv',
+  });
+};
