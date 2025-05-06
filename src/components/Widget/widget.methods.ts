@@ -12,8 +12,11 @@ export const tmpDriver = async (file: File) => {
   // transform splitwise to tvb
   let tvbArr = splitwiseToTvb(splitwiseArr, 'Thomas Van Buren');
 
-  // use most recent 10 for now
-  tvbArr = tvbArr.slice(-10);
+  // filter out charges that don't involve me
+  tvbArr = tvbArr.filter((row) => row.delta);
+
+  // use most recent 3 for now
+  tvbArr = tvbArr.slice(-3);
 
   // transform tvb to monarch
   const monarchArr = tvbToMonarch(tvbArr, 'The Upper');
