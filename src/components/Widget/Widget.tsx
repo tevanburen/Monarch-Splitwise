@@ -16,7 +16,7 @@ export const Widget = () => {
       <Typography>Hello world</Typography>
       <FileUploadButton
         onUpload={(files) => {
-          files.forEach(tmpDriver);
+          tmpDriver(files);
         }}
         id={widgetInputId}
       />

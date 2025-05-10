@@ -12,6 +12,15 @@ export const splitwiseRowsToTvbRows = (
   return rows.map(rowToRow);
 };
 
+export const monarchRowsToTvbRows = (rows: MonarchRow[]): TvbRow[] => {
+  const rowToRow = (row: MonarchRow): TvbRow => ({
+    date: new Date(row.Date),
+    delta: row.Amount,
+    description: row.Notes,
+  });
+  return rows.map(rowToRow);
+};
+
 export const tvbRowsToMonarchRows = (
   rows: TvbRow[],
   accountName: string
