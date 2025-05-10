@@ -1,5 +1,11 @@
-import { csvToRows, rowsToCsv, uploadFilesToInput } from '@/components';
-import { MonarchRow, SplitwiseRow, TvbRow } from './widget.types';
+import {
+  csvToRows,
+  rowsToCsv,
+  splitwiseRowsToTvbRows,
+  tvbRowsToMonarchRows,
+  uploadFilesToInput,
+} from '@/components';
+import { MonarchRow, SplitwiseRow, TvbRow } from '../shared/types';
 
 export const tmpDriver = async (file: File) => {
   // read splitwise rows
@@ -29,18 +35,6 @@ const ingestSplitwiseCsv = async (
   return tvbArr.filter((row) => row.delta);
 };
 
-const splitwiseRowsToTvbRows = (
-  rows: SplitwiseRow[],
-  memberName: string
-): TvbRow[] => {
-  const rowToRow = (row: SplitwiseRow): TvbRow => ({
-    date: row.Date,
-    delta: row[memberName],
-    description: row.Description,
-  });
-  return rows.map(rowToRow);
-};
-
 const uploadRowsToMonarch = (rows: TvbRow[]) => {
   // transform tvb to monarch
   const monarchRows = tvbRowsToMonarchRows(rows, 'The Upper');
@@ -61,22 +55,3 @@ const uploadRowsToMonarch = (rows: TvbRow[]) => {
   uploadFilesToInput(newFile);
   // downloadFile(newFile);
 };
-
-const tvbRowsToMonarchRows = (
-  rows: TvbRow[],
-  accountName: string
-): MonarchRow[] => {
-  const rowToRow = (row: TvbRow): MonarchRow => ({
-    Date: dateToString(row.date),
-    Amount: row.delta,
-    Notes: row.description,
-    Account: accountName,
-    Merchant: 'Splitwise',
-    Category: 'Uncategorized',
-    Tags: '',
-    'Original Statement': '',
-  });
-  return rows.map(rowToRow);
-};
-
-const dateToString = (date: Date): string => date.toISOString().split('T')[0];
