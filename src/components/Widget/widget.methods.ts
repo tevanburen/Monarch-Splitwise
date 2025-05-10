@@ -56,10 +56,9 @@ const uploadRowsToMonarch = (rows: TvbRow[]) => {
     'Amount',
     'Tags',
   ] satisfies (keyof MonarchRow)[]);
-  console.log(newFile);
 
   // drop it in
-  uploadFilesToInput([newFile]);
+  uploadFilesToInput(newFile);
   // downloadFile(newFile);
 };
 

@@ -26,7 +26,7 @@ export const rowsToCsv = (
   });
 };
 
-export const uploadFilesToInput = (files: File[]): void => {
+export const uploadFilesToInput = (...files: File[]): void => {
   const inputs = Array.from(
     document.querySelectorAll('input[type="file"]')
   ) as HTMLInputElement[];
