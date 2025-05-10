@@ -1,5 +1,5 @@
 import { Button, Paper, styled, Typography } from '@mui/material';
-import { FileUploadButton, widgetInputId } from '@/components';
+import { clickElement, FileUploadButton, widgetInputId } from '@/components';
 import { tmpDriver } from './widget.methods';
 
 const StyledWidget = styled(Paper)(({ theme }) => ({
@@ -22,15 +22,7 @@ export const Widget = () => {
       />
       <Button
         onClick={() => {
-          const button = Array.from(document.querySelectorAll('button')).find(
-            (el) => /^Edit[\s\W]*$/.test(el.textContent || '')
-          );
-
-          if (button) {
-            button.click();
-          } else {
-            console.warn('Edit button not found.');
-          }
+          clickElement('button', /^Edit[\s\W]*$/);
         }}
       >
         click

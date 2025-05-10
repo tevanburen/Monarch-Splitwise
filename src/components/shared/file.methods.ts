@@ -1,5 +1,4 @@
 import * as XLSX from 'xlsx';
-import { widgetInputId } from '@/components';
 
 export const csvToRows = async <R>(file: File): Promise<R[]> => {
   const workbook = XLSX.read(await file.arrayBuffer(), { cellDates: true });
@@ -24,23 +23,6 @@ export const rowsToCsv = (
   return new File([csv], fileName, {
     type: 'text/csv',
   });
-};
-
-export const uploadFilesToInput = (...files: File[]): void => {
-  const inputs = Array.from(
-    document.querySelectorAll('input[type="file"]')
-  ) as HTMLInputElement[];
-  const input = inputs.find((el) => el.id !== widgetInputId);
-
-  if (!input) {
-    console.error('CSV file input not found.');
-    return;
-  }
-
-  const dataTransfer = new DataTransfer();
-  files.forEach((file) => dataTransfer.items.add(file));
-  input.files = dataTransfer.files;
-  input.dispatchEvent(new Event('change', { bubbles: true }));
 };
 
 export const downloadFile = (file: File): void => {
