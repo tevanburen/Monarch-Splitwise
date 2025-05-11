@@ -1,47 +1,58 @@
 import { widgetInputId } from '@/components';
 
-export const clickElement = (
+export const clickElement = async (
   type: string,
   regex: RegExp,
   timeout?: boolean | number
-): void => {
-  const startTime = Date.now();
-
-  const tryClick = () => {
+): Promise<boolean> =>
+  await trySeveralTimes<boolean>(() => {
     const thing = Array.from(document.querySelectorAll(type)).find((el) =>
       regex.test(el.textContent || '')
     ) as HTMLElement;
 
     if (thing) {
       thing.click();
-    } else if (
-      timeout &&
-      Date.now() < startTime + (timeout === true ? 500 : timeout)
-    ) {
-      setTimeout(tryClick, 200);
-    } else {
-      console.warn(
-        `${type} with text content matching ${regex} does not exist`
-      );
+      return true;
     }
-  };
+    return false;
+  }, timeout);
 
-  tryClick();
-};
+export const uploadFilesToInput = async (...files: File[]): Promise<boolean> =>
+  await trySeveralTimes<boolean>(() => {
+    const inputs = Array.from(
+      document.querySelectorAll('input[type="file"]')
+    ) as HTMLInputElement[];
+    const input = inputs.find((el) => el.id !== widgetInputId);
 
-export const uploadFilesToInput = (...files: File[]): void => {
-  const inputs = Array.from(
-    document.querySelectorAll('input[type="file"]')
-  ) as HTMLInputElement[];
-  const input = inputs.find((el) => el.id !== widgetInputId);
+    if (!input) {
+      return false;
+    }
 
-  if (!input) {
-    console.error('CSV file input not found.');
-    return;
-  }
+    const dataTransfer = new DataTransfer();
+    files.forEach((file) => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  }, true);
 
-  const dataTransfer = new DataTransfer();
-  files.forEach((file) => dataTransfer.items.add(file));
-  input.files = dataTransfer.files;
-  input.dispatchEvent(new Event('change', { bubbles: true }));
-};
+const trySeveralTimes = async <K>(
+  funcToTry: () => K | Promise<K>,
+  timeout?: boolean | number,
+  interval: number = 200
+): Promise<K> =>
+  new Promise((resolve) => {
+    const endTime = Date.now() + (timeout === true ? 500 : timeout || 0);
+
+    const tryFunc = async () => {
+      const response = await funcToTry();
+      if (response) {
+        resolve(response);
+      } else if (timeout && Date.now() < endTime) {
+        setTimeout(tryFunc, interval);
+      } else {
+        resolve(response);
+      }
+    };
+
+    tryFunc();
+  });

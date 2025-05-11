@@ -33,7 +33,11 @@ export const tmpDriver = async (files: File[]) => {
   }
 
   // upload new rows to monarch
-  uploadRowsToMonarch(newRows);
+  if (newRows.length) {
+    await uploadRowsToMonarch(newRows);
+  } else {
+    console.log('Monarch looks up to date');
+  }
 };
 
 const ingestSplitwiseCsv = async (
@@ -68,7 +72,7 @@ const ingestMonarchCsv = async (file: File): Promise<TvbRow[]> => {
   return tvbArr;
 };
 
-const uploadRowsToMonarch = (rows: TvbRow[]) => {
+const uploadRowsToMonarch = async (rows: TvbRow[]) => {
   // transform tvb to monarch
   const monarchRows = tvbRowsToMonarchRows(rows, 'The Upper');
 
@@ -85,11 +89,11 @@ const uploadRowsToMonarch = (rows: TvbRow[]) => {
   ] satisfies (keyof MonarchRow)[]);
 
   // open the modal
-  clickElement('button', /^Edit[\s\W]*$/);
-  clickElement('div', /^Upload transactions$/, true);
+  await clickElement('button', /^Edit[\s\W]*$/);
+  await clickElement('div', /^Upload transactions$/, true);
 
   // drop in the file
-  uploadFilesToInput(newFile);
+  await uploadFilesToInput(newFile);
   // downloadFile(newFile);
 };
 
