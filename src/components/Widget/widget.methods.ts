@@ -77,7 +77,7 @@ const uploadRowsToMonarch = async (rows: TvbRow[]) => {
   const monarchRows = tvbRowsToMonarchRows(rows, 'The Upper');
 
   // write to a file
-  const newFile = rowsToCsv(monarchRows, 'test.csv', [
+  const newFile = rowsToCsv(monarchRows, 'Monarch-Splitwise.csv', [
     'Date',
     'Merchant',
     'Category',
@@ -90,10 +90,17 @@ const uploadRowsToMonarch = async (rows: TvbRow[]) => {
 
   // open the modal
   await clickElement('button', /^Edit[\s\W]*$/);
-  await clickElement('div', /^Upload transactions$/, true);
+  await clickElement('div', /^Upload transactions$/);
 
   // drop in the file
   await uploadFilesToInput(newFile);
+
+  // check the box
+  await clickElement(`input[type="checkbox"]`);
+
+  // hit go
+  await clickElement<HTMLButtonElement>('button', /^Add to account$/);
+
   // downloadFile(newFile);
 };
 

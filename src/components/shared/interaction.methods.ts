@@ -1,38 +1,40 @@
 import { widgetInputId } from '@/components';
 
-export const clickElement = async (
+export const clickElement = async <K extends HTMLElement>(
   type: string,
-  regex: RegExp,
-  timeout?: boolean | number
-): Promise<boolean> =>
-  await trySeveralTimes<boolean>(() => {
+  regex: RegExp = /.*/,
+  timeout: boolean | number = true
+): Promise<K | undefined> =>
+  await trySeveralTimes<K | undefined>(() => {
     const thing = Array.from(document.querySelectorAll(type)).find((el) =>
       regex.test(el.textContent || '')
-    ) as HTMLElement;
+    ) as K;
 
-    if (thing) {
+    if (thing && !(thing as unknown as HTMLButtonElement).disabled) {
       thing.click();
-      return true;
+      return thing;
     }
-    return false;
+    return undefined;
   }, timeout);
 
-export const uploadFilesToInput = async (...files: File[]): Promise<boolean> =>
-  await trySeveralTimes<boolean>(() => {
+export const uploadFilesToInput = async (
+  ...files: File[]
+): Promise<HTMLElement | undefined> =>
+  await trySeveralTimes<HTMLElement | undefined>(() => {
     const inputs = Array.from(
       document.querySelectorAll('input[type="file"]')
     ) as HTMLInputElement[];
     const input = inputs.find((el) => el.id !== widgetInputId);
 
     if (!input) {
-      return false;
+      return input;
     }
 
     const dataTransfer = new DataTransfer();
     files.forEach((file) => dataTransfer.items.add(file));
     input.files = dataTransfer.files;
     input.dispatchEvent(new Event('change', { bubbles: true }));
-    return true;
+    return input;
   }, true);
 
 const trySeveralTimes = async <K>(
