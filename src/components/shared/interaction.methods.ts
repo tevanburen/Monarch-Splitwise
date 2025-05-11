@@ -1,15 +1,32 @@
 import { widgetInputId } from '@/components';
 
-export const clickElement = (type: string, regex: RegExp): void => {
-  const thing = Array.from(document.querySelectorAll(type)).find((el) =>
-    regex.test(el.textContent || '')
-  ) as HTMLElement;
+export const clickElement = (
+  type: string,
+  regex: RegExp,
+  timeout?: boolean | number
+): void => {
+  const startTime = Date.now();
 
-  if (thing) {
-    thing.click();
-  } else {
-    console.warn(`${type} with text content matching ${regex} does not exist`);
-  }
+  const tryClick = () => {
+    const thing = Array.from(document.querySelectorAll(type)).find((el) =>
+      regex.test(el.textContent || '')
+    ) as HTMLElement;
+
+    if (thing) {
+      thing.click();
+    } else if (
+      timeout &&
+      Date.now() < startTime + (timeout === true ? 500 : timeout)
+    ) {
+      setTimeout(tryClick, 200);
+    } else {
+      console.warn(
+        `${type} with text content matching ${regex} does not exist`
+      );
+    }
+  };
+
+  tryClick();
 };
 
 export const uploadFilesToInput = (...files: File[]): void => {

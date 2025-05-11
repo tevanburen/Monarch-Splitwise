@@ -1,4 +1,5 @@
 import {
+  clickElement,
   csvToRows,
   monarchRowsToTvbRows,
   rowsToCsv,
@@ -83,7 +84,11 @@ const uploadRowsToMonarch = (rows: TvbRow[]) => {
     'Tags',
   ] satisfies (keyof MonarchRow)[]);
 
-  // drop it in
+  // open the modal
+  clickElement('button', /^Edit[\s\W]*$/);
+  clickElement('div', /^Upload transactions$/, true);
+
+  // drop in the file
   uploadFilesToInput(newFile);
   // downloadFile(newFile);
 };

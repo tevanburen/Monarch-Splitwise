@@ -1,5 +1,5 @@
-import { Button, Paper, styled, Typography } from '@mui/material';
-import { clickElement, FileUploadButton, widgetInputId } from '@/components';
+import { Paper, styled, Typography } from '@mui/material';
+import { FileUploadButton, widgetInputId } from '@/components';
 import { tmpDriver } from './widget.methods';
 
 const StyledWidget = styled(Paper)(({ theme }) => ({
@@ -20,13 +20,6 @@ export const Widget = () => {
         }}
         id={widgetInputId}
       />
-      <Button
-        onClick={() => {
-          clickElement('button', /^Edit[\s\W]*$/);
-        }}
-      >
-        click
-      </Button>
     </StyledWidget>
   );
 };
