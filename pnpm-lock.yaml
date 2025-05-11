@@ -22,6 +22,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      webpackbar:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.99.8)
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
@@ -845,6 +848,13 @@ packages:
       }
     engines: { node: '>=8' }
 
+  ansis@3.17.0:
+    resolution:
+      {
+        integrity: sha512-0qWUglt9JEqLFr3w1I1pbrChn1grhaiAR2ocX1PP/flRmxgtwTzPFFFnfIlD6aMOLQZgSuCRlidD70lvx8yhzg==,
+      }
+    engines: { node: '>=14' }
+
   argparse@2.0.1:
     resolution:
       {
@@ -1017,6 +1027,13 @@ packages:
       {
         integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==,
       }
+
+  consola@3.4.2:
+    resolution:
+      {
+        integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==,
+      }
+    engines: { node: ^14.18.0 || >=16.10.0 }
 
   content-disposition@1.0.0:
     resolution:
@@ -2094,6 +2111,13 @@ packages:
     engines: { node: '>=14' }
     hasBin: true
 
+  pretty-time@1.1.0:
+    resolution:
+      {
+        integrity: sha512-28iF6xPQrP8Oa6uxE6a1biz+lWeTOAPKggvjB8HAs6nVMKZwf5bG++632Dx614hIWgUPkgivRfG+a8uAXGTIbA==,
+      }
+    engines: { node: '>=4' }
+
   prop-types@15.8.1:
     resolution:
       {
@@ -2395,6 +2419,12 @@ packages:
       }
     engines: { node: '>= 0.8' }
 
+  std-env@3.9.0:
+    resolution:
+      {
+        integrity: sha512-UGvjygr6F6tpH7o2qyqR6QYpwraIjKSdtzyBdyytFOHmPZY917kwdwLG0RbOjWOnKmnm3PeHjaoLLMie7kPLQw==,
+      }
+
   strip-json-comments@3.1.1:
     resolution:
       {
@@ -2612,6 +2642,21 @@ packages:
       webpack-cli: '*'
     peerDependenciesMeta:
       webpack-cli:
+        optional: true
+
+  webpackbar@7.0.0:
+    resolution:
+      {
+        integrity: sha512-aS9soqSO2iCHgqHoCrj4LbfGQUboDCYJPSFOAchEK+9psIjNrfSWW4Y0YEz67MKURNvMmfo0ycOg9d/+OOf9/Q==,
+      }
+    engines: { node: '>=14.21.3' }
+    peerDependencies:
+      '@rspack/core': '*'
+      webpack: 3 || 4 || 5
+    peerDependenciesMeta:
+      '@rspack/core':
+        optional: true
+      webpack:
         optional: true
 
   which@2.0.2:
@@ -3264,6 +3309,8 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
+  ansis@3.17.0: {}
+
   argparse@2.0.1: {}
 
   babel-plugin-macros@3.1.0:
@@ -3361,6 +3408,8 @@ snapshots:
   commander@2.20.3: {}
 
   concat-map@0.0.1: {}
+
+  consola@3.4.2: {}
 
   content-disposition@1.0.0:
     dependencies:
@@ -3925,6 +3974,8 @@ snapshots:
 
   prettier@3.5.3: {}
 
+  pretty-time@1.1.0: {}
+
   prop-types@15.8.1:
     dependencies:
       loose-envify: 1.4.0
@@ -4114,6 +4165,8 @@ snapshots:
 
   statuses@2.0.1: {}
 
+  std-env@3.9.0: {}
+
   strip-json-comments@3.1.1: {}
 
   stylis@4.2.0: {}
@@ -4266,6 +4319,15 @@ snapshots:
       - '@swc/core'
       - esbuild
       - uglify-js
+
+  webpackbar@7.0.0(webpack@5.99.8):
+    dependencies:
+      ansis: 3.17.0
+      consola: 3.4.2
+      pretty-time: 1.1.0
+      std-env: 3.9.0
+    optionalDependencies:
+      webpack: 5.99.8(webpack-cli@6.0.1)
 
   which@2.0.2:
     dependencies:

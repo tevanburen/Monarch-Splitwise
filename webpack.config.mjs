@@ -1,5 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
+import WebpackBar from 'webpackbar';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,4 +32,5 @@ export default {
     path: path.resolve(__dirname, 'dist'),
   },
   mode: 'production',
+  plugins: [new WebpackBar()],
 };
