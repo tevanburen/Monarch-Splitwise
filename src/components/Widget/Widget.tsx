@@ -1,6 +1,7 @@
-import { Paper, styled, Typography } from '@mui/material';
+import { Button, Paper, styled, Typography } from '@mui/material';
 import { FileUploadButton, widgetInputId } from '@/components';
 import { tmpDriver } from './widget.methods';
+import { fetchMonarchRows, usePageContext } from '@/api';
 
 const StyledWidget = styled(Paper)(({ theme }) => ({
   bottom: theme.spacing(1),
@@ -11,6 +12,8 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 }));
 
 export const Widget = () => {
+  const { authToken } = usePageContext();
+
   return (
     <StyledWidget elevation={3}>
       <Typography>Hello world</Typography>
@@ -20,6 +23,9 @@ export const Widget = () => {
         }}
         id={widgetInputId}
       />
+      <Button onClick={() => fetchMonarchRows(authToken ?? 'nope')}>
+        fetch
+      </Button>
     </StyledWidget>
   );
 };

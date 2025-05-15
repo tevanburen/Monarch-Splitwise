@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 export default {
   entry: {
     app: './src/index.tsx',
+    'page-context-injection': './src/api/page-context-injection.ts',
   },
   module: {
     rules: [
