@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 
-export const csvToRows = async <R>(file: File): Promise<R[]> => {
+export const csvFileToRows = async <R>(file: File): Promise<R[]> => {
   const workbook = XLSX.read(await file.arrayBuffer(), { cellDates: true });
 
   const arr = XLSX.utils.sheet_to_json(
@@ -10,7 +10,7 @@ export const csvToRows = async <R>(file: File): Promise<R[]> => {
   return arr;
 };
 
-export const rowsToCsv = (
+export const rowsToCsvFile = (
   rows: unknown[],
   fileName: string,
   columns?: string[]
