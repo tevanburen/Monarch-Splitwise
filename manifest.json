@@ -7,5 +7,11 @@
       "js": ["dist/app.js"],
       "matches": ["*://app.monarchmoney.com/*"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dist/page-context-injection.js"],
+      "matches": ["*://app.monarchmoney.com/*"]
+    }
   ]
 }

@@ -1,27 +1,35 @@
 import {
-  csvToRows,
+  clickElement,
+  csvFileToRows,
+  csvTextToRows,
   monarchRowsToTvbRows,
-  rowsToCsv,
+  rowsToCsvFile,
   splitwiseRowsToTvbRows,
   tvbRowsToMonarchRows,
   uploadFilesToInput,
-} from '@/components';
-import { MonarchRow, SplitwiseRow, TvbRow } from '../shared/types';
+} from '@/shared';
+import { MonarchRow, SplitwiseRow, TvbRow } from '../../shared/shared.types';
+import { fetchMonarchCsv } from '@/api';
 
-export const tmpDriver = async (files: File[]) => {
+export const tmpDriver = async (files: File[], authToken: string) => {
   // decipher files
-  if (files.length !== 2) return;
+  if (files.length !== 1) return;
   const splitwiseFile = files.find(
     (file) => !file.name.includes('transactions')
   );
-  const monarchFile = files.find((file) => file.name.includes('transactions'));
-  if (!splitwiseFile || !monarchFile) return;
+  if (!splitwiseFile) return;
+
+  // fetch monarchText
+  const monarchText = await fetchMonarchCsv(authToken);
 
   // read splitwise rows
-  const newRows = await ingestSplitwiseCsv(splitwiseFile, 'Thomas Van Buren');
+  const newRows = await ingestSplitwiseCsvFile(
+    splitwiseFile,
+    'Thomas Van Buren'
+  );
 
   // read monarch rows
-  const oldRows = await ingestMonarchCsv(monarchFile);
+  const oldRows = await ingestMonarchCsvText(monarchText);
 
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
@@ -32,15 +40,19 @@ export const tmpDriver = async (files: File[]) => {
   }
 
   // upload new rows to monarch
-  uploadRowsToMonarch(newRows);
+  if (newRows.length) {
+    await uploadRowsToMonarch(newRows);
+  } else {
+    console.log('Monarch looks up to date');
+  }
 };
 
-const ingestSplitwiseCsv = async (
+const ingestSplitwiseCsvFile = async (
   file: File,
   memberName: string
 ): Promise<TvbRow[]> => {
   // read splitwise rows
-  const splitwiseArr = await csvToRows<SplitwiseRow>(file);
+  const splitwiseArr = await csvFileToRows<SplitwiseRow>(file);
 
   // need to remove the "total balance" row
   splitwiseArr.pop();
@@ -57,9 +69,12 @@ const ingestSplitwiseCsv = async (
   return tvbArr.filter((row) => row.delta);
 };
 
-const ingestMonarchCsv = async (file: File): Promise<TvbRow[]> => {
+/**
+ * @deprecated
+ */
+const _ingestMonarchCsvFile = async (file: File): Promise<TvbRow[]> => {
   // read splitwise rows
-  const splitwiseArr = await csvToRows<MonarchRow>(file);
+  const splitwiseArr = await csvFileToRows<MonarchRow>(file);
 
   // transform splitwise to tvb
   const tvbArr = monarchRowsToTvbRows(splitwiseArr);
@@ -67,12 +82,22 @@ const ingestMonarchCsv = async (file: File): Promise<TvbRow[]> => {
   return tvbArr;
 };
 
-const uploadRowsToMonarch = (rows: TvbRow[]) => {
+const ingestMonarchCsvText = async (text: string): Promise<TvbRow[]> => {
+  // read splitwise rows
+  const splitwiseArr = await csvTextToRows<MonarchRow>(text);
+
+  // transform splitwise to tvb
+  const tvbArr = monarchRowsToTvbRows(splitwiseArr);
+
+  return tvbArr;
+};
+
+const uploadRowsToMonarch = async (rows: TvbRow[]) => {
   // transform tvb to monarch
   const monarchRows = tvbRowsToMonarchRows(rows, 'The Upper');
 
   // write to a file
-  const newFile = rowsToCsv(monarchRows, 'test.csv', [
+  const newFile = rowsToCsvFile(monarchRows, 'Monarch-Splitwise.csv', [
     'Date',
     'Merchant',
     'Category',
@@ -83,8 +108,19 @@ const uploadRowsToMonarch = (rows: TvbRow[]) => {
     'Tags',
   ] satisfies (keyof MonarchRow)[]);
 
-  // drop it in
-  uploadFilesToInput(newFile);
+  // open the modal
+  await clickElement('button', /^Edit[\s\W]*$/);
+  await clickElement('div', /^Upload transactions$/);
+
+  // drop in the file
+  await uploadFilesToInput(newFile);
+
+  // check the box
+  await clickElement(`input[type="checkbox"]`);
+
+  // hit go
+  await clickElement<HTMLButtonElement>('button', /^Add to account$/);
+
   // downloadFile(newFile);
 };
 
