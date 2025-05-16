@@ -1,4 +1,9 @@
-import { MonarchRow, SplitwiseRow, TvbRow } from './shared.types';
+import {
+  MonarchRow,
+  SplitwiseRow,
+  TvbBalanceRow,
+  TvbRow,
+} from './shared.types';
 import * as XLSX from 'xlsx';
 
 export const splitwiseRowsToTvbRows = (
@@ -45,3 +50,24 @@ export const csvTextToRows = <K>(text: string): K[] => {
   const workbook = XLSX.read(text, { type: 'string', cellDates: true });
   return XLSX.utils.sheet_to_json<K>(workbook.Sheets[workbook.SheetNames[0]]);
 };
+
+export const compareTvbRows = (rowA: TvbRow, rowB: TvbRow): number =>
+  rowA.date.getTime() - rowB.date.getTime() ||
+  rowA.delta - rowB.delta ||
+  rowA.description.localeCompare(rowB.description);
+
+export const tvbRowsToTvbBalanceRows = (rows: TvbRow[]): TvbBalanceRow[] =>
+  rows
+    .toSorted(compareTvbRows)
+    .reduce((out: TvbBalanceRow[], currRow) => {
+      const lastRow: TvbBalanceRow | undefined = out[out.length - 1];
+      const newBalance =
+        Math.round(((lastRow?.balance ?? 0) + currRow.delta) * 100) / 100;
+      if (lastRow?.date === currRow.date) {
+        lastRow.balance = newBalance;
+      } else {
+        out.push({ date: currRow.date, balance: newBalance });
+      }
+      return out;
+    }, [])
+    .filter((row, index, arr) => row.balance !== arr[index - 1]?.balance);

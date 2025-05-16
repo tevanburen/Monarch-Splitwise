@@ -1,11 +1,13 @@
 import {
   clickElement,
+  compareTvbRows,
   csvFileToRows,
   csvTextToRows,
   monarchRowsToTvbRows,
   rowsToCsvFile,
   splitwiseRowsToTvbRows,
   tvbRowsToMonarchRows,
+  tvbRowsToTvbBalanceRows,
   uploadFilesToInput,
 } from '@/shared';
 import { MonarchRow, SplitwiseRow, TvbRow } from '../../shared/shared.types';
@@ -30,6 +32,14 @@ export const tmpDriver = async (files: File[], authToken: string) => {
 
   // read monarch rows
   const oldRows = await ingestMonarchCsvText(monarchText);
+
+  // sort both
+  oldRows.sort(compareTvbRows);
+  newRows.sort(compareTvbRows);
+
+  // build new balance history
+  const balanceRows = tvbRowsToTvbBalanceRows(newRows);
+  console.log(balanceRows);
 
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
@@ -124,24 +134,21 @@ const uploadRowsToMonarch = async (rows: TvbRow[]) => {
   // downloadFile(newFile);
 };
 
-const compareRows = (rowA: TvbRow, rowB: TvbRow): number =>
-  rowA.date.getTime() - rowB.date.getTime() ||
-  rowA.delta - rowB.delta ||
-  rowA.description.localeCompare(rowB.description);
-
-const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]) => {
+const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]): TvbRow[] => {
   // sort both arrays
   // these are sorted a->z
-  rowsA.sort(compareRows);
-  rowsB.sort(compareRows);
+  rowsA.sort(compareTvbRows);
+  rowsB.sort(compareTvbRows);
 
   // declare holders for popped items
   // these will be z->a
   const uniqueA: TvbRow[] = [];
   const uniqueB: TvbRow[] = [];
+  // holder for similar items
+  const out: TvbRow[] = [];
 
   while (rowsA.length && rowsB.length) {
-    const comparison = compareRows(
+    const comparison = compareTvbRows(
       rowsA[rowsA.length - 1],
       rowsB[rowsB.length - 1]
     );
@@ -153,7 +160,7 @@ const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]) => {
       uniqueA.push(rowsA.pop() as TvbRow);
     } else {
       // a === b, so remove both
-      rowsA.pop();
+      out.push(rowsA.pop() as TvbRow);
       rowsB.pop();
     }
   }
@@ -162,4 +169,6 @@ const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]) => {
   // flip the uniques because they are z->a
   rowsA.push(...uniqueA.reverse());
   rowsB.push(...uniqueB.reverse());
+
+  return out.reverse();
 };
