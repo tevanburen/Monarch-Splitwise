@@ -1,2 +1,2 @@
 export * from './Widget';
-export * from './shared';
+export * from './library';

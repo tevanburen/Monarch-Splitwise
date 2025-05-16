@@ -7,8 +7,8 @@ import {
   splitwiseRowsToTvbRows,
   tvbRowsToMonarchRows,
   uploadFilesToInput,
-} from '@/components';
-import { MonarchRow, SplitwiseRow, TvbRow } from '../shared/types';
+} from '@/shared';
+import { MonarchRow, SplitwiseRow, TvbRow } from '../../shared/shared.types';
 import { fetchMonarchCsv } from '@/api';
 
 export const tmpDriver = async (files: File[], authToken: string) => {

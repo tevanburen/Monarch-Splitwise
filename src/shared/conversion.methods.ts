@@ -1,4 +1,4 @@
-import { MonarchRow, SplitwiseRow, TvbRow } from './types';
+import { MonarchRow, SplitwiseRow, TvbRow } from './shared.types';
 import * as XLSX from 'xlsx';
 
 export const splitwiseRowsToTvbRows = (
