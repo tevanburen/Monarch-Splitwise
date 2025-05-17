@@ -1,7 +1,9 @@
 import { Paper, styled, Typography } from '@mui/material';
-import { FileUploadButton, widgetInputId } from '@/components';
-import { tmpDriver } from './widget.methods';
+import { FileUploadButton } from '@/components';
 import { usePageContext } from '@/api';
+import { tmpDriver } from '@/methods';
+
+export const widgetInputId = 'MonarchSplitwiseInput';
 
 const StyledWidget = styled(Paper)(({ theme }) => ({
   bottom: theme.spacing(1),
