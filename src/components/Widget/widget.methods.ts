@@ -109,7 +109,7 @@ const ingestMonarchCsvText = async (text: string): Promise<TvbRow[]> => {
 
 const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
   // transform tvb to monarch
-  const monarchRows = tvbRowsToMonarchRows(rows, 'The Upper');
+  const monarchRows = tvbRowsToMonarchRows(rows);
 
   // write to a file
   const newFile = rowsToCsvFile(monarchRows, 'Monarch-Splitwise.csv', [
@@ -142,7 +142,7 @@ const uploadBalanceRowsToMonarch = async (
   rows: TvbBalanceRow[]
 ): Promise<boolean> => {
   // transform tvb to monarch
-  const monarchRows = tvbBalanceRowsToMonarchBalanceRows(rows, 'The Upper');
+  const monarchRows = tvbBalanceRowsToMonarchBalanceRows(rows);
 
   // write to a file
   const newFile = rowsToCsvFile(monarchRows, 'Monarch-Splitwise-Balance.csv', [

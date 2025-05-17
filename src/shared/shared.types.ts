@@ -18,7 +18,7 @@ export interface MonarchRow {
   Date: string;
   Merchant: 'Splitwise';
   Category: 'Uncategorized';
-  Account: string;
+  Account: '';
   'Original Statement': '';
   Notes: string;
   Amount: number;
@@ -33,5 +33,5 @@ export interface TvbBalanceRow {
 export interface MonarchBalanceRow {
   Date: string;
   Balance: number;
-  Account: string;
+  Account: '';
 }

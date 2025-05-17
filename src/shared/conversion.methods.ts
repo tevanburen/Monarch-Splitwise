@@ -28,15 +28,12 @@ export const monarchRowsToTvbRows = (rows: MonarchRow[]): TvbRow[] => {
   return rows.map(rowToRow);
 };
 
-export const tvbRowsToMonarchRows = (
-  rows: TvbRow[],
-  accountName: string
-): MonarchRow[] => {
+export const tvbRowsToMonarchRows = (rows: TvbRow[]): MonarchRow[] => {
   const rowToRow = (row: TvbRow): MonarchRow => ({
     Date: dateToString(row.date),
     Amount: row.delta,
     Notes: row.description,
-    Account: accountName,
+    Account: '',
     Merchant: 'Splitwise',
     Category: 'Uncategorized',
     Tags: '',
@@ -74,8 +71,7 @@ export const tvbRowsToTvbBalanceRows = (rows: TvbRow[]): TvbBalanceRow[] =>
     .filter((row, index, arr) => row.balance !== arr[index - 1]?.balance);
 
 export const tvbBalanceRowsToMonarchBalanceRows = (
-  rows: TvbBalanceRow[],
-  account: string
+  rows: TvbBalanceRow[]
 ): MonarchBalanceRow[] =>
   [
     ...rows,
@@ -86,5 +82,5 @@ export const tvbBalanceRowsToMonarchBalanceRows = (
   ].map((row) => ({
     Date: dateToString(row.date),
     Balance: row.balance,
-    Account: account,
+    Account: '',
   }));
