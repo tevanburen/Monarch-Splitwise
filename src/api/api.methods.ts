@@ -1,4 +1,4 @@
-export const fetchMonarchCsv = async (authToken: string) => {
+export const fetchMonarchCsv = async (monarchId: string, authToken: string) => {
   const response = await fetch(
     'https://api.monarchmoney.com/download-transactions/',
     {
@@ -7,7 +7,7 @@ export const fetchMonarchCsv = async (authToken: string) => {
         'Content-Type': 'application/json',
         Authorization: authToken,
       },
-      body: JSON.stringify({ accounts: ['208836640834093863'] }),
+      body: JSON.stringify({ accounts: [monarchId] }),
       referrerPolicy: 'no-referrer',
     }
   );
