@@ -3,17 +3,21 @@ import {
   compareTvbRows,
   csvFileToRows,
   csvTextToRows,
-  MonarchBalanceRow,
   monarchRowsToTvbRows,
   rowsToCsvFile,
   splitwiseRowsToTvbRows,
-  TvbBalanceRow,
   tvbBalanceRowsToMonarchBalanceRows,
   tvbRowsToMonarchRows,
   tvbRowsToTvbBalanceRows,
   uploadFilesToInput,
-} from '@/shared';
-import { MonarchRow, SplitwiseRow, TvbRow } from '@/shared';
+} from '@/methods';
+import {
+  MonarchBalanceRow,
+  MonarchRow,
+  SplitwiseRow,
+  TvbBalanceRow,
+  TvbRow,
+} from '@/types';
 import { fetchMonarchCsv } from '@/api';
 
 export const tmpDriver = async (files: File[], authToken: string) => {

@@ -4,7 +4,7 @@ import {
   SplitwiseRow,
   TvbBalanceRow,
   TvbRow,
-} from './shared.types';
+} from '@/types';
 import * as XLSX from 'xlsx';
 
 export const splitwiseRowsToTvbRows = (
