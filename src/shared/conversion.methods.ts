@@ -1,4 +1,5 @@
 import {
+  MonarchBalanceRow,
   MonarchRow,
   SplitwiseRow,
   TvbBalanceRow,
@@ -63,7 +64,7 @@ export const tvbRowsToTvbBalanceRows = (rows: TvbRow[]): TvbBalanceRow[] =>
       const lastRow: TvbBalanceRow | undefined = out[out.length - 1];
       const newBalance =
         Math.round(((lastRow?.balance ?? 0) + currRow.delta) * 100) / 100;
-      if (lastRow?.date === currRow.date) {
+      if (lastRow?.date.getTime() === currRow.date.getTime()) {
         lastRow.balance = newBalance;
       } else {
         out.push({ date: currRow.date, balance: newBalance });
@@ -71,3 +72,16 @@ export const tvbRowsToTvbBalanceRows = (rows: TvbRow[]): TvbBalanceRow[] =>
       return out;
     }, [])
     .filter((row, index, arr) => row.balance !== arr[index - 1]?.balance);
+
+export const tvbBalanceRowsToMonarchBalanceRows = (
+  rows: TvbBalanceRow[],
+  account: string
+): MonarchBalanceRow[] =>
+  [...rows, {
+    date: new Date(),
+    balance: rows[rows.length - 1]?.balance ?? 0,
+  } satisfies TvbBalanceRow].map((row) => ({
+    Date: dateToString(row.date),
+    Balance: row.balance,
+    Account: account,
+  }));

@@ -3,14 +3,17 @@ import {
   compareTvbRows,
   csvFileToRows,
   csvTextToRows,
+  MonarchBalanceRow,
   monarchRowsToTvbRows,
   rowsToCsvFile,
   splitwiseRowsToTvbRows,
+  TvbBalanceRow,
+  tvbBalanceRowsToMonarchBalanceRows,
   tvbRowsToMonarchRows,
   tvbRowsToTvbBalanceRows,
   uploadFilesToInput,
 } from '@/shared';
-import { MonarchRow, SplitwiseRow, TvbRow } from '../../shared/shared.types';
+import { MonarchRow, SplitwiseRow, TvbRow } from '@/shared';
 import { fetchMonarchCsv } from '@/api';
 
 export const tmpDriver = async (files: File[], authToken: string) => {
@@ -39,7 +42,6 @@ export const tmpDriver = async (files: File[], authToken: string) => {
 
   // build new balance history
   const balanceRows = tvbRowsToTvbBalanceRows(newRows);
-  console.log(balanceRows);
 
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
@@ -55,6 +57,9 @@ export const tmpDriver = async (files: File[], authToken: string) => {
   } else {
     console.log('Monarch looks up to date');
   }
+
+  // upload balance rows
+  await uploadBalanceRowsToMonarch(balanceRows);
 };
 
 const ingestSplitwiseCsvFile = async (
@@ -102,7 +107,7 @@ const ingestMonarchCsvText = async (text: string): Promise<TvbRow[]> => {
   return tvbArr;
 };
 
-const uploadRowsToMonarch = async (rows: TvbRow[]) => {
+const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
   // transform tvb to monarch
   const monarchRows = tvbRowsToMonarchRows(rows, 'The Upper');
 
@@ -119,19 +124,44 @@ const uploadRowsToMonarch = async (rows: TvbRow[]) => {
   ] satisfies (keyof MonarchRow)[]);
 
   // open the modal
-  await clickElement('button', /^Edit[\s\W]*$/);
-  await clickElement('div', /^Upload transactions$/);
+  return Boolean(
+    (await clickElement('button', /^Edit[\s\W]*$/)) &&
+      (await clickElement('div', /^Upload transactions$/)) &&
+      // drop in the file
+      (await uploadFilesToInput(newFile)) &&
+      // check the box
+      // (await clickElement(`input[type="checkbox"]`)) &&
+      // hit go
+      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) &&
+      // hit go
+      (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
+  );
+};
 
-  // drop in the file
-  await uploadFilesToInput(newFile);
+const uploadBalanceRowsToMonarch = async (
+  rows: TvbBalanceRow[]
+): Promise<boolean> => {
+  // transform tvb to monarch
+  const monarchRows = tvbBalanceRowsToMonarchBalanceRows(rows, 'The Upper');
 
-  // check the box
-  await clickElement(`input[type="checkbox"]`);
+  // write to a file
+  const newFile = rowsToCsvFile(monarchRows, 'Monarch-Splitwise-Balance.csv', [
+    'Date',
+    'Balance',
+    'Account',
+  ] satisfies (keyof MonarchBalanceRow)[]);
 
-  // hit go
-  await clickElement<HTMLButtonElement>('button', /^Add to account$/);
-
-  // downloadFile(newFile);
+  // open the modal
+  return Boolean(
+    (await clickElement('button', /^Edit[\s\W]*$/)) &&
+      (await clickElement('div', /^Upload balance history$/)) &&
+      // drop in the file
+      (await uploadFilesToInput(newFile)) &&
+      // hit go
+      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) // &&
+    // hit go
+    // (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
+  );
 };
 
 const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]): TvbRow[] => {
