@@ -77,10 +77,13 @@ export const tvbBalanceRowsToMonarchBalanceRows = (
   rows: TvbBalanceRow[],
   account: string
 ): MonarchBalanceRow[] =>
-  [...rows, {
-    date: new Date(),
-    balance: rows[rows.length - 1]?.balance ?? 0,
-  } satisfies TvbBalanceRow].map((row) => ({
+  [
+    ...rows,
+    {
+      date: new Date(),
+      balance: rows[rows.length - 1]?.balance ?? 0,
+    } satisfies TvbBalanceRow,
+  ].map((row) => ({
     Date: dateToString(row.date),
     Balance: row.balance,
     Account: account,
