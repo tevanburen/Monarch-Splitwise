@@ -15,21 +15,54 @@ import {
   MonarchBalanceRow,
   MonarchRow,
   SplitwiseRow,
+  TvbAccount,
   TvbBalanceRow,
   TvbRow,
 } from '@/types';
 import { fetchMonarchCsv } from '@/api';
 
-export const tmpDriver = async (files: File[], authToken: string) => {
+export const tmpDriver = async (
+  files: File[],
+  tvbAccounts: TvbAccount[],
+  authToken: string
+): Promise<boolean[]> => {
   // decipher files
-  if (files.length !== 1) return;
-  const splitwiseFile = files.find(
-    (file) => !file.name.includes('transactions')
-  );
-  if (!splitwiseFile) return;
+  let hadError = false;
+  const results = new Array(tvbAccounts.length);
+  for (let i = 0; i < tvbAccounts.length; i++) {
+    if (hadError) {
+      results[i] = false;
+      break;
+    }
+    const account = tvbAccounts[i];
 
+    const fileIndex = files.findIndex(
+      (file) =>
+        file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
+        account.splitwiseName.toLowerCase().replaceAll(' ', '-')
+    );
+
+    if (fileIndex === -1) {
+      results[i] = false;
+      break;
+    }
+
+    results[i] = await driveAccount(files[fileIndex], account, authToken);
+
+    delete files[fileIndex];
+
+    if (results[i]) hadError = true;
+  }
+  return results;
+};
+
+const driveAccount = async (
+  splitwiseFile: File,
+  tvbAccount: TvbAccount,
+  authToken: string
+): Promise<boolean> => {
   // fetch monarchText
-  const monarchText = await fetchMonarchCsv(authToken);
+  const monarchText = await fetchMonarchCsv(tvbAccount.monarchId, authToken);
 
   // read splitwise rows
   const newRows = await ingestSplitwiseCsvFile(
@@ -64,6 +97,8 @@ export const tmpDriver = async (files: File[], authToken: string) => {
 
   // upload balance rows
   await uploadBalanceRowsToMonarch(balanceRows);
+
+  return true;
 };
 
 const ingestSplitwiseCsvFile = async (
