@@ -1,14 +1,8 @@
-import {
-  Button,
-  Divider,
-  Paper,
-  Stack,
-  styled,
-  Typography,
-} from '@mui/material';
+import { Divider, Paper, Stack, styled, Typography } from '@mui/material';
 import { FileUploadButton, useLocalStorageContext } from '@/components';
 import { usePageContext } from '@/api';
 import { tmpDriver } from '@/methods';
+import { AccountRows } from './AccountsRows';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
@@ -22,9 +16,7 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 
 export const Widget = () => {
   const { authToken } = usePageContext();
-  const { tvbAccounts, setLocalStorage } = useLocalStorageContext();
-
-  console.log(tvbAccounts);
+  const { tvbAccounts } = useLocalStorageContext();
 
   return (
     <StyledWidget elevation={3}>
@@ -38,6 +30,8 @@ export const Widget = () => {
             Splitwise
           </Typography>
         </Typography>
+        <Divider />
+        <AccountRows />
         <Divider />
         <FileUploadButton
           onUpload={(files) => {

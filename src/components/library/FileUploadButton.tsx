@@ -1,4 +1,5 @@
 // import { CloudUploadRounded } from '@mui/icons-material';
+import { CloudUploadRounded } from '@mui/icons-material';
 import { Button, styled } from '@mui/material';
 
 export interface FileUploadButtonProps {
@@ -30,8 +31,8 @@ export const FileUploadButton = ({ onUpload, id }: FileUploadButtonProps) => {
         role: undefined,
         variant: 'contained',
         tabIndex: -1,
-        // startIcon: <CloudUploadRounded />,
-        color: 'primary',
+        startIcon: <CloudUploadRounded />,
+        color: 'secondary',
       }}
     >
       Upload files

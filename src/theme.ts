@@ -15,4 +15,13 @@ export const theme = createTheme({
       main: '#e63731',
     },
   },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+  },
 });
