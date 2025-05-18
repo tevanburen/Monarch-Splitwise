@@ -1,8 +1,7 @@
-import { Paper, styled, Typography } from '@mui/material';
-import { FileUploadButton } from '@/components';
+import { Button, Paper, styled, Typography } from '@mui/material';
+import { FileUploadButton, useLocalStorageContext } from '@/components';
 import { usePageContext } from '@/api';
 import { tmpDriver } from '@/methods';
-import { TvbAccount } from '@/types';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
@@ -16,13 +15,9 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 
 export const Widget = () => {
   const { authToken } = usePageContext();
-  const tvbAccounts: TvbAccount[] = [
-    {
-      monarchName: 'The Upper',
-      splitwiseName: 'The Upper',
-      monarchId: '208836640834093863',
-    },
-  ];
+  const { tvbAccounts, setLocalStorage } = useLocalStorageContext();
+
+  console.log(tvbAccounts);
 
   return (
     <StyledWidget elevation={3}>
@@ -33,6 +28,19 @@ export const Widget = () => {
         }}
         id={widgetInputId}
       />
+      <Button
+        onClick={() =>
+          setLocalStorage('tvbAccounts', [
+            {
+              monarchName: 'The Upper',
+              splitwiseName: 'The Upper',
+              monarchId: '208836640834093863',
+            },
+          ])
+        }
+      >
+        Hi
+      </Button>
     </StyledWidget>
   );
 };

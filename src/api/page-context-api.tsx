@@ -11,14 +11,14 @@ import { PageContextMessage } from './api.types';
   (document.head || document.documentElement).appendChild(script);
 })();
 
-interface PageContextContent {
+interface PageContextComponents {
   authToken: string | undefined;
 }
 
-const PageContext = createContext<PageContextContent | undefined>(undefined);
+const pageContext = createContext<PageContextComponents | undefined>(undefined);
 
-export const usePageContext = (): PageContextContent => {
-  const context = useContext(PageContext);
+export const usePageContext = (): PageContextComponents => {
+  const context = useContext(pageContext);
   if (!context) {
     throw new Error('usePageContext must be used within a PageContextProvider');
   }
@@ -44,12 +44,12 @@ export const PageContextProvider = ({ children }: PropsWithChildren) => {
   });
 
   return (
-    <PageContext.Provider
+    <pageContext.Provider
       value={{
         authToken,
       }}
     >
       {children}
-    </PageContext.Provider>
+    </pageContext.Provider>
   );
 };
