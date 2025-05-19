@@ -40,7 +40,7 @@ export const tmpDriver = async (
     );
 
     if (fileIndex === -1) {
-      return false;
+      return true;
     }
 
     const success = await driveAccount(files[fileIndex], account, authToken);
