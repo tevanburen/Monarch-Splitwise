@@ -1,18 +1,21 @@
 import { createTheme } from '@mui/material';
 
+const monarchOrange = '#ff692d';
+const splitwiseGreen = '#1cc29f';
+
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#ff692d',
+      main: monarchOrange,
     },
     secondary: {
-      main: '#1cc29f',
+      main: splitwiseGreen,
     },
     success: {
-      main: '#30a46c',
+      main: splitwiseGreen,
     },
     error: {
-      main: '#e63731',
+      main: monarchOrange,
     },
   },
   components: {

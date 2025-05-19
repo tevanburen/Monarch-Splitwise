@@ -5,16 +5,12 @@ export type TitleUploadProps = FileAcceptorProps;
 
 export const TitleUpload = ({ onUpload, id }: FileAcceptorProps) => {
   return (
-    <Typography
-      fontWeight="bold"
-      component="label"
-      style={{ cursor: 'pointer' }}
-    >
-      <Typography color="primary" component="span" fontWeight="bold">
+    <Typography component="label" style={{ cursor: 'pointer' }} variant="h6">
+      <Typography color="primary" component="span" variant="h6">
         Monarch
       </Typography>
       {' - '}
-      <Typography color="secondary" component="span" fontWeight="bold">
+      <Typography color="secondary" component="span" variant="h6">
         Splitwise
       </Typography>
       <FileAcceptor id={id} onUpload={onUpload} />

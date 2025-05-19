@@ -4,6 +4,7 @@ import { usePageContext } from '@/api';
 import { tmpDriver } from '@/methods';
 import { AccountRows } from './AccountsRows';
 import { TitleUpload } from './TitleUpload';
+import { useState } from 'react';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
@@ -19,17 +20,20 @@ export const Widget = () => {
   const { authToken } = usePageContext();
   const { tvbAccounts } = useLocalStorageContext();
 
+  const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
+
+  const processFiles = async (files: File[]) => {
+    if (!authToken) return;
+    const response = await tmpDriver(files, tvbAccounts, authToken);
+    setCompletedMap(response);
+  };
+
   return (
     <StyledWidget elevation={3}>
       <Stack spacing={1}>
-        <TitleUpload
-          id={widgetInputId}
-          onUpload={(files) => {
-            if (authToken) tmpDriver(files, tvbAccounts, authToken);
-          }}
-        />
+        <TitleUpload id={widgetInputId} onUpload={processFiles} />
         <Divider />
-        <AccountRows />
+        <AccountRows completedMap={completedMap} />
       </Stack>
     </StyledWidget>
   );

@@ -25,17 +25,14 @@ export const tmpDriver = async (
   files: File[],
   tvbAccounts: TvbAccount[],
   authToken: string
-): Promise<boolean[]> => {
+): Promise<Record<string, boolean>> => {
   // decipher files
-  let hadError = false;
-  const results = new Array(tvbAccounts.length);
-  for (let i = 0; i < tvbAccounts.length; i++) {
-    if (hadError) {
-      results[i] = false;
-      break;
-    }
-    const account = tvbAccounts[i];
+  const results: Record<string, boolean> = Object.values(tvbAccounts).reduce(
+    (acc, curr) => ({ ...acc, [curr.monarchId]: false }),
+    {}
+  );
 
+  const keepGoing = async (account: TvbAccount): Promise<boolean> => {
     const fileIndex = files.findIndex(
       (file) =>
         file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
@@ -43,15 +40,22 @@ export const tmpDriver = async (
     );
 
     if (fileIndex === -1) {
-      results[i] = false;
-      break;
+      return false;
     }
 
-    results[i] = await driveAccount(files[fileIndex], account, authToken);
+    const success = await driveAccount(files[fileIndex], account, authToken);
 
-    delete files[fileIndex];
+    if (success) {
+      results[account.monarchId] = true;
+      delete files[fileIndex];
+      return true;
+    } else {
+      return false;
+    }
+  };
 
-    if (results[i]) hadError = true;
+  for (let i = 0; i < tvbAccounts.length; i++) {
+    if (!(await keepGoing(tvbAccounts[i]))) break;
   }
   return results;
 };

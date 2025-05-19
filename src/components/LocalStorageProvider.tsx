@@ -38,7 +38,11 @@ export const LocalStorageContextProvider = ({
     const ls: LocalStorageContextComponents | null = JSON.parse(
       localStorage.getItem(localStorageId) ?? 'null'
     );
-    setTvbAccounts(ls?.tvbAccounts ?? []);
+    setTvbAccounts(
+      ls?.tvbAccounts.sort((a, b) =>
+        a.monarchName.localeCompare(b.monarchName)
+      ) ?? []
+    );
   }, []);
 
   const setLocalStorage = useCallback((field: string, value: unknown) => {
