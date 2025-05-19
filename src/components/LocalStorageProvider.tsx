@@ -11,6 +11,7 @@ import {
 interface LocalStorageContextComponents {
   tvbAccounts: TvbAccount[];
   setLocalStorage: (field: string, value: unknown) => void;
+  isLocalStorageLoading: boolean;
 }
 
 const localStorageContext = createContext<
@@ -33,8 +34,11 @@ export const LocalStorageContextProvider = ({
   children,
 }: PropsWithChildren) => {
   const [tvbAccounts, setTvbAccounts] = useState<TvbAccount[]>([]);
+  const [isLocalStorageLoading, setIsLocalStorageLoading] =
+    useState<boolean>(true);
 
   const fetchLocalStorage = useCallback(() => {
+    setIsLocalStorageLoading(true);
     const ls: LocalStorageContextComponents | null = JSON.parse(
       localStorage.getItem(localStorageId) ?? 'null'
     );
@@ -43,6 +47,7 @@ export const LocalStorageContextProvider = ({
         a.monarchName.localeCompare(b.monarchName)
       ) ?? []
     );
+    setIsLocalStorageLoading(false);
   }, []);
 
   const setLocalStorage = useCallback((field: string, value: unknown) => {
@@ -65,6 +70,7 @@ export const LocalStorageContextProvider = ({
       value={{
         tvbAccounts,
         setLocalStorage,
+        isLocalStorageLoading,
       }}
     >
       {children}
