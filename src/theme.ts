@@ -26,5 +26,10 @@ export const theme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      defaultProps: {
+        color: 'secondary',
+      },
+    },
   },
 });

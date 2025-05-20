@@ -2,7 +2,7 @@ import { Divider, Paper, Stack, styled } from '@mui/material';
 import { useLocalStorageContext } from '@/components';
 import { usePageContext } from '@/api';
 import { tmpDriver } from '@/methods';
-import { AccountRows } from './AccountsRows';
+import { AccountRows } from './AccountRows';
 import { TitleUpload } from './TitleUpload';
 import { useState } from 'react';
 

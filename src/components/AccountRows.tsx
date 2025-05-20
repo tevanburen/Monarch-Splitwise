@@ -1,4 +1,4 @@
-import { Skeleton, Stack, Typography } from '@mui/material';
+import { Skeleton, Stack, styled, Typography } from '@mui/material';
 import { useLocalStorageContext } from './LocalStorageProvider';
 import { CancelRounded, CheckCircleRounded } from '@mui/icons-material';
 import { useState } from 'react';
@@ -7,6 +7,10 @@ import { SettingsModal } from './SettingsModal';
 export interface AccountsRowsProps {
   completedMap: Record<string, boolean>;
 }
+
+const CursorStack = styled(Stack)({
+  cursor: 'pointer',
+});
 
 export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
   const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
@@ -24,7 +28,7 @@ export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
             </Stack>
           ))
         : tvbAccounts.map((account) => (
-            <Stack
+            <CursorStack
               key={account.monarchId}
               direction="row"
               alignItems="center"
@@ -37,7 +41,7 @@ export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
                 <CancelRounded color="error" fontSize="small" />
               )}
               <Typography>{account.monarchName}</Typography>
-            </Stack>
+            </CursorStack>
           ))}
       <SettingsModal
         open={isSettingsModalOpen}
