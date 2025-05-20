@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   CircularProgress,
   Dialog,
   Divider,
@@ -19,7 +20,23 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <Stack padding={1} spacing={1}>
-        <Typography variant="h6">Settings</Typography>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography variant="h6">Settings</Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              onClose();
+            }}
+            size="small"
+          >
+            Save
+          </Button>
+        </Stack>
         <Divider />
         {isLocalStorageLoading ? (
           <Box
