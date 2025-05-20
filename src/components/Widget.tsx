@@ -5,6 +5,7 @@ import { tmpDriver } from '@/methods';
 import { AccountRows } from './AccountRows';
 import { TitleUpload } from './TitleUpload';
 import { useState } from 'react';
+import { SettingsModal } from './SettingsModal';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
@@ -21,6 +22,8 @@ export const Widget = () => {
   const { tvbAccounts } = useLocalStorageContext();
 
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
+  const [isSettingsModalOpen, setIsSettingsModalOpen] =
+    useState<boolean>(false);
 
   const processFiles = async (files: File[]) => {
     if (!authToken) return;
@@ -31,10 +34,27 @@ export const Widget = () => {
   return (
     <StyledWidget elevation={3}>
       <Stack spacing={1}>
-        <TitleUpload id={widgetInputId} onUpload={processFiles} />
-        <Divider />
-        <AccountRows completedMap={completedMap} />
+        <TitleUpload
+          id={widgetInputId}
+          onUpload={processFiles}
+          onClick={
+            tvbAccounts.length ? undefined : () => setIsSettingsModalOpen(true)
+          }
+        />
+        {Boolean(tvbAccounts.length) && (
+          <>
+            <Divider />{' '}
+            <AccountRows
+              completedMap={completedMap}
+              openSettingsModal={() => setIsSettingsModalOpen(true)}
+            />
+          </>
+        )}
       </Stack>
+      <SettingsModal
+        open={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </StyledWidget>
   );
 };

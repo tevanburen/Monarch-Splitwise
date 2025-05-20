@@ -1,21 +1,22 @@
 import { Skeleton, Stack, styled, Typography } from '@mui/material';
 import { useLocalStorageContext } from './LocalStorageProvider';
 import { CancelRounded, CheckCircleRounded } from '@mui/icons-material';
-import { useState } from 'react';
-import { SettingsModal } from './SettingsModal';
 
 export interface AccountsRowsProps {
   completedMap: Record<string, boolean>;
+  openSettingsModal: () => void;
 }
 
 const CursorStack = styled(Stack)({
   cursor: 'pointer',
 });
 
-export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
+export const AccountRows = ({
+  completedMap,
+  openSettingsModal,
+}: AccountsRowsProps) => {
   const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
-  const [isSettingsModalOpen, setIsSettingsModalOpen] =
-    useState<boolean>(false);
+
   return (
     <Stack>
       {isLocalStorageLoading
@@ -33,7 +34,7 @@ export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
               direction="row"
               alignItems="center"
               spacing={1}
-              onClick={() => setIsSettingsModalOpen(true)}
+              onClick={openSettingsModal}
             >
               {completedMap[account.monarchId] ? (
                 <CheckCircleRounded color="success" fontSize="small" />
@@ -43,10 +44,6 @@ export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
               <Typography>{account.monarchName}</Typography>
             </CursorStack>
           ))}
-      <SettingsModal
-        open={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-      />
     </Stack>
   );
 };

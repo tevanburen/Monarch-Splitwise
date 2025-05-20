@@ -1,11 +1,16 @@
 import { Typography } from '@mui/material';
 import { FileAcceptor, FileAcceptorProps } from './library';
 
-export type TitleUploadProps = FileAcceptorProps;
+export type TitleUploadProps = FileAcceptorProps & { onClick?: () => void };
 
-export const TitleUpload = ({ onUpload, id }: FileAcceptorProps) => {
+export const TitleUpload = ({ onClick, onUpload, id }: TitleUploadProps) => {
   return (
-    <Typography component="label" style={{ cursor: 'pointer' }} variant="h6">
+    <Typography
+      component="label"
+      style={{ cursor: 'pointer' }}
+      variant="h6"
+      onClick={onClick}
+    >
       <Typography color="primary" component="span" variant="h6">
         Monarch
       </Typography>
@@ -13,7 +18,7 @@ export const TitleUpload = ({ onUpload, id }: FileAcceptorProps) => {
       <Typography color="secondary" component="span" variant="h6">
         Splitwise
       </Typography>
-      <FileAcceptor id={id} onUpload={onUpload} />
+      {!onClick && <FileAcceptor id={id} onUpload={onUpload} />}
     </Typography>
   );
 };
