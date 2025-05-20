@@ -22,16 +22,19 @@ type TvbAccountWithRowKey = TvbAccount & { rowKey: number };
 let rowKey = 0;
 
 export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
-  const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
+  const { tvbAccounts, isLocalStorageLoading, setLocalStorage } =
+    useLocalStorageContext();
 
   const [currentAccounts, setCurrentAccounts] = useState<
     TvbAccountWithRowKey[]
   >([]);
 
   useEffect(() => {
-    setCurrentAccounts(
-      tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ }))
-    );
+    if (open) {
+      setCurrentAccounts(
+        tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ }))
+      );
+    }
   }, [tvbAccounts, open]);
 
   return (
@@ -47,6 +50,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
             variant="outlined"
             color="secondary"
             onClick={() => {
+              setLocalStorage('tvbAccounts', currentAccounts);
               onClose();
             }}
             size="small"
@@ -71,24 +75,26 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
         ) : (
           <Stack spacing={1}>
             {currentAccounts.map((row, index) => (
-              <SettingsModalRow
-                key={row.rowKey}
-                updateTvbAccount={(field: keyof TvbAccount, value: string) =>
-                  setCurrentAccounts((prev) => {
-                    const newRows = [...prev];
-                    newRows[index] = { ...newRows[index], [field]: value };
-                    return newRows;
-                  })
-                }
-                tvbAccount={row}
-                deleteAccount={() => {
-                  setCurrentAccounts((prev) => {
-                    const newRows = [...prev];
-                    newRows.splice(index, 1);
-                    return newRows;
-                  });
-                }}
-              />
+              <Stack spacing={2} key={row.rowKey} paddingTop={1}>
+                <SettingsModalRow
+                  updateTvbAccount={(field: keyof TvbAccount, value: string) =>
+                    setCurrentAccounts((prev) => {
+                      const newRows = [...prev];
+                      newRows[index] = { ...newRows[index], [field]: value };
+                      return newRows;
+                    })
+                  }
+                  tvbAccount={row}
+                  deleteAccount={() => {
+                    setCurrentAccounts((prev) => {
+                      const newRows = [...prev];
+                      newRows.splice(index, 1);
+                      return newRows;
+                    });
+                  }}
+                />
+                <Divider />
+              </Stack>
             ))}
             <div>
               <Button
