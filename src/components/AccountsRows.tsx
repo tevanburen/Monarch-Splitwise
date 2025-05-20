@@ -1,6 +1,8 @@
 import { Skeleton, Stack, Typography } from '@mui/material';
 import { useLocalStorageContext } from './LocalStorageProvider';
 import { CancelRounded, CheckCircleRounded } from '@mui/icons-material';
+import { useState } from 'react';
+import { SettingsModal } from './SettingsModal';
 
 export interface AccountsRowsProps {
   completedMap: Record<string, boolean>;
@@ -8,6 +10,8 @@ export interface AccountsRowsProps {
 
 export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
   const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
+  const [isSettingsModalOpen, setIsSettingsModalOpen] =
+    useState<boolean>(false);
   return (
     <Stack>
       {isLocalStorageLoading
@@ -25,6 +29,7 @@ export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
               direction="row"
               alignItems="center"
               spacing={1}
+              onClick={() => setIsSettingsModalOpen(true)}
             >
               {completedMap[account.monarchId] ? (
                 <CheckCircleRounded color="success" fontSize="small" />
@@ -34,6 +39,10 @@ export const AccountRows = ({ completedMap }: AccountsRowsProps) => {
               <Typography>{account.monarchName}</Typography>
             </Stack>
           ))}
+      <SettingsModal
+        open={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </Stack>
   );
 };
