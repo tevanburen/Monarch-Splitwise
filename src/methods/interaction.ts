@@ -17,6 +17,22 @@ export const clickElement = async <K extends HTMLElement>(
     return undefined;
   }, timeout);
 
+export const clickLink = async (
+  href: string,
+  timeout: boolean | number = true
+): Promise<HTMLAnchorElement | undefined> =>
+  await trySeveralTimes<HTMLAnchorElement | undefined>(() => {
+    const thing = Array.from(document.querySelectorAll('a')).find(
+      (el: HTMLAnchorElement) => href === el.getAttribute('href')
+    );
+
+    if (thing) {
+      thing.click();
+      return thing;
+    }
+    return undefined;
+  }, timeout);
+
 export const uploadFilesToInput = async (
   ...files: File[]
 ): Promise<HTMLElement | undefined> =>

@@ -1,5 +1,6 @@
 import {
   clickElement,
+  clickLink,
   compareTvbRows,
   csvFileToRows,
   csvTextToRows,
@@ -21,54 +22,35 @@ import {
 } from '@/types';
 import { fetchMonarchCsv } from '@/api';
 
-export const tmpDriver = async (
+export const driveAccount = async (
   account: TvbAccount,
   files: File[],
   authToken: string
 ): Promise<boolean> => {
+  // find index of matching file
   const fileIndex = files.findIndex(
     (file) =>
       file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
       account.splitwiseName.toLowerCase().replaceAll(' ', '-')
   );
 
-  if (fileIndex === -1) {
-    return false;
-  }
+  // return if no matching file
+  if (fileIndex === -1) return false;
 
-  const success = await driveAccount(files[fileIndex], account, authToken);
+  // get ready to add new charges
+  const [oldRows, [newRows, balanceRows], onPage] = await Promise.all([
+    // fetch old rows
+    buildOldRows(account.monarchId, authToken),
+    // read new row file
+    buildNewRows(files[fileIndex]),
+    // get to account page
+    navigateToPage(account.monarchId),
+  ]);
+  // remove this file from the list
+  files.splice(fileIndex, 1);
 
-  if (success) {
-    files.splice(fileIndex, 1);
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const driveAccount = async (
-  splitwiseFile: File,
-  tvbAccount: TvbAccount,
-  authToken: string
-): Promise<boolean> => {
-  // fetch monarchText
-  const monarchText = await fetchMonarchCsv(tvbAccount.monarchId, authToken);
-
-  // read splitwise rows
-  const newRows = await ingestSplitwiseCsvFile(
-    splitwiseFile,
-    'Thomas Van Buren'
-  );
-
-  // read monarch rows
-  const oldRows = await ingestMonarchCsvText(monarchText);
-
-  // sort both
-  oldRows.sort(compareTvbRows);
-  newRows.sort(compareTvbRows);
-
-  // build new balance history
-  const balanceRows = tvbRowsToTvbBalanceRows(newRows);
+  // return if couldn't navigate to page
+  if (!onPage) return false;
 
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
@@ -78,19 +60,58 @@ const driveAccount = async (
     console.warn('The following rows are unmatched:', oldRows);
   }
 
+  let response = true;
+
   // upload new rows to monarch
   if (newRows.length) {
-    await uploadRowsToMonarch(newRows);
-  } else {
-    console.log('Monarch looks up to date');
+    response = await uploadRowsToMonarch(newRows);
   }
+
+  // return if fail during update
+  if (!response) return false;
 
   // upload balance rows
   if (!oldRows.length) {
-    await uploadBalanceRowsToMonarch(balanceRows);
+    response = await uploadBalanceRowsToMonarch(balanceRows);
   }
 
-  return true;
+  return response;
+};
+
+const buildOldRows = async (
+  monarchId: string,
+  authToken: string
+): Promise<TvbRow[]> => {
+  // fetch monarchText
+  const monarchText = await fetchMonarchCsv(monarchId, authToken);
+
+  // read monarch rows
+  const oldRows = await ingestMonarchCsvText(monarchText);
+
+  return oldRows.sort(compareTvbRows);
+};
+
+const buildNewRows = async (
+  splitwiseFile: File
+): Promise<[TvbRow[], TvbBalanceRow[]]> => {
+  // read splitwise rows
+  const newRows = await ingestSplitwiseCsvFile(
+    splitwiseFile,
+    'Thomas Van Buren'
+  );
+
+  return [newRows.sort(compareTvbRows), tvbRowsToTvbBalanceRows(newRows)];
+};
+
+const navigateToPage = async (monarchId: string): Promise<boolean> => {
+  const target = `/accounts/details/${monarchId}`;
+  const accountsTarget = '/accounts';
+  return Boolean(
+    window.location.pathname === target ||
+      ((window.location.pathname === accountsTarget ||
+        (await clickLink(accountsTarget))) &&
+        (await clickLink(target)))
+  );
 };
 
 const ingestSplitwiseCsvFile = async (

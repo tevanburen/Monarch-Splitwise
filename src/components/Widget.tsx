@@ -1,7 +1,7 @@
 import { Divider, Paper, Stack, styled } from '@mui/material';
 import { useLocalStorageContext } from '@/components';
 import { usePageContext } from '@/api';
-import { tmpDriver } from '@/methods';
+import { driveAccount } from '@/methods';
 import { AccountRows } from './AccountRows';
 import { TitleUpload } from './TitleUpload';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ export const Widget = () => {
   const processFiles = async (files: File[]) => {
     if (!authToken) return;
     for (const account of tvbAccounts) {
-      const response = await tmpDriver(account, files, authToken);
+      const response = await driveAccount(account, files, authToken);
       setCompletedMap((prev) => ({
         ...prev,
         [account.monarchId]: prev[account.monarchId] || response,
