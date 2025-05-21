@@ -27,8 +27,13 @@ export const Widget = () => {
 
   const processFiles = async (files: File[]) => {
     if (!authToken) return;
-    const response = await tmpDriver(files, tvbAccounts, authToken);
-    setCompletedMap(response);
+    for (const account of tvbAccounts) {
+      const response = await tmpDriver(account, files, authToken);
+      setCompletedMap((prev) => ({
+        ...prev,
+        [account.monarchId]: prev[account.monarchId] || response,
+      }));
+    }
   };
 
   return (

@@ -22,42 +22,28 @@ import {
 import { fetchMonarchCsv } from '@/api';
 
 export const tmpDriver = async (
+  account: TvbAccount,
   files: File[],
-  tvbAccounts: TvbAccount[],
   authToken: string
-): Promise<Record<string, boolean>> => {
-  // decipher files
-  const results: Record<string, boolean> = Object.values(tvbAccounts).reduce(
-    (acc, curr) => ({ ...acc, [curr.monarchId]: false }),
-    {}
+): Promise<boolean> => {
+  const fileIndex = files.findIndex(
+    (file) =>
+      file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
+      account.splitwiseName.toLowerCase().replaceAll(' ', '-')
   );
 
-  const keepGoing = async (account: TvbAccount): Promise<boolean> => {
-    const fileIndex = files.findIndex(
-      (file) =>
-        file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
-        account.splitwiseName.toLowerCase().replaceAll(' ', '-')
-    );
-
-    if (fileIndex === -1) {
-      return true;
-    }
-
-    const success = await driveAccount(files[fileIndex], account, authToken);
-
-    if (success) {
-      results[account.monarchId] = true;
-      delete files[fileIndex];
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  for (let i = 0; i < tvbAccounts.length; i++) {
-    if (!(await keepGoing(tvbAccounts[i]))) break;
+  if (fileIndex === -1) {
+    return false;
   }
-  return results;
+
+  const success = await driveAccount(files[fileIndex], account, authToken);
+
+  if (success) {
+    files.splice(fileIndex, 1);
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const driveAccount = async (
