@@ -59,7 +59,7 @@ const trySeveralTimes = async <K>(
   interval: number = 200
 ): Promise<K> =>
   new Promise((resolve) => {
-    const endTime = Date.now() + (timeout === true ? 500 : timeout || 0);
+    const endTime = Date.now() + (timeout === true ? 5000 : timeout || 0);
 
     const tryFunc = async () => {
       const response = await funcToTry();

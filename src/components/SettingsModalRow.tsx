@@ -53,7 +53,7 @@ export const SettingsModalRow = ({
           slotProps={{ textField: { size: 'small' } }}
           value={tvbAccount.startDate ? dayjs(tvbAccount.startDate) : null}
           onChange={(newVal) =>
-            updateTvbAccount('startDate', newVal?.toString() ?? null)
+            updateTvbAccount('startDate', newVal?.format('YYYY-MM-DD') ?? null)
           }
         />
       </Stack>

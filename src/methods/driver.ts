@@ -59,21 +59,13 @@ export const driveAccount = async (
       oldRows,
       (row) => row.date,
       new Date(account.startDate),
-      (a, b) => {
-        console.log(a, b);
-        return a.getTime() - b.getTime();
-      }
+      (a, b) => a.getTime() - b.getTime()
     );
-    console.log(newRows);
     spliceElementsBS<TvbRow, Date>(
       newRows,
       (row) => row.date,
       new Date(account.startDate),
-      (a, b) => {
-        console.log(a);
-        console.log(b);
-        return a.getTime() - b.getTime();
-      }
+      (a, b) => a.getTime() - b.getTime()
     );
   }
 
