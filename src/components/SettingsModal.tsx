@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 import { TvbAccount } from '@/types';
 import { SettingsModalRow } from './SettingsModalRow';
 import { AddRounded } from '@mui/icons-material';
-import { Dayjs } from 'dayjs';
 
 export interface SettingsModalProps {
   open: boolean;
@@ -80,7 +79,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
                 <SettingsModalRow
                   updateTvbAccount={(
                     field: keyof TvbAccount,
-                    value: string | Dayjs | null
+                    value: string | null
                   ) =>
                     setCurrentAccounts((prev) => {
                       const newRows = [...prev];

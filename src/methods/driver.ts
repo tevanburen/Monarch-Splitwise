@@ -21,6 +21,7 @@ import {
   TvbRow,
 } from '@/types';
 import { fetchMonarchCsv } from '@/api';
+import { removeSimilarRows, spliceElementsBS } from './algo';
 
 export const driveAccount = async (
   account: TvbAccount,
@@ -51,6 +52,30 @@ export const driveAccount = async (
 
   // return if couldn't navigate to page
   if (!onPage) return false;
+
+  // trim rows to startDate
+  if (account.startDate) {
+    spliceElementsBS<TvbRow, Date>(
+      oldRows,
+      (row) => row.date,
+      new Date(account.startDate),
+      (a, b) => {
+        console.log(a, b);
+        return a.getTime() - b.getTime();
+      }
+    );
+    console.log(newRows);
+    spliceElementsBS<TvbRow, Date>(
+      newRows,
+      (row) => row.date,
+      new Date(account.startDate),
+      (a, b) => {
+        console.log(a);
+        console.log(b);
+        return a.getTime() - b.getTime();
+      }
+    );
+  }
 
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
@@ -214,43 +239,4 @@ const uploadBalanceRowsToMonarch = async (
     // hit go
     // (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
   );
-};
-
-const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]): TvbRow[] => {
-  // sort both arrays
-  // these are sorted a->z
-  rowsA.sort(compareTvbRows);
-  rowsB.sort(compareTvbRows);
-
-  // declare holders for popped items
-  // these will be z->a
-  const uniqueA: TvbRow[] = [];
-  const uniqueB: TvbRow[] = [];
-  // holder for similar items
-  const out: TvbRow[] = [];
-
-  while (rowsA.length && rowsB.length) {
-    const comparison = compareTvbRows(
-      rowsA[rowsA.length - 1],
-      rowsB[rowsB.length - 1]
-    );
-    if (comparison < 0) {
-      // a < b, so b is unique
-      uniqueB.push(rowsB.pop() as TvbRow);
-    } else if (comparison > 0) {
-      // a > b, so a is unique
-      uniqueA.push(rowsA.pop() as TvbRow);
-    } else {
-      // a === b, so remove both
-      out.push(rowsA.pop() as TvbRow);
-      rowsB.pop();
-    }
-  }
-
-  // add unique back
-  // flip the uniques because they are z->a
-  rowsA.push(...uniqueA.reverse());
-  rowsB.push(...uniqueB.reverse());
-
-  return out.reverse();
 };

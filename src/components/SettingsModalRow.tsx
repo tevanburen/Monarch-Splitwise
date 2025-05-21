@@ -2,14 +2,11 @@ import { TvbAccount } from '@/types';
 import { DeleteRounded } from '@mui/icons-material';
 import { IconButton, Stack, styled, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
-import { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 export interface SettingsModalRowProps {
   tvbAccount: TvbAccount;
-  updateTvbAccount: (
-    field: keyof TvbAccount,
-    value: string | Dayjs | null
-  ) => void;
+  updateTvbAccount: (field: keyof TvbAccount, value: string | null) => void;
   deleteAccount: () => void;
 }
 
@@ -54,8 +51,10 @@ export const SettingsModalRow = ({
         <WideDatePicker
           label="Start date"
           slotProps={{ textField: { size: 'small' } }}
-          value={tvbAccount.startDate ?? null}
-          onChange={(newVal) => updateTvbAccount('startDate', newVal)}
+          value={tvbAccount.startDate ? dayjs(tvbAccount.startDate) : null}
+          onChange={(newVal) =>
+            updateTvbAccount('startDate', newVal?.toString() ?? null)
+          }
         />
       </Stack>
     </Stack>

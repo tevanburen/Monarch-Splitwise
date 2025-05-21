@@ -44,12 +44,12 @@ export const Widget = () => {
           id={widgetInputId}
           onUpload={processFiles}
           onClick={
-            isAccountsEmpty ? undefined : () => setIsSettingsModalOpen(true)
+            isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
           }
         />
         {!isAccountsEmpty && (
           <>
-            <Divider />{' '}
+            <Divider />
             <AccountRows
               completedMap={completedMap}
               openSettingsModal={() => setIsSettingsModalOpen(true)}
