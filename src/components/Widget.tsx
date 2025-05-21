@@ -19,7 +19,8 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 
 export const Widget = () => {
   const { authToken } = usePageContext();
-  const { tvbAccounts } = useLocalStorageContext();
+  const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
+  const isAccountsEmpty = !isLocalStorageLoading && !tvbAccounts.length;
 
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
@@ -43,10 +44,10 @@ export const Widget = () => {
           id={widgetInputId}
           onUpload={processFiles}
           onClick={
-            tvbAccounts.length ? undefined : () => setIsSettingsModalOpen(true)
+            isAccountsEmpty ? undefined : () => setIsSettingsModalOpen(true)
           }
         />
-        {Boolean(tvbAccounts.length) && (
+        {!isAccountsEmpty && (
           <>
             <Divider />{' '}
             <AccountRows

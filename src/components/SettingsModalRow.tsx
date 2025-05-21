@@ -1,12 +1,21 @@
 import { TvbAccount } from '@/types';
 import { DeleteRounded } from '@mui/icons-material';
-import { IconButton, Stack, TextField } from '@mui/material';
+import { IconButton, Stack, styled, TextField } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers';
+import { Dayjs } from 'dayjs';
 
 export interface SettingsModalRowProps {
   tvbAccount: TvbAccount;
-  updateTvbAccount: (field: keyof TvbAccount, value: string) => void;
+  updateTvbAccount: (
+    field: keyof TvbAccount,
+    value: string | Dayjs | null
+  ) => void;
   deleteAccount: () => void;
 }
+
+const WideDatePicker = styled(DatePicker)(({ theme }) => ({
+  width: theme.spacing(36),
+}));
 
 export const SettingsModalRow = ({
   tvbAccount,
@@ -34,13 +43,21 @@ export const SettingsModalRow = ({
           <DeleteRounded fontSize="small" color="error" />
         </IconButton>
       </Stack>
-      <TextField
-        label="Monarch ID"
-        size="small"
-        value={tvbAccount.monarchId}
-        fullWidth
-        onChange={(e) => updateTvbAccount('monarchId', e.target.value)}
-      />
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <TextField
+          label="Monarch ID"
+          size="small"
+          value={tvbAccount.monarchId}
+          fullWidth
+          onChange={(e) => updateTvbAccount('monarchId', e.target.value)}
+        />
+        <WideDatePicker
+          label="Start date"
+          slotProps={{ textField: { size: 'small' } }}
+          value={tvbAccount.startDate ?? null}
+          onChange={(newVal) => updateTvbAccount('startDate', newVal)}
+        />
+      </Stack>
     </Stack>
   );
 };

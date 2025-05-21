@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { TvbAccount } from '@/types';
 import { SettingsModalRow } from './SettingsModalRow';
 import { AddRounded } from '@mui/icons-material';
+import { Dayjs } from 'dayjs';
 
 export interface SettingsModalProps {
   open: boolean;
@@ -77,7 +78,10 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
             {currentAccounts.map((row, index) => (
               <Stack spacing={2} key={row.rowKey} paddingTop={1}>
                 <SettingsModalRow
-                  updateTvbAccount={(field: keyof TvbAccount, value: string) =>
+                  updateTvbAccount={(
+                    field: keyof TvbAccount,
+                    value: string | Dayjs | null
+                  ) =>
                     setCurrentAccounts((prev) => {
                       const newRows = [...prev];
                       newRows[index] = { ...newRows[index], [field]: value };
@@ -110,6 +114,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
                       monarchName: '',
                       splitwiseName: '',
                       rowKey: newKey,
+                      startDate: null,
                     },
                   ]);
                 }}
