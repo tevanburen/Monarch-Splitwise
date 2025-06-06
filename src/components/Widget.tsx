@@ -1,11 +1,13 @@
 import { Divider, Paper, Stack, styled } from '@mui/material';
-import { useLocalStorageContext } from '@/components';
+import { useLocalStorageContext } from './LocalStorageProvider';
+import { useLoadingScreenContext } from './LoadingScreenProvider';
 import { usePageContext } from '@/api';
-import { tmpDriver } from '@/methods';
+import { driveAccount } from '@/methods';
 import { AccountRows } from './AccountRows';
 import { TitleUpload } from './TitleUpload';
 import { useState } from 'react';
 import { SettingsModal } from './SettingsModal';
+import { TvbAccountStatus } from '@/types';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
@@ -19,16 +21,29 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 
 export const Widget = () => {
   const { authToken } = usePageContext();
-  const { tvbAccounts } = useLocalStorageContext();
+  const { toggleLoading } = useLoadingScreenContext();
+  const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
+  const isAccountsEmpty = !isLocalStorageLoading && !tvbAccounts.length;
 
-  const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
+  const [completedMap, setCompletedMap] = useState<
+    Record<string, TvbAccountStatus>
+  >({});
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
     useState<boolean>(false);
 
   const processFiles = async (files: File[]) => {
     if (!authToken) return;
-    const response = await tmpDriver(files, tvbAccounts, authToken);
-    setCompletedMap(response);
+    const loadingKey = toggleLoading();
+    for (const account of tvbAccounts) {
+      const response = await driveAccount(account, files, authToken);
+      setCompletedMap((prev) => ({
+        ...prev,
+        [account.monarchId]: response.attempted
+          ? response
+          : prev[account.monarchId],
+      }));
+    }
+    toggleLoading(false, loadingKey);
   };
 
   return (
@@ -38,12 +53,12 @@ export const Widget = () => {
           id={widgetInputId}
           onUpload={processFiles}
           onClick={
-            tvbAccounts.length ? undefined : () => setIsSettingsModalOpen(true)
+            isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
           }
         />
-        {Boolean(tvbAccounts.length) && (
+        {!isAccountsEmpty && (
           <>
-            <Divider />{' '}
+            <Divider />
             <AccountRows
               completedMap={completedMap}
               openSettingsModal={() => setIsSettingsModalOpen(true)}

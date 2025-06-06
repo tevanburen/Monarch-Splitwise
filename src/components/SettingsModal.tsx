@@ -77,7 +77,10 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
             {currentAccounts.map((row, index) => (
               <Stack spacing={2} key={row.rowKey} paddingTop={1}>
                 <SettingsModalRow
-                  updateTvbAccount={(field: keyof TvbAccount, value: string) =>
+                  updateTvbAccount={(
+                    field: keyof TvbAccount,
+                    value: string | null
+                  ) =>
                     setCurrentAccounts((prev) => {
                       const newRows = [...prev];
                       newRows[index] = { ...newRows[index], [field]: value };
@@ -110,6 +113,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
                       monarchName: '',
                       splitwiseName: '',
                       rowKey: newKey,
+                      startDate: null,
                     },
                   ]);
                 }}

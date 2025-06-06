@@ -1,5 +1,6 @@
 import {
   clickElement,
+  clickLink,
   compareTvbRows,
   csvFileToRows,
   csvTextToRows,
@@ -10,79 +11,74 @@ import {
   tvbRowsToMonarchRows,
   tvbRowsToTvbBalanceRows,
   uploadFilesToInput,
+  wait,
 } from '@/methods';
 import {
   MonarchBalanceRow,
   MonarchRow,
   SplitwiseRow,
   TvbAccount,
+  TvbAccountStatus,
   TvbBalanceRow,
   TvbRow,
 } from '@/types';
 import { fetchMonarchCsv } from '@/api';
+import { removeSimilarRows, spliceElementsBS } from './algo';
 
-export const tmpDriver = async (
+export const driveAccount = async (
+  account: TvbAccount,
   files: File[],
-  tvbAccounts: TvbAccount[],
   authToken: string
-): Promise<Record<string, boolean>> => {
-  // decipher files
-  const results: Record<string, boolean> = Object.values(tvbAccounts).reduce(
-    (acc, curr) => ({ ...acc, [curr.monarchId]: false }),
-    {}
-  );
-
-  const keepGoing = async (account: TvbAccount): Promise<boolean> => {
-    const fileIndex = files.findIndex(
-      (file) =>
-        file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
-        account.splitwiseName.toLowerCase().replaceAll(' ', '-')
-    );
-
-    if (fileIndex === -1) {
-      return true;
-    }
-
-    const success = await driveAccount(files[fileIndex], account, authToken);
-
-    if (success) {
-      results[account.monarchId] = true;
-      delete files[fileIndex];
-      return true;
-    } else {
-      return false;
-    }
+): Promise<TvbAccountStatus> => {
+  const response: TvbAccountStatus = {
+    attempted: false,
+    transactions: false,
+    balances: false,
   };
 
-  for (let i = 0; i < tvbAccounts.length; i++) {
-    if (!(await keepGoing(tvbAccounts[i]))) break;
-  }
-  return results;
-};
-
-const driveAccount = async (
-  splitwiseFile: File,
-  tvbAccount: TvbAccount,
-  authToken: string
-): Promise<boolean> => {
-  // fetch monarchText
-  const monarchText = await fetchMonarchCsv(tvbAccount.monarchId, authToken);
-
-  // read splitwise rows
-  const newRows = await ingestSplitwiseCsvFile(
-    splitwiseFile,
-    'Thomas Van Buren'
+  // find index of matching file
+  const fileIndex = files.findIndex(
+    (file) =>
+      file.name.substring(0, account.splitwiseName.length).toLowerCase() ===
+      account.splitwiseName.toLowerCase().replaceAll(' ', '-')
   );
 
-  // read monarch rows
-  const oldRows = await ingestMonarchCsvText(monarchText);
+  // return if no matching file
+  if (fileIndex === -1) return response;
 
-  // sort both
-  oldRows.sort(compareTvbRows);
-  newRows.sort(compareTvbRows);
+  // we are now making an attempt
+  response.attempted = true;
 
-  // build new balance history
-  const balanceRows = tvbRowsToTvbBalanceRows(newRows);
+  // get ready to add new charges
+  const [oldRows, [newRows, balanceRows], onPage] = await Promise.all([
+    // fetch old rows
+    buildOldRows(account.monarchId, authToken),
+    // read new row file
+    buildNewRows(files[fileIndex]),
+    // get to account page
+    navigateToPage(account.monarchId),
+  ]);
+  // remove this file from the list
+  files.splice(fileIndex, 1);
+
+  // return if couldn't navigate to page
+  if (!onPage) return response;
+
+  // trim rows to startDate
+  if (account.startDate) {
+    spliceElementsBS<TvbRow, Date>(
+      oldRows,
+      (row) => row.date,
+      new Date(account.startDate),
+      (a, b) => a.getTime() - b.getTime()
+    );
+    spliceElementsBS<TvbRow, Date>(
+      newRows,
+      (row) => row.date,
+      new Date(account.startDate),
+      (a, b) => a.getTime() - b.getTime()
+    );
+  }
 
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
@@ -94,17 +90,63 @@ const driveAccount = async (
 
   // upload new rows to monarch
   if (newRows.length) {
-    await uploadRowsToMonarch(newRows);
+    response.transactions = await uploadRowsToMonarch(newRows);
   } else {
-    console.log('Monarch looks up to date');
+    response.transactions = true;
+  }
+
+  // return if fail during update
+  if (!response.transactions) return response;
+
+  // bridge the gap
+  const [transactionsDone, balancesStarted] = await bridgeTransactionsBalance();
+  if (!balancesStarted) {
+    response.transactions = transactionsDone;
+    return response;
   }
 
   // upload balance rows
   if (!oldRows.length) {
-    await uploadBalanceRowsToMonarch(balanceRows);
+    response.balances = await uploadBalanceRowsToMonarch(balanceRows);
   }
 
-  return true;
+  return response;
+};
+
+const buildOldRows = async (
+  monarchId: string,
+  authToken: string
+): Promise<TvbRow[]> => {
+  // fetch monarchText
+  const monarchText = await fetchMonarchCsv(monarchId, authToken);
+
+  // read monarch rows
+  const oldRows = await ingestMonarchCsvText(monarchText);
+
+  return oldRows.sort(compareTvbRows);
+};
+
+const buildNewRows = async (
+  splitwiseFile: File
+): Promise<[TvbRow[], TvbBalanceRow[]]> => {
+  // read splitwise rows
+  const newRows = await ingestSplitwiseCsvFile(
+    splitwiseFile,
+    'Thomas Van Buren'
+  );
+
+  return [newRows.sort(compareTvbRows), tvbRowsToTvbBalanceRows(newRows)];
+};
+
+const navigateToPage = async (monarchId: string): Promise<boolean> => {
+  const target = `/accounts/details/${monarchId}`;
+  const accountsTarget = '/accounts';
+  return Boolean(
+    window.location.pathname === target ||
+      ((window.location.pathname === accountsTarget ||
+        (await clickLink(accountsTarget))) &&
+        (await clickLink(target)))
+  );
 };
 
 const ingestSplitwiseCsvFile = async (
@@ -177,9 +219,8 @@ const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
       // check the box
       // (await clickElement(`input[type="checkbox"]`)) &&
       // hit go
-      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) &&
-      // hit go
-      (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
+      (await clickElement<HTMLButtonElement>('button', /^Add to account$/))
+    // here we may need to resubmit but handled by the bridge function
   );
 };
 
@@ -198,52 +239,40 @@ const uploadBalanceRowsToMonarch = async (
 
   // open the modal
   return Boolean(
-    (await clickElement('button', /^Edit[\s\W]*$/)) &&
-      (await clickElement('div', /^Upload balance history$/)) &&
+    // here we can assume the edit modal is open due to the bridge function
+    (await clickElement('div', /^Upload balance history$/)) &&
       // drop in the file
       (await uploadFilesToInput(newFile)) &&
       // hit go
-      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) // &&
-    // hit go
-    // (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
+      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) &&
+      // sometimes it doesn't update today's balance, so go hit save
+      (await wait(500)) &&
+      (await clickElement('button', /^Edit[\s\W]*$/, 5000)) &&
+      (await clickElement('div', /^Edit balance history$/)) &&
+      (await wait(500)) &&
+      (await clickElement('button', /^Save changes$/, 5000))
   );
 };
 
-const removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]): TvbRow[] => {
-  // sort both arrays
-  // these are sorted a->z
-  rowsA.sort(compareTvbRows);
-  rowsB.sort(compareTvbRows);
+// the difficulty is that sometimes Monarch wants to say "are you sure you want to submit this" and sometimes it doesn't
+// so we need to try to click that button or start the next flow, either works
+// allegedly
+const bridgeTransactionsBalance = async (): Promise<[boolean, boolean]> => {
+  const finishTransactions = async () =>
+    await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000);
+  const startBalances = async () =>
+    await clickElement('button', /^Edit[\s\W]*$/);
 
-  // declare holders for popped items
-  // these will be z->a
-  const uniqueA: TvbRow[] = [];
-  const uniqueB: TvbRow[] = [];
-  // holder for similar items
-  const out: TvbRow[] = [];
+  const finishTransactionsPromise = finishTransactions();
+  const startBalancesPromise = startBalances();
 
-  while (rowsA.length && rowsB.length) {
-    const comparison = compareTvbRows(
-      rowsA[rowsA.length - 1],
-      rowsB[rowsB.length - 1]
-    );
-    if (comparison < 0) {
-      // a < b, so b is unique
-      uniqueB.push(rowsB.pop() as TvbRow);
-    } else if (comparison > 0) {
-      // a > b, so a is unique
-      uniqueA.push(rowsA.pop() as TvbRow);
-    } else {
-      // a === b, so remove both
-      out.push(rowsA.pop() as TvbRow);
-      rowsB.pop();
-    }
+  if (await startBalancesPromise) {
+    // balance upload has been started, so
+    return [true, true];
+  } else if (await finishTransactionsPromise) {
+    // transactions were finished, so give balance one more shot
+    return [true, Boolean(await startBalances())];
   }
 
-  // add unique back
-  // flip the uniques because they are z->a
-  rowsA.push(...uniqueA.reverse());
-  rowsB.push(...uniqueB.reverse());
-
-  return out.reverse();
+  return [false, false];
 };

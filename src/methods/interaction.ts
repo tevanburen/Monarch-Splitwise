@@ -17,6 +17,22 @@ export const clickElement = async <K extends HTMLElement>(
     return undefined;
   }, timeout);
 
+export const clickLink = async (
+  href: string,
+  timeout: boolean | number = true
+): Promise<HTMLAnchorElement | undefined> =>
+  await trySeveralTimes<HTMLAnchorElement | undefined>(() => {
+    const thing = Array.from(document.querySelectorAll('a')).find(
+      (el: HTMLAnchorElement) => href === el.getAttribute('href')
+    );
+
+    if (thing) {
+      thing.click();
+      return thing;
+    }
+    return undefined;
+  }, timeout);
+
 export const uploadFilesToInput = async (
   ...files: File[]
 ): Promise<HTMLElement | undefined> =>
@@ -37,13 +53,16 @@ export const uploadFilesToInput = async (
     return input;
   }, true);
 
+export const wait = (ms: number): Promise<true> =>
+  new Promise((resolve) => setTimeout(() => resolve(true), ms));
+
 const trySeveralTimes = async <K>(
   funcToTry: () => K | Promise<K>,
   timeout?: boolean | number,
   interval: number = 200
 ): Promise<K> =>
   new Promise((resolve) => {
-    const endTime = Date.now() + (timeout === true ? 500 : timeout || 0);
+    const endTime = Date.now() + (timeout === true ? 5000 : timeout || 0);
 
     const tryFunc = async () => {
       const response = await funcToTry();
