@@ -6,6 +6,7 @@ import { AccountRows } from './AccountRows';
 import { TitleUpload } from './TitleUpload';
 import { useState } from 'react';
 import { SettingsModal } from './SettingsModal';
+import { TvbAccountStatus } from '@/types';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
@@ -22,7 +23,9 @@ export const Widget = () => {
   const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
   const isAccountsEmpty = !isLocalStorageLoading && !tvbAccounts.length;
 
-  const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
+  const [completedMap, setCompletedMap] = useState<
+    Record<string, TvbAccountStatus>
+  >({});
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
     useState<boolean>(false);
 
@@ -32,7 +35,9 @@ export const Widget = () => {
       const response = await driveAccount(account, files, authToken);
       setCompletedMap((prev) => ({
         ...prev,
-        [account.monarchId]: prev[account.monarchId] || response,
+        [account.monarchId]: response.attempted
+          ? response
+          : prev[account.monarchId],
       }));
     }
   };

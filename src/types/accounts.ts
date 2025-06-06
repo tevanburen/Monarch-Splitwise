@@ -4,3 +4,9 @@ export interface TvbAccount {
   monarchId: string;
   startDate: string | null;
 }
+
+export interface TvbAccountStatus {
+  transactions?: boolean;
+  balances?: boolean;
+  attempted: boolean;
+}

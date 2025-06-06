@@ -1,9 +1,10 @@
 import { Skeleton, Stack, styled, Typography } from '@mui/material';
 import { useLocalStorageContext } from './LocalStorageProvider';
 import { CancelRounded, CheckCircleRounded } from '@mui/icons-material';
+import { TvbAccountStatus } from '@/types';
 
 export interface AccountsRowsProps {
-  completedMap: Record<string, boolean>;
+  completedMap: Record<string, TvbAccountStatus>;
   openSettingsModal: () => void;
 }
 
@@ -17,6 +18,13 @@ export const AccountRows = ({
 }: AccountsRowsProps) => {
   const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
 
+  const getIcon = (completed?: boolean) =>
+    completed ? (
+      <CheckCircleRounded color="success" fontSize="small" />
+    ) : (
+      <CancelRounded color="error" fontSize="small" />
+    );
+
   return (
     <Stack>
       {isLocalStorageLoading
@@ -29,19 +37,41 @@ export const AccountRows = ({
             </Stack>
           ))
         : tvbAccounts.map((account) => (
-            <CursorStack
-              key={account.monarchId}
-              direction="row"
-              alignItems="center"
-              spacing={1}
-              onClick={openSettingsModal}
-            >
-              {completedMap[account.monarchId] ? (
-                <CheckCircleRounded color="success" fontSize="small" />
-              ) : (
-                <CancelRounded color="error" fontSize="small" />
-              )}
-              <Typography>{account.monarchName}</Typography>
+            <CursorStack key={account.monarchId} onClick={openSettingsModal}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {getIcon(completedMap[account.monarchId]?.balances)}
+                <Typography>{account.monarchName}</Typography>
+              </Stack>
+              {completedMap[account.monarchId]?.attempted &&
+                !completedMap[account.monarchId].balances && (
+                  <Stack paddingLeft={4}>
+                    {(
+                      [
+                        {
+                          key: 'transactions',
+                          title: 'Transactions',
+                        },
+                        {
+                          key: 'balances',
+                          title: 'Balance',
+                        },
+                      ] satisfies {
+                        key: keyof TvbAccountStatus;
+                        title: string;
+                      }[]
+                    ).map((step) => (
+                      <Stack
+                        key={step.key}
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                      >
+                        {getIcon(completedMap[account.monarchId][step.key])}
+                        <Typography variant="body2">{step.title}</Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                )}
             </CursorStack>
           ))}
     </Stack>

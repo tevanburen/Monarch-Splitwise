@@ -17,6 +17,7 @@ import {
   MonarchRow,
   SplitwiseRow,
   TvbAccount,
+  TvbAccountStatus,
   TvbBalanceRow,
   TvbRow,
 } from '@/types';
@@ -27,7 +28,13 @@ export const driveAccount = async (
   account: TvbAccount,
   files: File[],
   authToken: string
-): Promise<boolean> => {
+): Promise<TvbAccountStatus> => {
+  const response: TvbAccountStatus = {
+    attempted: false,
+    transactions: false,
+    balances: false,
+  };
+
   // find index of matching file
   const fileIndex = files.findIndex(
     (file) =>
@@ -36,7 +43,10 @@ export const driveAccount = async (
   );
 
   // return if no matching file
-  if (fileIndex === -1) return false;
+  if (fileIndex === -1) return response;
+
+  // we are now making an attempt
+  response.attempted = true;
 
   // get ready to add new charges
   const [oldRows, [newRows, balanceRows], onPage] = await Promise.all([
@@ -51,7 +61,7 @@ export const driveAccount = async (
   files.splice(fileIndex, 1);
 
   // return if couldn't navigate to page
-  if (!onPage) return false;
+  if (!onPage) return response;
 
   // trim rows to startDate
   if (account.startDate) {
@@ -77,19 +87,19 @@ export const driveAccount = async (
     console.warn('The following rows are unmatched:', oldRows);
   }
 
-  let response = true;
-
   // upload new rows to monarch
   if (newRows.length) {
-    response = await uploadRowsToMonarch(newRows);
+    response.transactions = await uploadRowsToMonarch(newRows);
+  } else {
+    response.transactions = true;
   }
 
   // return if fail during update
-  if (!response) return false;
+  if (!response.transactions) return response;
 
   // upload balance rows
   if (!oldRows.length) {
-    response = await uploadBalanceRowsToMonarch(balanceRows);
+    response.balances = await uploadBalanceRowsToMonarch(balanceRows);
   }
 
   return response;
