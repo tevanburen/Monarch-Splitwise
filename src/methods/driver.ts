@@ -11,6 +11,7 @@ import {
   tvbRowsToMonarchRows,
   tvbRowsToTvbBalanceRows,
   uploadFilesToInput,
+  wait,
 } from '@/methods';
 import {
   MonarchBalanceRow,
@@ -243,9 +244,13 @@ const uploadBalanceRowsToMonarch = async (
       // drop in the file
       (await uploadFilesToInput(newFile)) &&
       // hit go
-      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) // &&
-    // hit go
-    // (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
+      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) &&
+      // sometimes it doesn't update today's balance, so go hit save
+      (await wait(500)) &&
+      (await clickElement('button', /^Edit[\s\W]*$/, 5000)) &&
+      (await clickElement('div', /^Edit balance history$/)) &&
+      (await wait(500)) &&
+      (await clickElement('button', /^Save changes$/, 5000))
   );
 };
 

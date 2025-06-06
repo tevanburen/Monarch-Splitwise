@@ -53,6 +53,9 @@ export const uploadFilesToInput = async (
     return input;
   }, true);
 
+export const wait = (ms: number): Promise<true> =>
+  new Promise((resolve) => setTimeout(() => resolve(true), ms));
+
 const trySeveralTimes = async <K>(
   funcToTry: () => K | Promise<K>,
   timeout?: boolean | number,
