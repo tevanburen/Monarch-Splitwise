@@ -1,5 +1,6 @@
 import { Divider, Paper, Stack, styled } from '@mui/material';
-import { useLocalStorageContext } from '@/components';
+import { useLocalStorageContext } from './LocalStorageProvider';
+import { useLoadingScreenContext } from './LoadingScreenProvider';
 import { usePageContext } from '@/api';
 import { driveAccount } from '@/methods';
 import { AccountRows } from './AccountRows';
@@ -20,6 +21,7 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 
 export const Widget = () => {
   const { authToken } = usePageContext();
+  const { toggleLoading } = useLoadingScreenContext();
   const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
   const isAccountsEmpty = !isLocalStorageLoading && !tvbAccounts.length;
 
@@ -31,6 +33,7 @@ export const Widget = () => {
 
   const processFiles = async (files: File[]) => {
     if (!authToken) return;
+    const loadingKey = toggleLoading();
     for (const account of tvbAccounts) {
       const response = await driveAccount(account, files, authToken);
       setCompletedMap((prev) => ({
@@ -40,6 +43,7 @@ export const Widget = () => {
           : prev[account.monarchId],
       }));
     }
+    toggleLoading(false, loadingKey);
   };
 
   return (

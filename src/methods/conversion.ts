@@ -5,7 +5,7 @@ import {
   TvbBalanceRow,
   TvbRow,
 } from '@/types';
-import * as XLSX from 'xlsx';
+import { read as XLSXread, utils as XLSXutils } from 'xlsx';
 
 export const splitwiseRowsToTvbRows = (
   rows: SplitwiseRow[],
@@ -45,8 +45,8 @@ export const tvbRowsToMonarchRows = (rows: TvbRow[]): MonarchRow[] => {
 const dateToString = (date: Date): string => date.toISOString().split('T')[0];
 
 export const csvTextToRows = <K>(text: string): K[] => {
-  const workbook = XLSX.read(text, { type: 'string', cellDates: true });
-  return XLSX.utils.sheet_to_json<K>(workbook.Sheets[workbook.SheetNames[0]]);
+  const workbook = XLSXread(text, { type: 'string', cellDates: true });
+  return XLSXutils.sheet_to_json<K>(workbook.Sheets[workbook.SheetNames[0]]);
 };
 
 export const compareTvbRows = (rowA: TvbRow, rowB: TvbRow): number =>

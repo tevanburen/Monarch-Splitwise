@@ -5,6 +5,7 @@ import { LocalStorageContextProvider, Widget } from './components';
 import { PageContextProvider } from './api';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LoadingScreenContextProvider } from './components/LoadingScreenProvider';
 
 export const App = () => {
   return (
@@ -13,7 +14,9 @@ export const App = () => {
         <CssBaseline />
         <PageContextProvider>
           <LocalStorageContextProvider>
-            <Widget />
+            <LoadingScreenContextProvider>
+              <Widget />
+            </LoadingScreenContextProvider>
           </LocalStorageContextProvider>
         </PageContextProvider>
       </ThemeProvider>
