@@ -97,6 +97,13 @@ export const driveAccount = async (
   // return if fail during update
   if (!response.transactions) return response;
 
+  // bridge the gap
+  const [transactionsDone, balancesStarted] = await bridgeTransactionsBalance();
+  if (!balancesStarted) {
+    response.transactions = transactionsDone;
+    return response;
+  }
+
   // upload balance rows
   if (!oldRows.length) {
     response.balances = await uploadBalanceRowsToMonarch(balanceRows);
@@ -211,9 +218,8 @@ const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
       // check the box
       // (await clickElement(`input[type="checkbox"]`)) &&
       // hit go
-      (await clickElement<HTMLButtonElement>('button', /^Add to account$/)) &&
-      // hit go
-      (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
+      (await clickElement<HTMLButtonElement>('button', /^Add to account$/))
+    // here we may need to resubmit but handled by the bridge function
   );
 };
 
@@ -232,8 +238,8 @@ const uploadBalanceRowsToMonarch = async (
 
   // open the modal
   return Boolean(
-    (await clickElement('button', /^Edit[\s\W]*$/)) &&
-      (await clickElement('div', /^Upload balance history$/)) &&
+    // here we can assume the edit modal is open due to the bridge function
+    (await clickElement('div', /^Upload balance history$/)) &&
       // drop in the file
       (await uploadFilesToInput(newFile)) &&
       // hit go
@@ -241,4 +247,27 @@ const uploadBalanceRowsToMonarch = async (
     // hit go
     // (await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000))
   );
+};
+
+// the difficulty is that sometimes Monarch wants to say "are you sure you want to submit this" and sometimes it doesn't
+// so we need to try to click that button or start the next flow, either works
+// allegedly
+const bridgeTransactionsBalance = async (): Promise<[boolean, boolean]> => {
+  const finishTransactions = async () =>
+    await clickElement<HTMLButtonElement>('button', /^Confirm$/, 5000);
+  const startBalances = async () =>
+    await clickElement('button', /^Edit[\s\W]*$/);
+
+  const finishTransactionsPromise = finishTransactions();
+  const startBalancesPromise = startBalances();
+
+  if (await startBalancesPromise) {
+    // balance upload has been started, so
+    return [true, true];
+  } else if (await finishTransactionsPromise) {
+    // transactions were finished, so give balance one more shot
+    return [true, Boolean(await startBalances())];
+  }
+
+  return [false, false];
 };
