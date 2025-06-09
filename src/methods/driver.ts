@@ -106,9 +106,7 @@ export const driveAccount = async (
   }
 
   // upload balance rows
-  if (!oldRows.length) {
-    response.balances = await uploadBalanceRowsToMonarch(balanceRows);
-  }
+  response.balances = await uploadBalanceRowsToMonarch(balanceRows);
 
   return response;
 };
