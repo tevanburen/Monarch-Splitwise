@@ -63,5 +63,8 @@ export const spliceElementsBS = <K, T>(
     }
   }
 
-  rows.splice(0, left + (compareValues(getValue(rows[left]), target) ? 1 : 0));
+  rows.splice(
+    0,
+    compareValues(getValue(rows[left]), target) >= 0 ? left : rows.length
+  );
 };
