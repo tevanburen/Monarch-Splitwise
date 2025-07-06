@@ -159,7 +159,10 @@ const ingestSplitwiseCsvFile = async (
 
   // need to clean the strings otherwise Monarch throws a fit
   splitwiseArr.forEach(
-    (row) => (row.Description = row.Description.replace(/[^a-zA-Z0-9 ]+/g, ''))
+    (row) =>
+      (row.Description = (row.Description as number | string)
+        .toString()
+        .replace(/[^a-zA-Z0-9 ]+/g, ''))
   );
 
   // transform splitwise to tvb
