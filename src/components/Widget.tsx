@@ -53,7 +53,11 @@ export const Widget = () => {
           id={widgetInputId}
           onUpload={processFiles}
           onClick={
-            isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
+            isAccountsEmpty
+              ? () => setIsSettingsModalOpen(true)
+              : window.location.href.includes('splitwise')
+                ? () => console.log('hello world')
+                : undefined
           }
         />
         {!isAccountsEmpty && (
