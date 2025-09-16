@@ -14,7 +14,7 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.35.0",
-    "@types/chrome": "^0.1.11",
+    "@types/chrome": "^0.1.12",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "eslint": "^9.35.0",
