@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useLocalStorageContext } from './LocalStorageProvider';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { TvbAccount } from '@/types';
 import { SettingsModalRow } from './SettingsModalRow';
 import { AddRounded } from '@mui/icons-material';
@@ -35,13 +35,19 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
     TvbAccountWithRowKey[]
   >([]);
 
-  useEffect(() => {
-    if (open) {
+  const resetAccounts = useCallback(
+    () =>
       setCurrentAccounts(
         tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ }))
-      );
+      ),
+    [tvbAccounts]
+  );
+
+  useEffect(() => {
+    if (open) {
+      resetAccounts();
     }
-  }, [tvbAccounts, open]);
+  }, [resetAccounts, open]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -52,20 +58,31 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
           justifyContent="space-between"
         >
           <Typography variant="h6">Settings</Typography>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => {
-              setLocalStorage('tvbAccounts', currentAccounts);
-              onClose();
-            }}
-            size="small"
-            disabled={currentAccounts.some(
-              (row) => !(row.monarchId && row.monarchName && row.splitwiseName)
-            )}
-          >
-            Save
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => resetAccounts()}
+              size="small"
+            >
+              Reset
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                setLocalStorage('tvbAccounts', currentAccounts);
+                onClose();
+              }}
+              size="small"
+              disabled={currentAccounts.some(
+                (row) =>
+                  !(row.monarchId && row.monarchName && row.splitwiseName)
+              )}
+            >
+              Save
+            </Button>
+          </Stack>
         </Stack>
         <Divider />
         {isLocalStorageLoading ? (
