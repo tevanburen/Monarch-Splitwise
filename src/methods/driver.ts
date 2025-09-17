@@ -80,6 +80,14 @@ export const driveAccount = async (
     );
   }
 
+  // console.log(
+  //   JSON.stringify({
+  //     newRows,
+  //     oldRows,
+  //     balanceRows,
+  //   })
+  // );
+
   // remove similar rows;
   removeSimilarRows(newRows, oldRows);
 
@@ -87,6 +95,14 @@ export const driveAccount = async (
   if (oldRows.length) {
     console.warn('The following rows are unmatched:', oldRows);
   }
+
+  // console.log(
+  //   JSON.stringify({
+  //     newRows,
+  //     oldRows,
+  //     balanceRows,
+  //   })
+  // );
 
   // upload new rows to monarch
   if (newRows.length) {
