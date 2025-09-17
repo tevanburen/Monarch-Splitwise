@@ -1,4 +1,4 @@
-import { TvbAccount } from '@/types';
+import { CornerPosition, TvbAccount } from '@/types';
 import { useCallback } from 'react';
 import {
   createContext,
@@ -8,9 +8,13 @@ import {
   useState,
 } from 'react';
 
-interface LocalStorageContextComponents {
+interface LocalStorageFields {
   tvbAccounts: TvbAccount[];
-  setLocalStorage: (field: string, value: unknown) => void;
+  cornerPosition: CornerPosition;
+}
+
+interface LocalStorageContextComponents extends LocalStorageFields {
+  setLocalStorage: (field: keyof LocalStorageFields, value: unknown) => void;
   isLocalStorageLoading: boolean;
 }
 
@@ -34,6 +38,7 @@ export const LocalStorageContextProvider = ({
   children,
 }: PropsWithChildren) => {
   const [tvbAccounts, setTvbAccounts] = useState<TvbAccount[]>([]);
+  const [cornerPosition, setCornerPosition] = useState<CornerPosition>('right');
   const [isLocalStorageLoading, setIsLocalStorageLoading] =
     useState<boolean>(true);
 
@@ -47,6 +52,7 @@ export const LocalStorageContextProvider = ({
         a.monarchName.localeCompare(b.monarchName)
       ) ?? []
     );
+    setCornerPosition(ls?.cornerPosition ?? 'right');
     setIsLocalStorageLoading(false);
   }, []);
 
@@ -71,6 +77,7 @@ export const LocalStorageContextProvider = ({
         tvbAccounts,
         setLocalStorage,
         isLocalStorageLoading,
+        cornerPosition,
       }}
     >
       {children}

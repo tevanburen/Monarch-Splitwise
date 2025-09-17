@@ -3,6 +3,7 @@ export interface TvbAccount {
   splitwiseName: string;
   monarchId: string;
   startDate: string | null;
+  invisible?: boolean;
 }
 
 export interface TvbAccountStatus {
