@@ -1,10 +1,12 @@
 import {
+  Autocomplete,
   Box,
   Button,
   CircularProgress,
   Dialog,
   Divider,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material';
 import { useLocalStorageContext } from './LocalStorageProvider';
@@ -22,8 +24,12 @@ type TvbAccountWithRowKey = TvbAccount & { rowKey: number };
 let rowKey = 0;
 
 export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
-  const { tvbAccounts, isLocalStorageLoading, setLocalStorage } =
-    useLocalStorageContext();
+  const {
+    tvbAccounts,
+    cornerPosition,
+    isLocalStorageLoading,
+    setLocalStorage,
+  } = useLocalStorageContext();
 
   const [currentAccounts, setCurrentAccounts] = useState<
     TvbAccountWithRowKey[]
@@ -74,6 +80,19 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
           </Box>
         ) : (
           <Stack spacing={1}>
+            <Autocomplete
+              value={cornerPosition}
+              disableClearable
+              options={['left', 'right']}
+              getOptionLabel={(value) =>
+                value ? value.charAt(0).toUpperCase() + value.slice(1) : value
+              }
+              onChange={(_, value) => setLocalStorage('cornerPosition', value)}
+              renderInput={(params) => (
+                <TextField {...params} label="Position" size="small" />
+              )}
+            />
+            <Divider />
             {currentAccounts.map((row, index) => (
               <Stack spacing={2} key={row.rowKey} paddingTop={1}>
                 <SettingsModalRow

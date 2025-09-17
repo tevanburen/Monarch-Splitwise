@@ -7,13 +7,18 @@ import { AccountRows } from './AccountRows';
 import { TitleUpload } from './TitleUpload';
 import { useState } from 'react';
 import { SettingsModal } from './SettingsModal';
-import { TvbAccountStatus } from '@/types';
+import { CornerPosition, TvbAccountStatus } from '@/types';
 
 export const widgetInputId = 'MonarchSplitwiseInput';
 
-const StyledWidget = styled(Paper)(({ theme }) => ({
+const StyledWidget = styled(Paper, {
+  shouldForwardProp: (prop: string) => prop !== 'position',
+})<{
+  cornerPosition: CornerPosition | undefined;
+}>(({ theme, cornerPosition }) => ({
   bottom: theme.spacing(1),
-  right: theme.spacing(1),
+  right: cornerPosition === 'right' ? theme.spacing(1) : undefined,
+  left: cornerPosition === 'left' ? theme.spacing(1) : undefined,
   position: 'fixed',
   pointerEvents: 'auto',
   padding: theme.spacing(1),
@@ -22,7 +27,8 @@ const StyledWidget = styled(Paper)(({ theme }) => ({
 export const Widget = () => {
   const { authToken } = usePageContext();
   const { toggleLoading } = useLoadingScreenContext();
-  const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
+  const { tvbAccounts, isLocalStorageLoading, cornerPosition } =
+    useLocalStorageContext();
   const isAccountsEmpty = !isLocalStorageLoading && !tvbAccounts.length;
 
   const [completedMap, setCompletedMap] = useState<
@@ -47,7 +53,10 @@ export const Widget = () => {
   };
 
   return (
-    <StyledWidget elevation={3}>
+    <StyledWidget
+      elevation={3}
+      cornerPosition={isLocalStorageLoading ? undefined : cornerPosition}
+    >
       <Stack spacing={1}>
         <TitleUpload
           id={widgetInputId}
