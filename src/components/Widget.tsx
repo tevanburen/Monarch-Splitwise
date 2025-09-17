@@ -29,7 +29,9 @@ export const Widget = () => {
   const { toggleLoading } = useLoadingScreenContext();
   const { tvbAccounts, isLocalStorageLoading, cornerPosition } =
     useLocalStorageContext();
-  const isAccountsEmpty = !isLocalStorageLoading && !tvbAccounts.length;
+  const isAccountsEmpty =
+    !isLocalStorageLoading &&
+    !tvbAccounts.filter((account) => !account.invisible).length;
 
   const [completedMap, setCompletedMap] = useState<
     Record<string, TvbAccountStatus>

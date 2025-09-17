@@ -115,7 +115,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
                 <SettingsModalRow
                   updateTvbAccount={(
                     field: keyof TvbAccount,
-                    value: string | null
+                    value: string | boolean | null
                   ) =>
                     setCurrentAccounts((prev) => {
                       const newRows = [...prev];

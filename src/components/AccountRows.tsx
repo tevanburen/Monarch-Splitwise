@@ -36,44 +36,46 @@ export const AccountRows = ({
               </Typography>
             </Stack>
           ))
-        : tvbAccounts.map((account) => (
-            <CursorStack key={account.monarchId} onClick={openSettingsModal}>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                {getIcon(completedMap[account.monarchId]?.balances)}
-                <Typography>{account.monarchName}</Typography>
-              </Stack>
-              {completedMap[account.monarchId]?.attempted &&
-                !completedMap[account.monarchId].balances && (
-                  <Stack paddingLeft={4}>
-                    {(
-                      [
-                        {
-                          key: 'transactions',
-                          title: 'Transactions',
-                        },
-                        {
-                          key: 'balances',
-                          title: 'Balance',
-                        },
-                      ] satisfies {
-                        key: keyof TvbAccountStatus;
-                        title: string;
-                      }[]
-                    ).map((step) => (
-                      <Stack
-                        key={step.key}
-                        direction="row"
-                        alignItems="center"
-                        spacing={1}
-                      >
-                        {getIcon(completedMap[account.monarchId][step.key])}
-                        <Typography variant="body2">{step.title}</Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                )}
-            </CursorStack>
-          ))}
+        : tvbAccounts
+            .filter((account) => !account.invisible)
+            .map((account) => (
+              <CursorStack key={account.monarchId} onClick={openSettingsModal}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  {getIcon(completedMap[account.monarchId]?.balances)}
+                  <Typography>{account.monarchName}</Typography>
+                </Stack>
+                {completedMap[account.monarchId]?.attempted &&
+                  !completedMap[account.monarchId].balances && (
+                    <Stack paddingLeft={4}>
+                      {(
+                        [
+                          {
+                            key: 'transactions',
+                            title: 'Transactions',
+                          },
+                          {
+                            key: 'balances',
+                            title: 'Balance',
+                          },
+                        ] satisfies {
+                          key: keyof TvbAccountStatus;
+                          title: string;
+                        }[]
+                      ).map((step) => (
+                        <Stack
+                          key={step.key}
+                          direction="row"
+                          alignItems="center"
+                          spacing={1}
+                        >
+                          {getIcon(completedMap[account.monarchId][step.key])}
+                          <Typography variant="body2">{step.title}</Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  )}
+              </CursorStack>
+            ))}
     </Stack>
   );
 };

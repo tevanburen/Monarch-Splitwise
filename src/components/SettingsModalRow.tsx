@@ -1,17 +1,28 @@
 import { TvbAccount } from '@/types';
-import { DeleteRounded } from '@mui/icons-material';
+import {
+  DeleteRounded,
+  VisibilityOffRounded,
+  VisibilityRounded,
+} from '@mui/icons-material';
 import { IconButton, Stack, styled, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 
 export interface SettingsModalRowProps {
   tvbAccount: TvbAccount;
-  updateTvbAccount: (field: keyof TvbAccount, value: string | null) => void;
+  updateTvbAccount: (
+    field: keyof TvbAccount,
+    value: string | boolean | null
+  ) => void;
   deleteAccount: () => void;
 }
 
 const WideDatePicker = styled(DatePicker)(({ theme }) => ({
   width: theme.spacing(36),
+}));
+
+const GrayInvisibleIcon = styled(VisibilityOffRounded)(({ theme }) => ({
+  color: theme.palette.grey[500],
 }));
 
 export const SettingsModalRow = ({
@@ -36,6 +47,16 @@ export const SettingsModalRow = ({
           fullWidth
           onChange={(e) => updateTvbAccount('splitwiseName', e.target.value)}
         />
+        <IconButton
+          size="small"
+          onClick={() => updateTvbAccount('invisible', !tvbAccount.invisible)}
+        >
+          {tvbAccount.invisible ? (
+            <GrayInvisibleIcon fontSize="small" />
+          ) : (
+            <VisibilityRounded fontSize="small" color="success" />
+          )}
+        </IconButton>
         <IconButton size="small" onClick={deleteAccount}>
           <DeleteRounded fontSize="small" color="error" />
         </IconButton>
