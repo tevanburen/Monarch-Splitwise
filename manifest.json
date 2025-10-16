@@ -5,7 +5,7 @@
   "content_scripts": [
     {
       "js": ["dist/app.js"],
-      "matches": ["*://app.monarchmoney.com/*"]
+      "matches": ["*://app.monarch.com/*"]
     }
   ],
   "web_accessible_resources": [
