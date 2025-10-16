@@ -1,1 +1,1 @@
-export type CornerPosition = 'left' | 'right';
+export type CornerPosition = "left" | "right";

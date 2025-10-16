@@ -1,42 +1,42 @@
-import { read as XLSXread, utils as XLSXutils } from 'xlsx';
+import { read as XLSXread, utils as XLSXutils } from "xlsx";
 
 export const csvFileToRows = async <R>(file: File): Promise<R[]> => {
-  const workbook = XLSXread(await file.arrayBuffer(), { cellDates: true });
+	const workbook = XLSXread(await file.arrayBuffer(), { cellDates: true });
 
-  const arr = XLSXutils.sheet_to_json(
-    workbook.Sheets[workbook.SheetNames[0]]
-  ) as R[];
+	const arr = XLSXutils.sheet_to_json(
+		workbook.Sheets[workbook.SheetNames[0]],
+	) as R[];
 
-  return arr;
+	return arr;
 };
 
 export const rowsToCsvFile = (
-  rows: unknown[],
-  fileName: string,
-  columns?: string[]
+	rows: unknown[],
+	fileName: string,
+	columns?: string[],
 ): File => {
-  const worksheet = XLSXutils.json_to_sheet(rows, {
-    header: columns,
-    skipHeader: false,
-  });
-  const csv = XLSXutils.sheet_to_csv(worksheet);
-  return new File([csv], fileName, {
-    type: 'text/csv',
-  });
+	const worksheet = XLSXutils.json_to_sheet(rows, {
+		header: columns,
+		skipHeader: false,
+	});
+	const csv = XLSXutils.sheet_to_csv(worksheet);
+	return new File([csv], fileName, {
+		type: "text/csv",
+	});
 };
 
 export const downloadFile = (file: File): void => {
-  const url = URL.createObjectURL(file);
-  const a = document.createElement('a');
+	const url = URL.createObjectURL(file);
+	const a = document.createElement("a");
 
-  a.href = URL.createObjectURL(file);
-  a.download = file.name;
-  a.style.display = 'none';
+	a.href = URL.createObjectURL(file);
+	a.download = file.name;
+	a.style.display = "none";
 
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
 
-  // Clean up the object URL to avoid memory leaks
-  URL.revokeObjectURL(url);
+	// Clean up the object URL to avoid memory leaks
+	URL.revokeObjectURL(url);
 };

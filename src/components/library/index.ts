@@ -1,1 +1,1 @@
-export * from './FileAcceptor';
+export * from "./FileAcceptor";

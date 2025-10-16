@@ -1,17 +1,17 @@
 {
-  "name": "Monarch-Splitwise",
-  "version": "1.0",
-  "manifest_version": 3,
-  "content_scripts": [
-    {
-      "js": ["dist/app.js"],
-      "matches": ["*://app.monarch.com/*"]
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["dist/page-context-injection.js"],
-      "matches": ["*://app.monarch.com/*"]
-    }
-  ]
+	"name": "Monarch-Splitwise",
+	"version": "1.0",
+	"manifest_version": 3,
+	"content_scripts": [
+		{
+			"js": ["dist/app.js"],
+			"matches": ["*://app.monarch.com/*"]
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["dist/page-context-injection.js"],
+			"matches": ["*://app.monarch.com/*"]
+		}
+	]
 }
