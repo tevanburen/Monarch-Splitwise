@@ -40,7 +40,10 @@ export const Widget = () => {
     useState<boolean>(false);
 
   const processFiles = async (files: File[]) => {
-    if (!authToken) return;
+    if (!authToken) {
+      console.error("No authorization token found");
+      return;
+    };
     const loadingKey = toggleLoading();
     for (const account of tvbAccounts) {
       const response = await driveAccount(account, files, authToken);

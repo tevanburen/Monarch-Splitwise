@@ -5,6 +5,7 @@ import { PageContextMessage } from './api.types';
 
 // inject page-context-injection
 (() => {
+  console.log("Injecting script");
   const script = document.createElement('script');
   script.src = chrome.runtime.getURL('dist/page-context-injection.js');
   script.onload = () => script.remove();

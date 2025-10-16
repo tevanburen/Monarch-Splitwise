@@ -11,7 +11,7 @@
   "web_accessible_resources": [
     {
       "resources": ["dist/page-context-injection.js"],
-      "matches": ["*://app.monarchmoney.com/*"]
+      "matches": ["*://app.monarch.com/*"]
     }
   ]
 }
