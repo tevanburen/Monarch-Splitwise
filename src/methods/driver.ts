@@ -44,7 +44,10 @@ export const driveAccount = async (
   );
 
   // return if no matching file
-  if (fileIndex === -1) return response;
+  if (fileIndex === -1) {
+    console.log(`No files found for Splitwise Name: ${account.splitwiseName}`);
+    return response;
+  };
 
   // we are now making an attempt
   response.attempted = true;

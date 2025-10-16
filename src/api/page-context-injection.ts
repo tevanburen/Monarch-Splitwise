@@ -6,7 +6,7 @@ import { PageContextMessage } from './api.types';
   window.fetch = async (...args) => {
     const [target, init] = args;
 
-    const targetUrl = 'api.monarchmoney.com';
+    const targetUrl = 'api.monarch.com';
 
     if (
       (target as URL)?.href?.includes(targetUrl) ||
