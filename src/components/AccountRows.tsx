@@ -1,7 +1,7 @@
-import { Skeleton, Stack, styled, Typography } from "@mui/material";
-import { useLocalStorageContext } from "./LocalStorageProvider";
 import { CancelRounded, CheckCircleRounded } from "@mui/icons-material";
+import { Skeleton, Stack, styled, Typography } from "@mui/material";
 import type { TvbAccountStatus } from "@/types";
+import { useLocalStorageContext } from "./LocalStorageProvider";
 
 export interface AccountsRowsProps {
 	completedMap: Record<string, TvbAccountStatus>;

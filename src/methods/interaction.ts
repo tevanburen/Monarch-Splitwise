@@ -47,7 +47,9 @@ export const uploadFilesToInput = async (
 		}
 
 		const dataTransfer = new DataTransfer();
-		files.forEach((file) => dataTransfer.items.add(file));
+		files.forEach((file) => {
+			dataTransfer.items.add(file);
+		});
 		input.files = dataTransfer.files;
 		input.dispatchEvent(new Event("change", { bubbles: true }));
 		return input;

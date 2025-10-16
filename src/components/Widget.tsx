@@ -1,13 +1,13 @@
 import { Divider, Paper, Stack, styled } from "@mui/material";
-import { useLocalStorageContext } from "./LocalStorageProvider";
-import { useLoadingScreenContext } from "./LoadingScreenProvider";
+import { useState } from "react";
 import { usePageContext } from "@/api";
 import { driveAccount } from "@/methods";
-import { AccountRows } from "./AccountRows";
-import { TitleUpload } from "./TitleUpload";
-import { useState } from "react";
-import { SettingsModal } from "./SettingsModal";
 import type { CornerPosition, TvbAccountStatus } from "@/types";
+import { AccountRows } from "./AccountRows";
+import { useLoadingScreenContext } from "./LoadingScreenProvider";
+import { useLocalStorageContext } from "./LocalStorageProvider";
+import { SettingsModal } from "./SettingsModal";
+import { TitleUpload } from "./TitleUpload";
 
 export const widgetInputId = "MonarchSplitwiseInput";
 

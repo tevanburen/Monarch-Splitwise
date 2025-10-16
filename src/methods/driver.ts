@@ -1,3 +1,4 @@
+import { fetchMonarchCsv } from "@/api";
 import {
 	clickElement,
 	clickLink,
@@ -22,7 +23,6 @@ import type {
 	TvbBalanceRow,
 	TvbRow,
 } from "@/types";
-import { fetchMonarchCsv } from "@/api";
 import { removeSimilarRows, spliceElementsBS } from "./algo";
 
 export const driveAccount = async (
@@ -177,12 +177,11 @@ const ingestSplitwiseCsvFile = async (
 	splitwiseArr.pop();
 
 	// need to clean the strings otherwise Monarch throws a fit
-	splitwiseArr.forEach(
-		(row) =>
-			(row.Description = (row.Description as number | string)
-				.toString()
-				.replace(/[^a-zA-Z0-9 ]+/g, "")),
-	);
+	splitwiseArr.forEach((row) => {
+		row.Description = (row.Description as number | string)
+			.toString()
+			.replace(/[^a-zA-Z0-9 ]+/g, "");
+	});
 
 	// transform splitwise to tvb
 	const tvbArr = splitwiseRowsToTvbRows(splitwiseArr, memberName);

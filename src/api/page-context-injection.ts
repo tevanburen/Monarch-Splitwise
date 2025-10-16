@@ -18,8 +18,8 @@ import type { PageContextMessage } from "./api.types";
 					? Object.fromEntries(init.headers.entries())
 					: (init?.headers as Record<string, string>) || {};
 
-			if (headers["Authorization"] || headers["authorization"]) {
-				const token = headers["Authorization"] || headers["authorization"];
+			const token = headers.Authorization || headers.authorization;
+			if (token) {
 				window.postMessage({
 					isTvbMessage: true,
 					source: "page-context",
