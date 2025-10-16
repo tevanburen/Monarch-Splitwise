@@ -1,37 +1,37 @@
 export type SplitwiseRow = {
-  Category: string;
-  Cost: number;
-  Currency: string;
-  Date: Date;
-  Description: string;
+	Category: string;
+	Cost: number;
+	Currency: string;
+	Date: Date;
+	Description: string;
 } & {
-  [memberName: string]: number;
+	[memberName: string]: number;
 };
 
 export interface TvbRow {
-  date: Date;
-  delta: number;
-  description: string;
+	date: Date;
+	delta: number;
+	description: string;
 }
 
 export interface MonarchRow {
-  Date: string;
-  Merchant: 'Splitwise';
-  Category: 'Uncategorized';
-  Account: '';
-  'Original Statement': '';
-  Notes: string;
-  Amount: number;
-  Tags: '';
+	Date: string;
+	Merchant: "Splitwise";
+	Category: "Uncategorized";
+	Account: "";
+	"Original Statement": "";
+	Notes: string;
+	Amount: number;
+	Tags: "";
 }
 
 export interface TvbBalanceRow {
-  date: Date;
-  balance: number;
+	date: Date;
+	balance: number;
 }
 
 export interface MonarchBalanceRow {
-  Date: string;
-  Balance: number;
-  Account: '';
+	Date: string;
+	Balance: number;
+	Account: "";
 }

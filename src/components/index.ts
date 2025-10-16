@@ -1,3 +1,3 @@
-export * from './Widget';
-export * from './library';
-export * from './LocalStorageProvider';
+export * from "./Widget";
+export * from "./library";
+export * from "./LocalStorageProvider";

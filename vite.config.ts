@@ -12,15 +12,15 @@ export default {
 		outDir: resolve(__dirname, "./dist"),
 		emptyOutDir: true,
 		rollupOptions: {
-      input: {
-        app: "./src/index.tsx",
-				'page-context-injection': './src/api/page-context-injection.ts'
+			input: {
+				app: "./src/index.tsx",
+				"page-context-injection": "./src/api/page-context-injection.ts",
 			},
-      output: {
-        entryFileNames: "[name].js",
-        format: "es",
-      },
-    },
+			output: {
+				entryFileNames: "[name].js",
+				format: "es",
+			},
+		},
 	},
 	plugins: [react()],
 };
