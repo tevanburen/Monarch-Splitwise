@@ -1,4 +1,3 @@
-import type { TvbAccount } from "@/types";
 import {
 	DeleteRounded,
 	VisibilityOffRounded,
@@ -7,6 +6,7 @@ import {
 import { IconButton, Stack, styled, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import type { TvbAccount } from "@/types";
 
 export interface SettingsModalRowProps {
 	tvbAccount: TvbAccount;

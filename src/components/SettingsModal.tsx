@@ -1,3 +1,4 @@
+import { AddRounded } from "@mui/icons-material";
 import {
 	Autocomplete,
 	Box,
@@ -9,11 +10,10 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { useLocalStorageContext } from "./LocalStorageProvider";
 import { useCallback, useEffect, useState } from "react";
 import type { TvbAccount } from "@/types";
+import { useLocalStorageContext } from "./LocalStorageProvider";
 import { SettingsModalRow } from "./SettingsModalRow";
-import { AddRounded } from "@mui/icons-material";
 
 export interface SettingsModalProps {
 	open: boolean;

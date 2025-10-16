@@ -1,3 +1,4 @@
+import { read as XLSXread, utils as XLSXutils } from "xlsx";
 import type {
 	MonarchBalanceRow,
 	MonarchRow,
@@ -5,7 +6,6 @@ import type {
 	TvbBalanceRow,
 	TvbRow,
 } from "@/types";
-import { read as XLSXread, utils as XLSXutils } from "xlsx";
 
 export const splitwiseRowsToTvbRows = (
 	rows: SplitwiseRow[],

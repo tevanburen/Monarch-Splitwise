@@ -1,10 +1,10 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { theme } from "./theme";
-import { LocalStorageContextProvider, Widget } from "./components";
-import { PageContextProvider } from "./api";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { PageContextProvider } from "./api";
+import { LocalStorageContextProvider, Widget } from "./components";
 import { LoadingScreenContextProvider } from "./components/LoadingScreenProvider";
+import { theme } from "./theme";
 
 export const App = () => {
 	return (

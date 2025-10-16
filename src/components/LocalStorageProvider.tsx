@@ -1,12 +1,12 @@
-import type { CornerPosition, TvbAccount } from "@/types";
-import { useCallback } from "react";
 import {
 	createContext,
 	type PropsWithChildren,
+	useCallback,
 	useContext,
 	useEffect,
 	useState,
 } from "react";
+import type { CornerPosition, TvbAccount } from "@/types";
 
 interface LocalStorageFields {
 	tvbAccounts: TvbAccount[];
@@ -56,16 +56,19 @@ export const LocalStorageContextProvider = ({
 		setIsLocalStorageLoading(false);
 	}, []);
 
-	const setLocalStorage = useCallback((field: string, value: unknown) => {
-		localStorage.setItem(
-			localStorageId,
-			JSON.stringify({
-				...JSON.parse(localStorage.getItem(localStorageId) ?? "null"),
-				[field]: value,
-			}),
-		);
-		fetchLocalStorage();
-	}, []);
+	const setLocalStorage = useCallback(
+		(field: string, value: unknown) => {
+			localStorage.setItem(
+				localStorageId,
+				JSON.stringify({
+					...JSON.parse(localStorage.getItem(localStorageId) ?? "null"),
+					[field]: value,
+				}),
+			);
+			fetchLocalStorage();
+		},
+		[fetchLocalStorage],
+	);
 
 	useEffect(() => {
 		fetchLocalStorage();
