@@ -232,7 +232,7 @@ const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
 	// open the modal
 	return Boolean(
 		(await clickElement("button", /^Edit[\s\W]*$/)) &&
-			(await clickElement("div", /^Upload transactions$/)) &&
+			(await clickElement("div", /^Import transactions$/)) &&
 			// drop in the file
 			(await uploadFilesToInput(newFile)) &&
 			// check the box
@@ -259,7 +259,7 @@ const uploadBalanceRowsToMonarch = async (
 	// open the modal
 	return Boolean(
 		// here we can assume the edit modal is open due to the bridge function
-		(await clickElement("div", /^Upload balance history$/)) &&
+		(await clickElement("div", /^Import balance history$/)) &&
 			// drop in the file
 			(await uploadFilesToInput(newFile)) &&
 			// hit go
