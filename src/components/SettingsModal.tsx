@@ -1,16 +1,16 @@
-import { AddRounded } from "@mui/icons-material";
-import {
-	Autocomplete,
-	Box,
-	Button,
-	CircularProgress,
-	Dialog,
-	Divider,
-	Stack,
-	TextField,
-	Typography,
-} from "@mui/material";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/shadcn/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/shadcn/dialog";
+import { Input } from "@/components/shadcn/input";
+import { Separator } from "@/components/shadcn/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/shadcn/toggle-group";
 import type { TvbAccount } from "@/types";
 import { useLocalStorageContext } from "./LocalStorageProvider";
 import { SettingsModalRow } from "./SettingsModalRow";
@@ -27,6 +27,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	const {
 		tvbAccounts,
 		cornerPosition,
+		splitwiseName,
 		isLocalStorageLoading,
 		setLocalStorage,
 	} = useLocalStorageContext();
@@ -34,14 +35,15 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	const [currentAccounts, setCurrentAccounts] = useState<
 		TvbAccountWithRowKey[]
 	>([]);
+	const [currentSplitswiseName, setCurrentSplitswiseName] =
+		useState<string>("");
 
-	const resetAccounts = useCallback(
-		() =>
-			setCurrentAccounts(
-				tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ })),
-			),
-		[tvbAccounts],
-	);
+	const resetAccounts = useCallback(() => {
+		setCurrentAccounts(
+			tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ })),
+		);
+		setCurrentSplitswiseName(splitwiseName);
+	}, [tvbAccounts, splitwiseName]);
 
 	useEffect(() => {
 		if (open) {
@@ -50,96 +52,95 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	}, [resetAccounts, open]);
 
 	return (
-		<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-			<Stack padding={1} spacing={1}>
-				<Stack
-					direction="row"
-					alignItems="center"
-					justifyContent="space-between"
-				>
-					<Typography variant="h6">Settings</Typography>
-					<Stack direction="row" spacing={1}>
-						<Button
-							variant="outlined"
-							color="primary"
-							onClick={() => resetAccounts()}
-							size="small"
-						>
-							Reset
-						</Button>
-						<Button
-							variant="outlined"
-							color="secondary"
-							onClick={() => {
-								setLocalStorage("tvbAccounts", currentAccounts);
-								onClose();
-							}}
-							size="small"
-							disabled={currentAccounts.some(
-								(row) =>
-									!(row.monarchId && row.monarchName && row.splitwiseName),
-							)}
-						>
-							Save
-						</Button>
-					</Stack>
-				</Stack>
-				<Divider />
+		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+			<DialogContent
+				className="max-w-2xl"
+				showCloseButton={true}
+				onPointerDownOutside={(e) => e.preventDefault()}
+			>
+				<DialogHeader>
+					<DialogTitle>Settings</DialogTitle>
+				</DialogHeader>
+				<Separator />
 				{isLocalStorageLoading ? (
-					<Box
-						height="64px"
-						width="100%"
-						alignItems="center"
-						justifyContent="center"
-						display="flex"
-					>
-						<CircularProgress />
-					</Box>
+					<div className="h-16 w-full flex items-center justify-center">
+						<div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+					</div>
 				) : (
-					<Stack spacing={1}>
-						<Autocomplete
-							value={cornerPosition}
-							disableClearable
-							options={["left", "right"]}
-							getOptionLabel={(value) =>
-								value ? value.charAt(0).toUpperCase() + value.slice(1) : value
-							}
-							onChange={(_, value) => setLocalStorage("cornerPosition", value)}
-							renderInput={(params) => (
-								<TextField {...params} label="Position" size="small" />
+					<div className="flex flex-col gap-2">
+						<div className="flex items-center justify-between pb-2">
+							<div className="text-sm font-medium">Position</div>
+							<ToggleGroup
+								type="single"
+								value={cornerPosition}
+								onValueChange={(value) =>
+									value &&
+									setLocalStorage("cornerPosition", value as "left" | "right")
+								}
+								variant="outline"
+							>
+								<ToggleGroupItem value="left">Left</ToggleGroupItem>
+								<ToggleGroupItem value="right">Right</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
+						<div className="flex items-center justify-between pb-2">
+							<div className="text-sm font-medium">Your Splitwise Name</div>
+							<Input
+								value={currentSplitswiseName}
+								onChange={(e) => setCurrentSplitswiseName(e.target.value)}
+								placeholder="e.g., Haynes King"
+								className="max-w-xs"
+							/>
+						</div>
+						<Separator />
+						<div className="max-h-96 overflow-y-auto pr-2">
+							{currentAccounts.length === 0 ? (
+								<div className="flex flex-col items-center justify-center py-8 text-center">
+									<p className="text-sm text-muted-foreground">
+										No accounts configured yet
+									</p>
+									<p className="text-xs text-muted-foreground mt-1">
+										Click "Add account" below to get started
+									</p>
+								</div>
+							) : (
+								currentAccounts.map((row, index) => (
+									<div key={row.rowKey} className="flex flex-col gap-2">
+										<SettingsModalRow
+											updateTvbAccount={(
+												field: keyof TvbAccount,
+												value: string | boolean | null,
+											) =>
+												setCurrentAccounts((prev) => {
+													const newRows = [...prev];
+													newRows[index] = {
+														...newRows[index],
+														[field]: value,
+													};
+													return newRows;
+												})
+											}
+											tvbAccount={row}
+											deleteAccount={() => {
+												setCurrentAccounts((prev) => {
+													const newRows = [...prev];
+													newRows.splice(index, 1);
+													return newRows;
+												});
+											}}
+										/>
+										{index < currentAccounts.length - 1 && (
+											<Separator className="mb-2" />
+										)}
+									</div>
+								))
 							)}
-						/>
-						<Divider />
-						{currentAccounts.map((row, index) => (
-							<Stack spacing={2} key={row.rowKey} paddingTop={1}>
-								<SettingsModalRow
-									updateTvbAccount={(
-										field: keyof TvbAccount,
-										value: string | boolean | null,
-									) =>
-										setCurrentAccounts((prev) => {
-											const newRows = [...prev];
-											newRows[index] = { ...newRows[index], [field]: value };
-											return newRows;
-										})
-									}
-									tvbAccount={row}
-									deleteAccount={() => {
-										setCurrentAccounts((prev) => {
-											const newRows = [...prev];
-											newRows.splice(index, 1);
-											return newRows;
-										});
-									}}
-								/>
-								<Divider />
-							</Stack>
-						))}
+						</div>
+						<Separator />
 						<div>
 							<Button
-								variant="text"
-								startIcon={<AddRounded />}
-								size="small"
+								variant="ghost"
+								size="sm"
 								onClick={() => {
 									const newKey = rowKey++;
 									setCurrentAccounts((prev) => [
@@ -154,12 +155,35 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 									]);
 								}}
 							>
+								<Plus className="size-4" />
 								Add account
 							</Button>
 						</div>
-					</Stack>
+					</div>
 				)}
-			</Stack>
+				<DialogFooter>
+					<Button variant="outline" onClick={() => resetAccounts()}>
+						Reset
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={() => {
+							setLocalStorage("tvbAccounts", currentAccounts);
+							setLocalStorage("splitwiseName", currentSplitswiseName);
+							onClose();
+						}}
+						disabled={
+							!currentSplitswiseName ||
+							currentAccounts.some(
+								(row) =>
+									!(row.monarchId && row.monarchName && row.splitwiseName),
+							)
+						}
+					>
+						Save
+					</Button>
+				</DialogFooter>
+			</DialogContent>
 		</Dialog>
 	);
 };

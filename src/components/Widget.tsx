@@ -1,8 +1,9 @@
-import { Divider, Paper, Stack, styled } from "@mui/material";
 import { useState } from "react";
 import { usePageContext } from "@/api";
+import { Separator } from "@/components/shadcn/separator";
+import { cn } from "@/lib/utils";
 import { driveAccount } from "@/methods";
-import type { CornerPosition, TvbAccountStatus } from "@/types";
+import type { TvbAccountStatus } from "@/types";
 import { AccountRows } from "./AccountRows";
 import { useLoadingScreenContext } from "./LoadingScreenProvider";
 import { useLocalStorageContext } from "./LocalStorageProvider";
@@ -11,23 +12,10 @@ import { TitleUpload } from "./TitleUpload";
 
 export const widgetInputId = "MonarchSplitwiseInput";
 
-const StyledWidget = styled(Paper, {
-	shouldForwardProp: (prop: string) => prop !== "position",
-})<{
-	cornerPosition: CornerPosition | undefined;
-}>(({ theme, cornerPosition }) => ({
-	bottom: theme.spacing(1),
-	right: cornerPosition === "right" ? theme.spacing(1) : undefined,
-	left: cornerPosition === "left" ? theme.spacing(1) : undefined,
-	position: "fixed",
-	pointerEvents: "auto",
-	padding: theme.spacing(1),
-}));
-
 export const Widget = () => {
 	const { authToken } = usePageContext();
 	const { toggleLoading } = useLoadingScreenContext();
-	const { tvbAccounts, isLocalStorageLoading, cornerPosition } =
+	const { tvbAccounts, isLocalStorageLoading, cornerPosition, splitwiseName } =
 		useLocalStorageContext();
 	const isAccountsEmpty =
 		!isLocalStorageLoading &&
@@ -46,7 +34,12 @@ export const Widget = () => {
 		}
 		const loadingKey = toggleLoading();
 		for (const account of tvbAccounts) {
-			const response = await driveAccount(account, files, authToken);
+			const response = await driveAccount(
+				account,
+				files,
+				authToken,
+				splitwiseName,
+			);
 			setCompletedMap((prev) => ({
 				...prev,
 				[account.monarchId]: response.attempted
@@ -58,32 +51,37 @@ export const Widget = () => {
 	};
 
 	return (
-		<StyledWidget
-			elevation={3}
-			cornerPosition={isLocalStorageLoading ? undefined : cornerPosition}
-		>
-			<Stack spacing={1}>
-				<TitleUpload
-					id={widgetInputId}
-					onUpload={processFiles}
-					onClick={
-						isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
-					}
-				/>
-				{!isAccountsEmpty && (
-					<>
-						<Divider />
-						<AccountRows
-							completedMap={completedMap}
-							openSettingsModal={() => setIsSettingsModalOpen(true)}
-						/>
-					</>
+		<>
+			<div
+				className={cn(
+					"fixed bottom-2 z-10 pointer-events-auto p-2 bg-card border rounded-lg shadow-md",
+					!isLocalStorageLoading && cornerPosition === "right" && "right-2",
+					!isLocalStorageLoading && cornerPosition === "left" && "left-2",
 				)}
-			</Stack>
+			>
+				<div className="flex flex-col gap-2">
+					<TitleUpload
+						id={widgetInputId}
+						onUpload={processFiles}
+						onClick={
+							isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
+						}
+					/>
+					{!isAccountsEmpty && (
+						<>
+							<Separator />
+							<AccountRows
+								completedMap={completedMap}
+								openSettingsModal={() => setIsSettingsModalOpen(true)}
+							/>
+						</>
+					)}
+				</div>
+			</div>
 			<SettingsModal
 				open={isSettingsModalOpen}
 				onClose={() => setIsSettingsModalOpen(false)}
 			/>
-		</StyledWidget>
+		</>
 	);
 };

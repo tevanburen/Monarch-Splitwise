@@ -1,4 +1,4 @@
-import { Box, CircularProgress, styled } from "@mui/material";
+import { Loader2 } from "lucide-react";
 import {
 	createContext,
 	type PropsWithChildren,
@@ -14,20 +14,6 @@ interface LoadingScreenContextComponents {
 		((loading: false, loadingKey: number) => void);
 	clearLoading: () => void;
 }
-
-const StyledBox = styled(Box)({
-	position: "fixed",
-	top: 0,
-	left: 0,
-	width: "100vw",
-	height: "100vh",
-	backgroundColor: "rgba(0, 0, 0, 0.5)",
-	zIndex: 1300,
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	pointerEvents: "all",
-});
 
 const LoadingScreenContext = createContext<
 	LoadingScreenContextComponents | undefined
@@ -77,9 +63,9 @@ export const LoadingScreenContextProvider = ({
 		>
 			{children}
 			{isLoading && (
-				<StyledBox>
-					<CircularProgress color="primary" />
-				</StyledBox>
+				<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center pointer-events-auto">
+					<Loader2 className="size-8 text-primary animate-spin" />
+				</div>
 			)}
 		</LoadingScreenContext.Provider>
 	);

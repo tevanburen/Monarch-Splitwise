@@ -5,6 +5,7 @@
 	"content_scripts": [
 		{
 			"js": ["dist/app.js"],
+			"css": ["dist/app.css"],
 			"matches": ["*://app.monarch.com/*"]
 		}
 	],

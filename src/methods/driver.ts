@@ -38,6 +38,7 @@ export const driveAccount = async (
 	account: TvbAccount,
 	files: File[],
 	authToken: string,
+	splitwiseName: string,
 ): Promise<TvbAccountStatus> => {
 	const response: TvbAccountStatus = {
 		attempted: false,
@@ -66,7 +67,7 @@ export const driveAccount = async (
 		// fetch old rows
 		buildOldRows(account.monarchId, authToken),
 		// read new row file
-		buildNewRows(files[fileIndex]),
+		buildNewRows(files[fileIndex], splitwiseName),
 		// get to account page
 		navigateToPage(account.monarchId),
 	]);
@@ -115,12 +116,18 @@ export const driveAccount = async (
 	//     balanceRows,
 	//   })
 	// );
+	console.log(newRows);
 
 	// upload new rows to monarch
 	if (newRows.length) {
 		response.transactions = await uploadRowsToMonarch(newRows);
+		// for now, attempt to navigate back to account, and mark balances as done
+		response.balances =
+			(await clickElement("button", /^View cash flow report$/)) &&
+			(await navigateToPage(account.monarchId));
 	} else {
-		response.transactions = true;
+		// response.transactions = true;
+		response.balances = await navigateToPage(account.monarchId);
 	}
 
 	// return if fail during update
@@ -136,11 +143,6 @@ export const driveAccount = async (
 
 	// // upload balance rows
 	// response.balances = await uploadBalanceRowsToMonarch(balanceRows);
-
-	// for now, attempt to navigate back to account, and mark balances as done
-	response.balances =
-		(await clickElement("button", /^View cash flow report$/)) &&
-		(await navigateToPage(account.monarchId));
 
 	return response;
 };
@@ -168,15 +170,14 @@ const buildOldRows = async (
  * Processes a Splitwise CSV file to extract transaction and balance rows.
  *
  * @param splitwiseFile - The Splitwise CSV file to process
+ * @param splitwiseName - The Splitwise member name to filter transactions for
  * @returns Tuple containing sorted transaction rows and balance rows
  */ const buildNewRows = async (
 	splitwiseFile: File,
+	splitwiseName: string,
 ): Promise<[TvbRow[], TvbBalanceRow[]]> => {
 	// read splitwise rows
-	const newRows = await ingestSplitwiseCsvFile(
-		splitwiseFile,
-		"Thomas Van Buren",
-	);
+	const newRows = await ingestSplitwiseCsvFile(splitwiseFile, splitwiseName);
 
 	return [newRows.sort(compareTvbRows), tvbRowsToTvbBalanceRows(newRows)];
 };
