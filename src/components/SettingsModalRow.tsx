@@ -21,9 +21,7 @@ export const SettingsModalRow = ({
 		<div className="flex flex-col gap-2">
 			<div className="flex flex-row items-end gap-2">
 				<div className="flex-1 flex flex-col gap-1">
-					<div className="text-xs text-muted-foreground px-1">
-						Monarch name
-					</div>
+					<div className="text-xs text-muted-foreground px-1">Monarch name</div>
 					<Input
 						className="flex-1"
 						value={tvbAccount.monarchName}
@@ -57,9 +55,7 @@ export const SettingsModalRow = ({
 			</div>
 			<div className="flex flex-row items-end gap-2">
 				<div className="flex-1 flex flex-col gap-1">
-					<div className="text-xs text-muted-foreground px-1">
-						Monarch ID
-					</div>
+					<div className="text-xs text-muted-foreground px-1">Monarch ID</div>
 					<Input
 						className="flex-1"
 						value={tvbAccount.monarchId}
@@ -67,9 +63,7 @@ export const SettingsModalRow = ({
 					/>
 				</div>
 				<div className="flex-1 flex flex-col gap-1">
-					<div className="text-xs text-muted-foreground px-1">
-						Start date
-					</div>
+					<div className="text-xs text-muted-foreground px-1">Start date</div>
 					<Input
 						type="date"
 						className="flex-1"
