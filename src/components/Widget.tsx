@@ -1,28 +1,14 @@
-// import { Divider, Paper, Stack, styled } from "@mui/material";
 import { useState } from "react";
 import { usePageContext } from "@/api";
+import { cn } from "@/lib/utils";
 import { driveAccount } from "@/methods";
-import type { CornerPosition, TvbAccountStatus } from "@/types";
+import type { TvbAccountStatus } from "@/types";
 import { AccountRows } from "./AccountRows";
 import { useLoadingScreenContext } from "./LoadingScreenProvider";
 import { useLocalStorageContext } from "./LocalStorageProvider";
-// import { SettingsModal } from "./SettingsModal";
-// import { TitleUpload } from "./TitleUpload";
+import { TitleUpload } from "./TitleUpload";
 
 export const widgetInputId = "MonarchSplitwiseInput";
-
-// const StyledWidget = styled(Paper, {
-// 	shouldForwardProp: (prop: string) => prop !== "position",
-// })<{
-// 	cornerPosition: CornerPosition | undefined;
-// }>(({ theme, cornerPosition }) => ({
-// 	bottom: theme.spacing(1),
-// 	right: cornerPosition === "right" ? theme.spacing(1) : undefined,
-// 	left: cornerPosition === "left" ? theme.spacing(1) : undefined,
-// 	position: "fixed",
-// 	pointerEvents: "auto",
-// 	padding: theme.spacing(1),
-// }));
 
 export const Widget = () => {
 	const { authToken } = usePageContext();
@@ -36,8 +22,7 @@ export const Widget = () => {
 	const [completedMap, setCompletedMap] = useState<
 		Record<string, TvbAccountStatus>
 	>({});
-	const [isSettingsModalOpen, setIsSettingsModalOpen] =
-		useState<boolean>(false);
+	const [, setIsSettingsModalOpen] = useState<boolean>(false);
 
 	const processFiles = async (files: File[]) => {
 		if (!authToken) {
@@ -59,42 +44,34 @@ export const Widget = () => {
 
 	return (
 		<div
-			className={`fixed bottom-2 pointer-events-auto p-2 bg-card border rounded-lg shadow-md ${
-				!isLocalStorageLoading && cornerPosition === "right"
-					? "right-2"
-					: !isLocalStorageLoading && cornerPosition === "left"
-						? "left-2"
-						: ""
-			}`}
+			className={cn(
+				"fixed bottom-2 pointer-events-auto p-2 bg-card border rounded-lg shadow-md",
+				!isLocalStorageLoading && cornerPosition === "right" && "right-2",
+				!isLocalStorageLoading && cornerPosition === "left" && "left-2",
+			)}
 		>
-			TVB Extension
+			<div className="flex flex-col gap-2">
+				<TitleUpload
+					id={widgetInputId}
+					onUpload={processFiles}
+					onClick={
+						isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
+					}
+				/>
+				{!isAccountsEmpty && (
+					<>
+						<div className="border-t" />
+						<AccountRows
+							completedMap={completedMap}
+							openSettingsModal={() => setIsSettingsModalOpen(true)}
+						/>
+					</>
+				)}
+			</div>
+			{/* <SettingsModal
+				open={isSettingsModalOpen}
+				onClose={() => setIsSettingsModalOpen(false)}
+			/> */}
 		</div>
-		// <StyledWidget
-		// 	elevation={3}
-		// 	cornerPosition={isLocalStorageLoading ? undefined : cornerPosition}
-		// >
-		// 	<Stack spacing={1}>
-		// 		<TitleUpload
-		// 			id={widgetInputId}
-		// 			onUpload={processFiles}
-		// 			onClick={
-		// 				isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
-		// 			}
-		// 		/>
-		// 		{!isAccountsEmpty && (
-		// 			<>
-		// 				<Divider />
-		// 				<AccountRows
-		// 					completedMap={completedMap}
-		// 					openSettingsModal={() => setIsSettingsModalOpen(true)}
-		// 				/>
-		// 			</>
-		// 		)}
-		// 	</Stack>
-		// 	<SettingsModal
-		// 		open={isSettingsModalOpen}
-		// 		onClose={() => setIsSettingsModalOpen(false)}
-		// 	/>
-		// </StyledWidget>
 	);
 };

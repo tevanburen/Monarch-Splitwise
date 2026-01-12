@@ -1,11 +1,7 @@
-import {
-	DeleteRounded,
-	VisibilityOffRounded,
-	VisibilityRounded,
-} from "@mui/icons-material";
-import { IconButton, Stack, styled, TextField } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
+import { Eye, EyeOff, Trash2 } from "lucide-react";
+import { Button } from "@/components/shadcn/button";
+import { Input } from "@/components/shadcn/input";
+import { Textarea } from "@/components/shadcn/textarea";
 import type { TvbAccount } from "@/types";
 
 export interface SettingsModalRowProps {
@@ -17,67 +13,61 @@ export interface SettingsModalRowProps {
 	deleteAccount: () => void;
 }
 
-const WideDatePicker = styled(DatePicker)(({ theme }) => ({
-	width: theme.spacing(36),
-}));
-
-const GrayInvisibleIcon = styled(VisibilityOffRounded)(({ theme }) => ({
-	color: theme.palette.grey[500],
-}));
-
 export const SettingsModalRow = ({
 	tvbAccount,
 	deleteAccount,
 	updateTvbAccount,
 }: SettingsModalRowProps) => {
 	return (
-		<Stack spacing={1}>
-			<Stack direction="row" alignItems="center" spacing={1}>
-				<TextField
-					label="Monarch name"
-					size="small"
+		<div className="flex flex-col gap-2">
+			<div className="flex flex-row items-center gap-2">
+				<Textarea
+					placeholder="Monarch name"
+					className="flex-1 min-h-9 resize-none"
 					value={tvbAccount.monarchName}
-					fullWidth
 					onChange={(e) => updateTvbAccount("monarchName", e.target.value)}
+					rows={1}
 				/>
-				<TextField
-					label="Splitwise name"
-					size="small"
+				<Textarea
+					placeholder="Splitwise name"
+					className="flex-1 min-h-9 resize-none"
 					value={tvbAccount.splitwiseName}
-					fullWidth
 					onChange={(e) => updateTvbAccount("splitwiseName", e.target.value)}
+					rows={1}
 				/>
-				<IconButton
-					size="small"
+				<Button
+					variant="ghost"
+					size="icon"
 					onClick={() => updateTvbAccount("invisible", !tvbAccount.invisible)}
 				>
 					{tvbAccount.invisible ? (
-						<GrayInvisibleIcon fontSize="small" />
+						<EyeOff className="size-4 text-muted-foreground" />
 					) : (
-						<VisibilityRounded fontSize="small" color="success" />
+						<Eye className="size-4 text-secondary" />
 					)}
-				</IconButton>
-				<IconButton size="small" onClick={deleteAccount}>
-					<DeleteRounded fontSize="small" color="error" />
-				</IconButton>
-			</Stack>
-			<Stack direction="row" alignItems="center" spacing={1}>
-				<TextField
-					label="Monarch ID"
-					size="small"
+				</Button>
+				<Button variant="ghost" size="icon" onClick={deleteAccount}>
+					<Trash2 className="size-4 text-primary" />
+				</Button>
+			</div>
+			<div className="flex flex-row items-center gap-2">
+				<Textarea
+					placeholder="Monarch ID"
+					className="flex-1 min-h-9 resize-none"
 					value={tvbAccount.monarchId}
-					fullWidth
 					onChange={(e) => updateTvbAccount("monarchId", e.target.value)}
+					rows={1}
 				/>
-				<WideDatePicker
-					label="Start date"
-					slotProps={{ textField: { size: "small" } }}
-					value={tvbAccount.startDate ? dayjs(tvbAccount.startDate) : null}
-					onChange={(newVal) =>
-						updateTvbAccount("startDate", newVal?.format("YYYY-MM-DD") ?? null)
+				<Input
+					type="date"
+					placeholder="Start date"
+					className="w-72"
+					value={tvbAccount.startDate ?? ""}
+					onChange={(e) =>
+						updateTvbAccount("startDate", e.target.value || null)
 					}
 				/>
-			</Stack>
-		</Stack>
+			</div>
+		</div>
 	);
 };

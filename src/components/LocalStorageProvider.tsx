@@ -48,7 +48,7 @@ export const LocalStorageContextProvider = ({
 			localStorage.getItem(localStorageId) ?? "null",
 		);
 		setTvbAccounts(
-			ls?.tvbAccounts.sort((a, b) =>
+			ls?.tvbAccounts?.sort((a, b) =>
 				a.monarchName.localeCompare(b.monarchName),
 			) ?? [],
 		);
