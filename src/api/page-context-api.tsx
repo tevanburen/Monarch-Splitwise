@@ -15,12 +15,21 @@ import type { PageContextMessage } from "./api.types";
 	(document.head || document.documentElement).appendChild(script);
 })();
 
+/**
+ * Context interface providing access to page-level data like auth tokens.
+ */
 interface PageContextComponents {
 	authToken: string | undefined;
 }
 
 const pageContext = createContext<PageContextComponents | undefined>(undefined);
 
+/**
+ * Hook to access the page context containing authentication and page-level data.
+ *
+ * @throws Error if used outside of PageContextProvider
+ * @returns Page context with auth token
+ */
 export const usePageContext = (): PageContextComponents => {
 	const context = useContext(pageContext);
 	if (!context) {
@@ -29,9 +38,21 @@ export const usePageContext = (): PageContextComponents => {
 	return context;
 };
 
+/**
+ * Provider component that captures authentication tokens from page context.
+ * Listens for messages from the injected page script containing auth data.
+ *
+ * @component
+ */
 export const PageContextProvider = ({ children }: PropsWithChildren) => {
+	/**
+	 * State
+	 */
 	const [authToken, setAuthToken] = useState<string | undefined>(undefined);
 
+	/**
+	 * Effects
+	 */
 	useEffect(() => {
 		const handler = (event: MessageEvent) => {
 			if (event.data?.isTvbMessage) {

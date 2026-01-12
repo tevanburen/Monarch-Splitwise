@@ -12,6 +12,12 @@ export interface SettingsModalRowProps {
 	deleteAccount: () => void;
 }
 
+/**
+ * Renders a single account configuration row in the settings modal.
+ * Allows editing of Monarch/Splitwise names, IDs, start dates, and visibility.
+ *
+ * @component
+ */
 export const SettingsModalRow = ({
 	tvbAccount,
 	deleteAccount,

@@ -7,6 +7,12 @@ const acceptedFileTypes: Record<string, string> = {
 	"text/csv": "csv",
 };
 
+/**
+ * Hidden file input component that accepts CSV files.
+ * Filters uploaded files by type and resets the input after each selection.
+ *
+ * @component
+ */
 export const FileAcceptor = ({ onUpload, id }: FileAcceptorProps) => {
 	return (
 		<input

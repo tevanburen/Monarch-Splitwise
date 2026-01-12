@@ -2,6 +2,12 @@ import { FileAcceptor, type FileAcceptorProps } from "./library";
 
 export type TitleUploadProps = FileAcceptorProps & { onClick?: () => void };
 
+/**
+ * Renders the title banner that doubles as a file upload trigger or settings button.
+ * Displays "Monarch - Splitwise" branding with conditional interaction behavior.
+ *
+ * @component
+ */
 export const TitleUpload = ({ onClick, onUpload, id }: TitleUploadProps) => {
 	const content = (
 		<>

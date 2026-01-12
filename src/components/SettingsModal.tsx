@@ -23,6 +23,11 @@ export interface SettingsModalProps {
 type TvbAccountWithRowKey = TvbAccount & { rowKey: number };
 let rowKey = 0;
 
+/**
+ * Renders a modal allowing the user to configure their settings
+ *
+ * @component
+ */
 export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	const {
 		tvbAccounts,
@@ -32,12 +37,23 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 		setLocalStorage,
 	} = useLocalStorageContext();
 
+	/**
+	 * State
+	 */
 	const [currentAccounts, setCurrentAccounts] = useState<
 		TvbAccountWithRowKey[]
 	>([]);
 	const [currentSplitswiseName, setCurrentSplitswiseName] =
 		useState<string>("");
 
+	/**
+	 * Functions
+	 */
+
+	/**
+	 * Resets the current accounts and Splitwise name to their original values from local storage.
+	 * This function creates a new array of accounts with unique row keys for React rendering.
+	 */
 	const resetAccounts = useCallback(() => {
 		setCurrentAccounts(
 			tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ })),
@@ -45,6 +61,9 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 		setCurrentSplitswiseName(splitwiseName);
 	}, [tvbAccounts, splitwiseName]);
 
+	/**
+	 * Effects
+	 */
 	useEffect(() => {
 		if (open) {
 			resetAccounts();

@@ -12,6 +12,12 @@ import { TitleUpload } from "./TitleUpload";
 
 export const widgetInputId = "MonarchSplitwiseInput";
 
+/**
+ * Main widget component that handles file uploads and displays account status.
+ * Manages the upload flow for Splitwise CSV files and coordinates with Monarch accounts.
+ *
+ * @component
+ */
 export const Widget = () => {
 	const { authToken } = usePageContext();
 	const { toggleLoading } = useLoadingScreenContext();
@@ -21,12 +27,25 @@ export const Widget = () => {
 		!isLocalStorageLoading &&
 		!tvbAccounts.filter((account) => !account.invisible).length;
 
+	/**
+	 * State
+	 */
 	const [completedMap, setCompletedMap] = useState<
 		Record<string, TvbAccountStatus>
 	>({});
 	const [isSettingsModalOpen, setIsSettingsModalOpen] =
 		useState<boolean>(false);
 
+	/**
+	 * Functions
+	 */
+
+	/**
+	 * Processes uploaded Splitwise CSV files by driving each configured account.
+	 * Updates completion status for each account as transactions are processed.
+	 *
+	 * @param files - Array of Splitwise CSV files to process
+	 */
 	const processFiles = async (files: File[]) => {
 		if (!authToken) {
 			console.error("No authorization token found");

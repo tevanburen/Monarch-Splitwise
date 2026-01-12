@@ -7,12 +7,24 @@ export interface AccountsRowsProps {
 	openSettingsModal: () => void;
 }
 
+/**
+ * Displays a list of account rows with their completion status.
+ * Shows success/failure icons for each account's transaction and balance updates.
+ *
+ * @component
+ */
 export const AccountRows = ({
 	completedMap,
 	openSettingsModal,
 }: AccountsRowsProps) => {
 	const { tvbAccounts, isLocalStorageLoading } = useLocalStorageContext();
 
+	/**
+	 * Returns the appropriate icon based on completion status.
+	 *
+	 * @param completed - Whether the operation was completed successfully
+	 * @returns CheckCircle for success, XCircle for failure
+	 */
 	const getIcon = (completed?: boolean) =>
 		completed ? (
 			<CheckCircle className="size-4 text-secondary" />
