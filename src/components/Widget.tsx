@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { usePageContext } from "@/api";
+import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/utils";
 import { driveAccount } from "@/methods";
 import type { TvbAccountStatus } from "@/types";
 import { AccountRows } from "./AccountRows";
 import { useLoadingScreenContext } from "./LoadingScreenProvider";
 import { useLocalStorageContext } from "./LocalStorageProvider";
+import { SettingsModal } from "./SettingsModal";
 import { TitleUpload } from "./TitleUpload";
 
 export const widgetInputId = "MonarchSplitwiseInput";
@@ -22,7 +24,8 @@ export const Widget = () => {
 	const [completedMap, setCompletedMap] = useState<
 		Record<string, TvbAccountStatus>
 	>({});
-	const [, setIsSettingsModalOpen] = useState<boolean>(false);
+	const [isSettingsModalOpen, setIsSettingsModalOpen] =
+		useState<boolean>(false);
 
 	const processFiles = async (files: File[]) => {
 		if (!authToken) {
@@ -60,7 +63,7 @@ export const Widget = () => {
 				/>
 				{!isAccountsEmpty && (
 					<>
-						<div className="border-t" />
+						<Separator />
 						<AccountRows
 							completedMap={completedMap}
 							openSettingsModal={() => setIsSettingsModalOpen(true)}
@@ -68,10 +71,10 @@ export const Widget = () => {
 					</>
 				)}
 			</div>
-			{/* <SettingsModal
+			<SettingsModal
 				open={isSettingsModalOpen}
 				onClose={() => setIsSettingsModalOpen(false)}
-			/> */}
+			/>
 		</div>
 	);
 };

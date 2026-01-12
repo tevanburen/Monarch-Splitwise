@@ -4,16 +4,17 @@ import { Button } from "@/components/shadcn/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/shadcn/dialog";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/shadcn/select";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
+import { Separator } from "@/components/shadcn/separator";
 import type { TvbAccount } from "@/types";
 import { useLocalStorageContext } from "./LocalStorageProvider";
 import { SettingsModalRow } from "./SettingsModalRow";
@@ -56,55 +57,35 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
 			<DialogContent className="max-w-2xl" showCloseButton={true}>
 				<DialogHeader>
-					<div className="flex flex-row items-center justify-between">
-						<DialogTitle>Settings</DialogTitle>
-						<div className="flex flex-row gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => resetAccounts()}
-							>
-								Reset
-							</Button>
-							<Button
-								variant="secondary"
-								size="sm"
-								onClick={() => {
-									setLocalStorage("tvbAccounts", currentAccounts);
-									onClose();
-								}}
-								disabled={currentAccounts.some(
-									(row) =>
-										!(row.monarchId && row.monarchName && row.splitwiseName),
-								)}
-							>
-								Save
-							</Button>
-						</div>
-					</div>
+					<DialogTitle>Settings</DialogTitle>
 				</DialogHeader>
-				<div className="border-t" />
+				<Separator />
 				{isLocalStorageLoading ? (
 					<div className="h-16 w-full flex items-center justify-center">
 						<div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
 					</div>
 				) : (
 					<div className="flex flex-col gap-2">
-						<Select
-							value={cornerPosition}
-							onValueChange={(value) =>
-								setLocalStorage("cornerPosition", value as "left" | "right")
-							}
-						>
-							<SelectTrigger>
-								<SelectValue placeholder="Position" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="left">Left</SelectItem>
-								<SelectItem value="right">Right</SelectItem>
-							</SelectContent>
-						</Select>
-						<div className="border-t" />
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="outline" className="w-full justify-start">
+									Position: {cornerPosition.charAt(0).toUpperCase() + cornerPosition.slice(1)}
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent>
+								<DropdownMenuItem
+									onClick={() => setLocalStorage("cornerPosition", "left")}
+								>
+									Left
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => setLocalStorage("cornerPosition", "right")}
+								>
+									Right
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+						<Separator />
 						{currentAccounts.map((row, index) => (
 							<div key={row.rowKey} className="flex flex-col gap-2 pt-2">
 								<SettingsModalRow
@@ -127,7 +108,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 										});
 									}}
 								/>
-								<div className="border-t" />
+								<Separator />
 							</div>
 						))}
 						<div>
@@ -154,6 +135,23 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 						</div>
 					</div>
 				)}
+				<DialogFooter>
+					<Button variant="outline" onClick={() => resetAccounts()}>
+						Reset
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={() => {
+							setLocalStorage("tvbAccounts", currentAccounts);
+							onClose();
+						}}
+						disabled={currentAccounts.some(
+							(row) => !(row.monarchId && row.monarchName && row.splitwiseName),
+						)}
+					>
+						Save
+					</Button>
+				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);
