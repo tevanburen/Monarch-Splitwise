@@ -19,19 +19,27 @@ export const SettingsModalRow = ({
 }: SettingsModalRowProps) => {
 	return (
 		<div className="flex flex-col gap-2">
-			<div className="flex flex-row items-center gap-2">
-				<Input
-					placeholder="Monarch name"
-					className="flex-1"
-					value={tvbAccount.monarchName}
-					onChange={(e) => updateTvbAccount("monarchName", e.target.value)}
-				/>
-				<Input
-					placeholder="Splitwise name"
-					className="flex-1"
-					value={tvbAccount.splitwiseName}
-					onChange={(e) => updateTvbAccount("splitwiseName", e.target.value)}
-				/>
+			<div className="flex flex-row items-end gap-2">
+				<div className="flex-1 flex flex-col gap-1">
+					<div className="text-xs text-muted-foreground px-1">
+						Monarch name
+					</div>
+					<Input
+						className="flex-1"
+						value={tvbAccount.monarchName}
+						onChange={(e) => updateTvbAccount("monarchName", e.target.value)}
+					/>
+				</div>
+				<div className="flex-1 flex flex-col gap-1">
+					<div className="text-xs text-muted-foreground px-1">
+						Splitwise name
+					</div>
+					<Input
+						className="flex-1"
+						value={tvbAccount.splitwiseName}
+						onChange={(e) => updateTvbAccount("splitwiseName", e.target.value)}
+					/>
+				</div>
 				<Button
 					variant="ghost"
 					size="icon"
@@ -47,22 +55,30 @@ export const SettingsModalRow = ({
 					<Trash2 className="size-4 text-primary" />
 				</Button>
 			</div>
-			<div className="flex flex-row items-center gap-2">
-				<Input
-					placeholder="Monarch ID"
-					className="flex-1"
-					value={tvbAccount.monarchId}
-					onChange={(e) => updateTvbAccount("monarchId", e.target.value)}
-				/>
-				<Input
-					type="date"
-					placeholder="Start date"
-					className="flex-1"
-					value={tvbAccount.startDate ?? ""}
-					onChange={(e) =>
-						updateTvbAccount("startDate", e.target.value || null)
-					}
-				/>
+			<div className="flex flex-row items-end gap-2">
+				<div className="flex-1 flex flex-col gap-1">
+					<div className="text-xs text-muted-foreground px-1">
+						Monarch ID
+					</div>
+					<Input
+						className="flex-1"
+						value={tvbAccount.monarchId}
+						onChange={(e) => updateTvbAccount("monarchId", e.target.value)}
+					/>
+				</div>
+				<div className="flex-1 flex flex-col gap-1">
+					<div className="text-xs text-muted-foreground px-1">
+						Start date
+					</div>
+					<Input
+						type="date"
+						className="flex-1"
+						value={tvbAccount.startDate ?? ""}
+						onChange={(e) =>
+							updateTvbAccount("startDate", e.target.value || null)
+						}
+					/>
+				</div>
 			</div>
 		</div>
 	);

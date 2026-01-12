@@ -82,7 +82,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 						</div>
 						<Separator />
 						{currentAccounts.map((row, index) => (
-							<div key={row.rowKey} className="flex flex-col gap-2 pt-2">
+							<div key={row.rowKey} className="flex flex-col gap-2">
 								<SettingsModalRow
 									updateTvbAccount={(
 										field: keyof TvbAccount,
