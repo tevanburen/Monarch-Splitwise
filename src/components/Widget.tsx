@@ -51,35 +51,37 @@ export const Widget = () => {
 	};
 
 	return (
-		<div
-			className={cn(
-				"fixed bottom-2 pointer-events-auto p-2 bg-card border rounded-lg shadow-md",
-				!isLocalStorageLoading && cornerPosition === "right" && "right-2",
-				!isLocalStorageLoading && cornerPosition === "left" && "left-2",
-			)}
-		>
-			<div className="flex flex-col gap-2">
-				<TitleUpload
-					id={widgetInputId}
-					onUpload={processFiles}
-					onClick={
-						isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
-					}
-				/>
-				{!isAccountsEmpty && (
-					<>
-						<Separator />
-						<AccountRows
-							completedMap={completedMap}
-							openSettingsModal={() => setIsSettingsModalOpen(true)}
-						/>
-					</>
+		<>
+			<div
+				className={cn(
+					"fixed bottom-2 z-10 pointer-events-auto p-2 bg-card border rounded-lg shadow-md",
+					!isLocalStorageLoading && cornerPosition === "right" && "right-2",
+					!isLocalStorageLoading && cornerPosition === "left" && "left-2",
 				)}
+			>
+				<div className="flex flex-col gap-2">
+					<TitleUpload
+						id={widgetInputId}
+						onUpload={processFiles}
+						onClick={
+							isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
+						}
+					/>
+					{!isAccountsEmpty && (
+						<>
+							<Separator />
+							<AccountRows
+								completedMap={completedMap}
+								openSettingsModal={() => setIsSettingsModalOpen(true)}
+							/>
+						</>
+					)}
+				</div>
 			</div>
 			<SettingsModal
 				open={isSettingsModalOpen}
 				onClose={() => setIsSettingsModalOpen(false)}
 			/>
-		</div>
+		</>
 	);
 };
