@@ -15,9 +15,9 @@ export const AccountRows = ({
 
 	const getIcon = (completed?: boolean) =>
 		completed ? (
-			<CheckCircle className="size-4 text-green-600" />
+			<CheckCircle className="size-4 text-secondary" />
 		) : (
-			<XCircle className="size-4 text-red-600" />
+			<XCircle className="size-4 text-primary" />
 		);
 
 	return (
