@@ -69,7 +69,9 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" className="w-full justify-start">
-									Position: {cornerPosition.charAt(0).toUpperCase() + cornerPosition.slice(1)}
+									Position:{" "}
+									{cornerPosition.charAt(0).toUpperCase() +
+										cornerPosition.slice(1)}
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
