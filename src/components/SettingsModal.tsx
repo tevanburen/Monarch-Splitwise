@@ -88,36 +88,39 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 							<Input
 								value={currentSplitswiseName}
 								onChange={(e) => setCurrentSplitswiseName(e.target.value)}
-								placeholder="e.g., Thomas Van Buren"
+								placeholder="e.g., Haynes King"
 								className="max-w-xs"
 							/>
 						</div>
-						<Separator />{" "}
-						{currentAccounts.map((row, index) => (
-							<div key={row.rowKey} className="flex flex-col gap-2">
-								<SettingsModalRow
-									updateTvbAccount={(
-										field: keyof TvbAccount,
-										value: string | boolean | null,
-									) =>
-										setCurrentAccounts((prev) => {
-											const newRows = [...prev];
-											newRows[index] = { ...newRows[index], [field]: value };
-											return newRows;
-										})
-									}
-									tvbAccount={row}
-									deleteAccount={() => {
-										setCurrentAccounts((prev) => {
-											const newRows = [...prev];
-											newRows.splice(index, 1);
-											return newRows;
-										});
-									}}
-								/>
-								<Separator />
-							</div>
-						))}
+						<Separator />
+						<div className="max-h-96 overflow-y-auto pr-2">
+							{currentAccounts.map((row, index) => (
+								<div key={row.rowKey} className="flex flex-col gap-2">
+									<SettingsModalRow
+										updateTvbAccount={(
+											field: keyof TvbAccount,
+											value: string | boolean | null,
+										) =>
+											setCurrentAccounts((prev) => {
+												const newRows = [...prev];
+												newRows[index] = { ...newRows[index], [field]: value };
+												return newRows;
+											})
+										}
+										tvbAccount={row}
+										deleteAccount={() => {
+											setCurrentAccounts((prev) => {
+												const newRows = [...prev];
+												newRows.splice(index, 1);
+												return newRows;
+											});
+										}}
+									/>
+									{index < currentAccounts.length - 1 && <Separator />}
+								</div>
+							))}
+						</div>
+						<Separator />
 						<div>
 							<Button
 								variant="ghost"
