@@ -115,12 +115,18 @@ export const driveAccount = async (
 	//     balanceRows,
 	//   })
 	// );
+	console.log(newRows);
 
 	// upload new rows to monarch
 	if (newRows.length) {
 		response.transactions = await uploadRowsToMonarch(newRows);
+		// for now, attempt to navigate back to account, and mark balances as done
+		response.balances =
+			(await clickElement("button", /^View cash flow report$/)) &&
+			(await navigateToPage(account.monarchId));
 	} else {
-		response.transactions = true;
+		// response.transactions = true;
+		response.balances = await navigateToPage(account.monarchId);
 	}
 
 	// return if fail during update
@@ -136,11 +142,6 @@ export const driveAccount = async (
 
 	// // upload balance rows
 	// response.balances = await uploadBalanceRowsToMonarch(balanceRows);
-
-	// for now, attempt to navigate back to account, and mark balances as done
-	response.balances =
-		(await clickElement("button", /^View cash flow report$/)) &&
-		(await navigateToPage(account.monarchId));
 
 	return response;
 };
