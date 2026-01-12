@@ -25,9 +25,12 @@
 		"@mui/icons-material": "^7.3.7",
 		"@mui/material": "^7.3.7",
 		"@mui/x-date-pickers": "^8.24.0",
+		"@tailwindcss/postcss": "^4.1.18",
+		"@tailwindcss/vite": "^4.1.18",
 		"dayjs": "^1.11.19",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
+		"tailwindcss": "^4.1.18",
 		"xlsx": "^0.18.5"
 	}
 }

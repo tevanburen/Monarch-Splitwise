@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 
 export default {
@@ -22,5 +23,5 @@ export default {
 			},
 		},
 	},
-	plugins: [react()],
+	plugins: [react(), tailwindcss()],
 };
