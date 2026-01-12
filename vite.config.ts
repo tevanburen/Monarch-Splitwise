@@ -19,6 +19,7 @@ export default {
 			},
 			output: {
 				entryFileNames: "[name].js",
+				assetFileNames: "[name].[ext]",
 				format: "es",
 			},
 		},
