@@ -1,5 +1,13 @@
 import { read as XLSXread, utils as XLSXutils } from "xlsx";
 
+/**
+ * Reads a CSV file and parses it into an array of typed objects.
+ * Automatically parses date values.
+ *
+ * @template R - The expected type of each row object
+ * @param file - The CSV file to read
+ * @returns Promise resolving to an array of parsed row objects
+ */
 export const csvFileToRows = async <R>(file: File): Promise<R[]> => {
 	const workbook = XLSXread(await file.arrayBuffer(), { cellDates: true });
 
@@ -10,6 +18,14 @@ export const csvFileToRows = async <R>(file: File): Promise<R[]> => {
 	return arr;
 };
 
+/**
+ * Converts an array of objects to a CSV file.
+ *
+ * @param rows - Array of objects to convert
+ * @param fileName - Name for the generated file
+ * @param columns - Optional array of column names to include and their order
+ * @returns File object containing CSV data
+ */
 export const rowsToCsvFile = (
 	rows: unknown[],
 	fileName: string,
@@ -25,6 +41,12 @@ export const rowsToCsvFile = (
 	});
 };
 
+/**
+ * Triggers a browser download of a file.
+ * Creates a temporary anchor element to initiate the download, then cleans up.
+ *
+ * @param file - The file to download
+ */
 export const downloadFile = (file: File): void => {
 	const url = URL.createObjectURL(file);
 	const a = document.createElement("a");

@@ -1,19 +1,14 @@
-// import { CssBaseline, ThemeProvider } from "@mui/material";
-// import { LocalizationProvider } from "@mui/x-date-pickers";
-// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-// import { PageContextProvider } from "./api";
-// import { LocalStorageContextProvider, Widget } from "./components";
-// import { LoadingScreenContextProvider } from "./components/LoadingScreenProvider";
-// import { theme } from "./theme";
 import { PageContextProvider } from "./api";
 import { LocalStorageContextProvider, Widget } from "./components";
 import { LoadingScreenContextProvider } from "./components/LoadingScreenProvider";
 
+/**
+ * Root application component that sets up all context providers and renders the main widget.
+ *
+ * @component
+ */
 export const App = () => {
 	return (
-		// <LocalizationProvider dateAdapter={AdapterDayjs}>
-		// 	<ThemeProvider theme={theme}>
-		// 		<CssBaseline />
 		<PageContextProvider>
 			<LocalStorageContextProvider>
 				<LoadingScreenContextProvider>
@@ -21,7 +16,5 @@ export const App = () => {
 				</LoadingScreenContextProvider>
 			</LocalStorageContextProvider>
 		</PageContextProvider>
-		// 	</ThemeProvider>
-		// </LocalizationProvider>
 	);
 };

@@ -1,6 +1,15 @@
 import type { TvbRow } from "@/types";
 import { compareTvbRows } from "./conversion";
 
+/**
+ * Removes rows that appear in both arrays, leaving only unique entries in each.
+ * Uses a two-pointer algorithm with sorted arrays for efficient comparison.
+ * Modifies the input arrays in place and returns the removed similar rows.
+ *
+ * @param rowsA - First array of transaction rows
+ * @param rowsB - Second array of transaction rows
+ * @returns Array of rows that were found in both input arrays
+ */
 export const removeSimilarRows = (
 	rowsA: TvbRow[],
 	rowsB: TvbRow[],
@@ -43,6 +52,17 @@ export const removeSimilarRows = (
 	return out.reverse();
 };
 
+/**
+ * Removes elements from the beginning of an array up to (but not including) the first element
+ * that matches or exceeds the target value. Uses binary search for efficiency.
+ *
+ * @template K - The type of elements in the array
+ * @template T - The type of the value being compared
+ * @param rows - The array to modify
+ * @param getValue - Function to extract the comparable value from each element
+ * @param target - The target value to compare against
+ * @param compareValues - Comparison function that returns negative if a < b, 0 if equal, positive if a > b
+ */
 export const spliceElementsBS = <K, T>(
 	rows: K[],
 	getValue: (row: K) => T,

@@ -1,24 +1,38 @@
-import { Typography } from "@mui/material";
 import { FileAcceptor, type FileAcceptorProps } from "./library";
 
 export type TitleUploadProps = FileAcceptorProps & { onClick?: () => void };
 
+/**
+ * Renders the title banner that doubles as a file upload trigger or settings button.
+ * Displays "Monarch - Splitwise" branding with conditional interaction behavior.
+ *
+ * @component
+ */
 export const TitleUpload = ({ onClick, onUpload, id }: TitleUploadProps) => {
-	return (
-		<Typography
-			component="label"
-			style={{ cursor: "pointer" }}
-			variant="h6"
-			onClick={onClick}
-		>
-			<Typography color="primary" component="span" variant="h6">
-				Monarch
-			</Typography>
+	const content = (
+		<>
+			<span className="text-primary">Monarch</span>
 			{" - "}
-			<Typography color="secondary" component="span" variant="h6">
-				Splitwise
-			</Typography>
-			{!onClick && <FileAcceptor id={id} onUpload={onUpload} />}
-		</Typography>
+			<span className="text-secondary">Splitwise</span>
+		</>
+	);
+
+	if (onClick) {
+		return (
+			<button
+				type="button"
+				className="cursor-pointer text-lg font-semibold bg-transparent border-0 p-0"
+				onClick={onClick}
+			>
+				{content}
+			</button>
+		);
+	}
+
+	return (
+		<label htmlFor={id} className="cursor-pointer text-lg font-semibold">
+			{content}
+			<FileAcceptor id={id} onUpload={onUpload} />
+		</label>
 	);
 };

@@ -1,29 +1,22 @@
-import { styled } from "@mui/material";
-
 export interface FileAcceptorProps {
 	onUpload?: (files: File[]) => void | Promise<void>;
 	id?: string;
 }
 
-const VisuallyHiddenInput = styled("input")({
-	clip: "rect(0 0 0 0)",
-	clipPath: "inset(50%)",
-	height: 1,
-	overflow: "hidden",
-	position: "absolute",
-	bottom: 0,
-	left: 0,
-	whiteSpace: "nowrap",
-	width: 1,
-});
-
 const acceptedFileTypes: Record<string, string> = {
 	"text/csv": "csv",
 };
 
+/**
+ * Hidden file input component that accepts CSV files.
+ * Filters uploaded files by type and resets the input after each selection.
+ *
+ * @component
+ */
 export const FileAcceptor = ({ onUpload, id }: FileAcceptorProps) => {
 	return (
-		<VisuallyHiddenInput
+		<input
+			className="sr-only"
 			type="file"
 			accept={Object.values(acceptedFileTypes)
 				.map((ext) => `.${ext}`)
