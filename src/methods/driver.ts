@@ -177,10 +177,7 @@ const buildOldRows = async (
 	splitwiseName: string,
 ): Promise<[TvbRow[], TvbBalanceRow[]]> => {
 	// read splitwise rows
-	const newRows = await ingestSplitwiseCsvFile(
-		splitwiseFile,
-		splitwiseName,
-	);
+	const newRows = await ingestSplitwiseCsvFile(splitwiseFile, splitwiseName);
 
 	return [newRows.sort(compareTvbRows), tvbRowsToTvbBalanceRows(newRows)];
 };

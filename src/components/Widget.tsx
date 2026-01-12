@@ -34,7 +34,12 @@ export const Widget = () => {
 		}
 		const loadingKey = toggleLoading();
 		for (const account of tvbAccounts) {
-			const response = await driveAccount(account, files, authToken, splitwiseName);
+			const response = await driveAccount(
+				account,
+				files,
+				authToken,
+				splitwiseName,
+			);
 			setCompletedMap((prev) => ({
 				...prev,
 				[account.monarchId]: response.attempted
