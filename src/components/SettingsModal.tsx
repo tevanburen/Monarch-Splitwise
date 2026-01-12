@@ -8,6 +8,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/shadcn/dialog";
+import { Input } from "@/components/shadcn/input";
 import { Separator } from "@/components/shadcn/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/shadcn/toggle-group";
 import type { TvbAccount } from "@/types";
@@ -26,6 +27,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	const {
 		tvbAccounts,
 		cornerPosition,
+		splitwiseName,
 		isLocalStorageLoading,
 		setLocalStorage,
 	} = useLocalStorageContext();
@@ -33,14 +35,15 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	const [currentAccounts, setCurrentAccounts] = useState<
 		TvbAccountWithRowKey[]
 	>([]);
+	const [currentSplitswiseName, setCurrentSplitswiseName] =
+		useState<string>("");
 
-	const resetAccounts = useCallback(
-		() =>
-			setCurrentAccounts(
-				tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ })),
-			),
-		[tvbAccounts],
-	);
+	const resetAccounts = useCallback(() => {
+		setCurrentAccounts(
+			tvbAccounts.map((row) => ({ ...row, rowKey: rowKey++ })),
+		);
+		setCurrentSplitswiseName(splitwiseName);
+	}, [tvbAccounts, splitwiseName]);
 
 	useEffect(() => {
 		if (open) {
@@ -80,7 +83,16 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 								<ToggleGroupItem value="right">Right</ToggleGroupItem>
 							</ToggleGroup>
 						</div>
-						<Separator />
+						<div className="flex items-center justify-between pb-2">
+							<div className="text-sm font-medium">Your Splitwise Name</div>
+							<Input
+								value={currentSplitswiseName}
+								onChange={(e) => setCurrentSplitswiseName(e.target.value)}
+								placeholder="e.g., Thomas Van Buren"
+								className="max-w-xs"
+							/>
+						</div>
+						<Separator />{" "}
 						{currentAccounts.map((row, index) => (
 							<div key={row.rowKey} className="flex flex-col gap-2">
 								<SettingsModalRow
@@ -138,11 +150,16 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 						variant="secondary"
 						onClick={() => {
 							setLocalStorage("tvbAccounts", currentAccounts);
+							setLocalStorage("splitwiseName", currentSplitswiseName);
 							onClose();
 						}}
-						disabled={currentAccounts.some(
-							(row) => !(row.monarchId && row.monarchName && row.splitwiseName),
-						)}
+						disabled={
+							!currentSplitswiseName ||
+							currentAccounts.some(
+								(row) =>
+									!(row.monarchId && row.monarchName && row.splitwiseName),
+							)
+						}
 					>
 						Save
 					</Button>

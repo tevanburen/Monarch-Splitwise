@@ -11,6 +11,7 @@ import type { CornerPosition, TvbAccount } from "@/types";
 interface LocalStorageFields {
 	tvbAccounts: TvbAccount[];
 	cornerPosition: CornerPosition;
+	splitwiseName: string;
 }
 
 interface LocalStorageContextComponents extends LocalStorageFields {
@@ -39,6 +40,7 @@ export const LocalStorageContextProvider = ({
 }: PropsWithChildren) => {
 	const [tvbAccounts, setTvbAccounts] = useState<TvbAccount[]>([]);
 	const [cornerPosition, setCornerPosition] = useState<CornerPosition>("right");
+	const [splitwiseName, setSplitswiseName] = useState<string>("");
 	const [isLocalStorageLoading, setIsLocalStorageLoading] =
 		useState<boolean>(true);
 
@@ -53,6 +55,7 @@ export const LocalStorageContextProvider = ({
 			) ?? [],
 		);
 		setCornerPosition(ls?.cornerPosition ?? "right");
+		setSplitswiseName(ls?.splitwiseName ?? "");
 		setIsLocalStorageLoading(false);
 	}, []);
 
@@ -81,6 +84,7 @@ export const LocalStorageContextProvider = ({
 				setLocalStorage,
 				isLocalStorageLoading,
 				cornerPosition,
+				splitwiseName,
 			}}
 		>
 			{children}

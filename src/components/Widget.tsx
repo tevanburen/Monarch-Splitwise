@@ -15,7 +15,7 @@ export const widgetInputId = "MonarchSplitwiseInput";
 export const Widget = () => {
 	const { authToken } = usePageContext();
 	const { toggleLoading } = useLoadingScreenContext();
-	const { tvbAccounts, isLocalStorageLoading, cornerPosition } =
+	const { tvbAccounts, isLocalStorageLoading, cornerPosition, splitwiseName } =
 		useLocalStorageContext();
 	const isAccountsEmpty =
 		!isLocalStorageLoading &&
@@ -34,7 +34,7 @@ export const Widget = () => {
 		}
 		const loadingKey = toggleLoading();
 		for (const account of tvbAccounts) {
-			const response = await driveAccount(account, files, authToken);
+			const response = await driveAccount(account, files, authToken, splitwiseName);
 			setCompletedMap((prev) => ({
 				...prev,
 				[account.monarchId]: response.attempted

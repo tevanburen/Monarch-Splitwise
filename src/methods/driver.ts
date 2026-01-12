@@ -38,6 +38,7 @@ export const driveAccount = async (
 	account: TvbAccount,
 	files: File[],
 	authToken: string,
+	splitwiseName: string,
 ): Promise<TvbAccountStatus> => {
 	const response: TvbAccountStatus = {
 		attempted: false,
@@ -66,7 +67,7 @@ export const driveAccount = async (
 		// fetch old rows
 		buildOldRows(account.monarchId, authToken),
 		// read new row file
-		buildNewRows(files[fileIndex]),
+		buildNewRows(files[fileIndex], splitwiseName),
 		// get to account page
 		navigateToPage(account.monarchId),
 	]);
@@ -169,14 +170,16 @@ const buildOldRows = async (
  * Processes a Splitwise CSV file to extract transaction and balance rows.
  *
  * @param splitwiseFile - The Splitwise CSV file to process
+ * @param splitwiseName - The Splitwise member name to filter transactions for
  * @returns Tuple containing sorted transaction rows and balance rows
  */ const buildNewRows = async (
 	splitwiseFile: File,
+	splitwiseName: string,
 ): Promise<[TvbRow[], TvbBalanceRow[]]> => {
 	// read splitwise rows
 	const newRows = await ingestSplitwiseCsvFile(
 		splitwiseFile,
-		"Thomas Van Buren",
+		splitwiseName,
 	);
 
 	return [newRows.sort(compareTvbRows), tvbRowsToTvbBalanceRows(newRows)];
