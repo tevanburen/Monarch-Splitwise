@@ -6,8 +6,10 @@ export const clickElement = async <K extends HTMLElement>(
 	timeout: boolean | number = true,
 ): Promise<K | undefined> =>
 	await trySeveralTimes<K | undefined>(() => {
-		const thing = Array.from(document.querySelectorAll(type)).find((el) =>
-			regex.test(el.textContent || "") || regex.test(el.getAttribute("name") || ""),
+		const thing = Array.from(document.querySelectorAll(type)).find(
+			(el) =>
+				regex.test(el.textContent || "") ||
+				regex.test(el.getAttribute("name") || ""),
 		) as K;
 
 		if (thing && !(thing as unknown as HTMLButtonElement).disabled) {

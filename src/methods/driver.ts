@@ -28,7 +28,7 @@ import { removeSimilarRows, spliceElementsBS } from "./algo";
 /**
  * Processes an account by fetching old transactions, reading new Splitwise data,
  * uploading transactions and balance history to Monarch.
- * 
+ *
  * @param account - The account configuration to process
  * @param files - Array of Splitwise CSV files to process
  * @param authToken - Authentication token for Monarch API
@@ -62,7 +62,7 @@ export const driveAccount = async (
 	response.attempted = true;
 
 	// get ready to add new charges
-	const [oldRows, [newRows, ], onPage] = await Promise.all([
+	const [oldRows, [newRows], onPage] = await Promise.all([
 		// fetch old rows
 		buildOldRows(account.monarchId, authToken),
 		// read new row file
@@ -138,15 +138,16 @@ export const driveAccount = async (
 	// response.balances = await uploadBalanceRowsToMonarch(balanceRows);
 
 	// for now, attempt to navigate back to account, and mark balances as done
-	response.balances = (await clickElement("button", /^View cash flow report$/)) && (
-	await navigateToPage(account.monarchId));
+	response.balances =
+		(await clickElement("button", /^View cash flow report$/)) &&
+		(await navigateToPage(account.monarchId));
 
 	return response;
 };
 
 /**
  * Fetches and processes existing transaction rows from Monarch.
- * 
+ *
  * @param monarchId - The Monarch account ID
  * @param authToken - Authentication token for Monarch API
  * @returns Sorted array of existing transaction rows
@@ -165,10 +166,10 @@ const buildOldRows = async (
 };
 /**
  * Processes a Splitwise CSV file to extract transaction and balance rows.
- * 
+ *
  * @param splitwiseFile - The Splitwise CSV file to process
  * @returns Tuple containing sorted transaction rows and balance rows
- */const buildNewRows = async (
+ */ const buildNewRows = async (
 	splitwiseFile: File,
 ): Promise<[TvbRow[], TvbBalanceRow[]]> => {
 	// read splitwise rows
@@ -182,7 +183,7 @@ const buildOldRows = async (
 
 /**
  * Navigates to the account details page in Monarch.
- * 
+ *
  * @param monarchId - The Monarch account ID to navigate to
  * @returns True if navigation was successful, false otherwise
  */
@@ -199,7 +200,7 @@ const navigateToPage = async (monarchId: string): Promise<boolean> => {
 
 /**
  * Reads and processes a Splitwise CSV file, filtering for transactions involving the specified member.
- * 
+ *
  * @param file - The Splitwise CSV file to process
  * @param memberName - The name of the member to filter transactions for
  * @returns Array of transaction rows involving the specified member
@@ -230,7 +231,7 @@ const ingestSplitwiseCsvFile = async (
 
 /**
  * Reads and processes a Monarch CSV file.
- * 
+ *
  * @deprecated Use ingestMonarchCsvText instead
  * @param file - The Monarch CSV file to process
  * @returns Array of transaction rows
@@ -247,7 +248,7 @@ const _ingestMonarchCsvFile = async (file: File): Promise<TvbRow[]> => {
 
 /**
  * Parses Monarch CSV text data into transaction rows.
- * 
+ *
  * @param text - The CSV text content from Monarch
  * @returns Array of transaction rows
  */
@@ -263,7 +264,7 @@ const ingestMonarchCsvText = (text: string): TvbRow[] => {
 
 /**
  * Converts transaction rows to Monarch format and uploads them via the UI.
- * 
+ *
  * @param rows - Array of transaction rows to upload
  * @returns True if upload was successful, false otherwise
  */
@@ -313,17 +314,26 @@ const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
 			// Go to the priorities step
 			(await clickElement<HTMLButtonElement>("button", /^Next$/)) &&
 			// Prioritize monarch
-			(await clickElement<HTMLButtonElement>("span", /^Prioritize Monarch transactions$/)) && 
+			(await clickElement<HTMLButtonElement>(
+				"span",
+				/^Prioritize Monarch transactions$/,
+			)) &&
 			// Click adjust balances
-			(await clickElement<HTMLButtonElement>("input", /^shouldUpdateBalance$/)) &&
+			(await clickElement<HTMLButtonElement>(
+				"input",
+				/^shouldUpdateBalance$/,
+			)) &&
 			// Click Import
-			(await clickElement<HTMLButtonElement>("button", /^Import \d+ transactions$/)),
+			(await clickElement<HTMLButtonElement>(
+				"button",
+				/^Import \d+ transactions$/,
+			)),
 	);
 };
 
 /**
  * Converts balance rows to Monarch format and uploads them via the UI.
- * 
+ *
  * @param rows - Array of balance rows to upload
  * @returns True if upload was successful, false otherwise
  * @deprecated as of January 2026 due to Monarch changes
@@ -361,9 +371,9 @@ const _uploadBalanceRowsToMonarch = async (
 /**
  * Bridges the transaction upload flow to the balance upload flow.
  * Handles the conditional confirmation dialog that Monarch may or may not show.
- * 
+ *
  * @returns Tuple indicating [transactionsFinished, balancesStarted]
-* @deprecated as of January 2026 due to Monarch changes
+ * @deprecated as of January 2026 due to Monarch changes
  */
 const _bridgeTransactionsBalance = async (): Promise<[boolean, boolean]> => {
 	const finishTransactions = async () =>
