@@ -1,7 +1,6 @@
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
-import { Textarea } from "@/components/shadcn/textarea";
 import type { TvbAccount } from "@/types";
 
 export interface SettingsModalRowProps {
@@ -21,19 +20,17 @@ export const SettingsModalRow = ({
 	return (
 		<div className="flex flex-col gap-2">
 			<div className="flex flex-row items-center gap-2">
-				<Textarea
+				<Input
 					placeholder="Monarch name"
-					className="flex-1 min-h-9 resize-none overflow-hidden text-ellipsis whitespace-nowrap"
+					className="flex-1"
 					value={tvbAccount.monarchName}
 					onChange={(e) => updateTvbAccount("monarchName", e.target.value)}
-					rows={1}
 				/>
-				<Textarea
+				<Input
 					placeholder="Splitwise name"
-					className="flex-1 min-h-9 resize-none overflow-hidden text-ellipsis whitespace-nowrap"
+					className="flex-1"
 					value={tvbAccount.splitwiseName}
 					onChange={(e) => updateTvbAccount("splitwiseName", e.target.value)}
-					rows={1}
 				/>
 				<Button
 					variant="ghost"
@@ -51,12 +48,11 @@ export const SettingsModalRow = ({
 				</Button>
 			</div>
 			<div className="flex flex-row items-center gap-2">
-				<Textarea
+				<Input
 					placeholder="Monarch ID"
-					className="flex-1 min-h-9 resize-none overflow-hidden text-ellipsis whitespace-nowrap"
+					className="flex-1"
 					value={tvbAccount.monarchId}
 					onChange={(e) => updateTvbAccount("monarchId", e.target.value)}
-					rows={1}
 				/>
 				<Input
 					type="date"
