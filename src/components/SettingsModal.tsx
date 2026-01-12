@@ -94,31 +94,47 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 						</div>
 						<Separator />
 						<div className="max-h-96 overflow-y-auto pr-2">
-							{currentAccounts.map((row, index) => (
-								<div key={row.rowKey} className="flex flex-col gap-2">
-									<SettingsModalRow
-										updateTvbAccount={(
-											field: keyof TvbAccount,
-											value: string | boolean | null,
-										) =>
-											setCurrentAccounts((prev) => {
-												const newRows = [...prev];
-												newRows[index] = { ...newRows[index], [field]: value };
-												return newRows;
-											})
-										}
-										tvbAccount={row}
-										deleteAccount={() => {
-											setCurrentAccounts((prev) => {
-												const newRows = [...prev];
-												newRows.splice(index, 1);
-												return newRows;
-											});
-										}}
-									/>
-									{index < currentAccounts.length - 1 && <Separator />}
+							{currentAccounts.length === 0 ? (
+								<div className="flex flex-col items-center justify-center py-8 text-center">
+									<p className="text-sm text-muted-foreground">
+										No accounts configured yet
+									</p>
+									<p className="text-xs text-muted-foreground mt-1">
+										Click "Add account" below to get started
+									</p>
 								</div>
-							))}
+							) : (
+								currentAccounts.map((row, index) => (
+									<div key={row.rowKey} className="flex flex-col gap-2">
+										<SettingsModalRow
+											updateTvbAccount={(
+												field: keyof TvbAccount,
+												value: string | boolean | null,
+											) =>
+												setCurrentAccounts((prev) => {
+													const newRows = [...prev];
+													newRows[index] = {
+														...newRows[index],
+														[field]: value,
+													};
+													return newRows;
+												})
+											}
+											tvbAccount={row}
+											deleteAccount={() => {
+												setCurrentAccounts((prev) => {
+													const newRows = [...prev];
+													newRows.splice(index, 1);
+													return newRows;
+												});
+											}}
+										/>
+										{index < currentAccounts.length - 1 && (
+											<Separator className="mb-2" />
+										)}
+									</div>
+								))
+							)}
 						</div>
 						<Separator />
 						<div>
