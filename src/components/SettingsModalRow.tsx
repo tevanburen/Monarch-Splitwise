@@ -23,14 +23,14 @@ export const SettingsModalRow = ({
 			<div className="flex flex-row items-center gap-2">
 				<Textarea
 					placeholder="Monarch name"
-					className="flex-1 min-h-9 resize-none"
+					className="flex-1 min-h-9 resize-none overflow-hidden text-ellipsis whitespace-nowrap"
 					value={tvbAccount.monarchName}
 					onChange={(e) => updateTvbAccount("monarchName", e.target.value)}
 					rows={1}
 				/>
 				<Textarea
 					placeholder="Splitwise name"
-					className="flex-1 min-h-9 resize-none"
+					className="flex-1 min-h-9 resize-none overflow-hidden text-ellipsis whitespace-nowrap"
 					value={tvbAccount.splitwiseName}
 					onChange={(e) => updateTvbAccount("splitwiseName", e.target.value)}
 					rows={1}
@@ -53,7 +53,7 @@ export const SettingsModalRow = ({
 			<div className="flex flex-row items-center gap-2">
 				<Textarea
 					placeholder="Monarch ID"
-					className="flex-1 min-h-9 resize-none"
+					className="flex-1 min-h-9 resize-none overflow-hidden text-ellipsis whitespace-nowrap"
 					value={tvbAccount.monarchId}
 					onChange={(e) => updateTvbAccount("monarchId", e.target.value)}
 					rows={1}
@@ -61,7 +61,7 @@ export const SettingsModalRow = ({
 				<Input
 					type="date"
 					placeholder="Start date"
-					className="w-72"
+					className="flex-1"
 					value={tvbAccount.startDate ?? ""}
 					onChange={(e) =>
 						updateTvbAccount("startDate", e.target.value || null)

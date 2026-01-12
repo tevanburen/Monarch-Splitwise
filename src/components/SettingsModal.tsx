@@ -8,13 +8,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/shadcn/dialog";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
 import { Separator } from "@/components/shadcn/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/shadcn/toggle-group";
 import type { TvbAccount } from "@/types";
 import { useLocalStorageContext } from "./LocalStorageProvider";
 import { SettingsModalRow } from "./SettingsModalRow";
@@ -55,7 +50,11 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-			<DialogContent className="max-w-2xl" showCloseButton={true}>
+			<DialogContent
+				className="max-w-2xl"
+				showCloseButton={true}
+				onPointerDownOutside={(e) => e.preventDefault()}
+			>
 				<DialogHeader>
 					<DialogTitle>Settings</DialogTitle>
 				</DialogHeader>
@@ -66,27 +65,21 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 					</div>
 				) : (
 					<div className="flex flex-col gap-2">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="w-full justify-start">
-									Position:{" "}
-									{cornerPosition.charAt(0).toUpperCase() +
-										cornerPosition.slice(1)}
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuItem
-									onClick={() => setLocalStorage("cornerPosition", "left")}
-								>
-									Left
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={() => setLocalStorage("cornerPosition", "right")}
-								>
-									Right
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<div className="flex items-center justify-between pb-2">
+							<div className="text-sm font-medium">Position</div>
+							<ToggleGroup
+								type="single"
+								value={cornerPosition}
+								onValueChange={(value) =>
+									value &&
+									setLocalStorage("cornerPosition", value as "left" | "right")
+								}
+								variant="outline"
+							>
+								<ToggleGroupItem value="left">Left</ToggleGroupItem>
+								<ToggleGroupItem value="right">Right</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
 						<Separator />
 						{currentAccounts.map((row, index) => (
 							<div key={row.rowKey} className="flex flex-col gap-2 pt-2">
