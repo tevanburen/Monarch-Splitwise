@@ -116,7 +116,6 @@ export const driveAccount = async (
 	//     balanceRows,
 	//   })
 	// );
-	console.log(newRows);
 
 	// upload new rows to monarch
 	if (newRows.length) {
