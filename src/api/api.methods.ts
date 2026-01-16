@@ -7,7 +7,7 @@
  */
 export const fetchMonarchCsv = async (monarchId: string, authToken: string) => {
 	const response = await fetch(
-		"https://api.monarchmoney.com/download-transactions/",
+		"https://api.monarch.com/download-transactions/",
 		{
 			method: "POST",
 			headers: {
