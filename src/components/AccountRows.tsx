@@ -1,6 +1,6 @@
 import { CheckCircle, XCircle } from "lucide-react";
+import { useLocalStorageContext } from "@/providers";
 import type { TvbAccountStatus } from "@/types";
-import { useLocalStorageContext } from "./LocalStorageProvider";
 
 export interface AccountsRowsProps {
 	completedMap: Record<string, TvbAccountStatus>;

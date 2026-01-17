@@ -11,8 +11,8 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Separator } from "@/components/shadcn/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/shadcn/toggle-group";
+import { useLocalStorageContext } from "@/providers";
 import type { TvbAccount } from "@/types";
-import { useLocalStorageContext } from "./LocalStorageProvider";
 import { SettingsModalRow } from "./SettingsModalRow";
 
 export interface SettingsModalProps {
