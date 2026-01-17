@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { usePageContext } from "@/api";
 import { Separator } from "@/components/shadcn/separator";
-import { cn } from "@/lib/utils";
 import { driveAccount } from "@/methods";
+import { useLoadingScreenContext, useLocalStorageContext } from "@/providers";
 import type { TvbAccountStatus } from "@/types";
 import { AccountRows } from "./AccountRows";
-import { useLoadingScreenContext } from "./LoadingScreenProvider";
-import { useLocalStorageContext } from "./LocalStorageProvider";
-import { SettingsModal } from "./SettingsModal";
+import { WidgetCard } from "./library";
+import { SettingsModal } from "./settings-modal";
 import { TitleUpload } from "./TitleUpload";
 
 export const widgetInputId = "MonarchSplitwiseInput";
@@ -71,13 +70,7 @@ export const Widget = () => {
 
 	return (
 		<>
-			<div
-				className={cn(
-					"fixed bottom-2 z-10 pointer-events-auto p-2 bg-card border rounded-lg shadow-md",
-					!isLocalStorageLoading && cornerPosition === "right" && "right-2",
-					!isLocalStorageLoading && cornerPosition === "left" && "left-2",
-				)}
-			>
+			<WidgetCard cornerPosition={cornerPosition}>
 				<div className="flex flex-col gap-2">
 					<TitleUpload
 						id={widgetInputId}
@@ -96,7 +89,7 @@ export const Widget = () => {
 						</>
 					)}
 				</div>
-			</div>
+			</WidgetCard>
 			<SettingsModal
 				open={isSettingsModalOpen}
 				onClose={() => setIsSettingsModalOpen(false)}

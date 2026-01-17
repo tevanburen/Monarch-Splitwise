@@ -1,6 +1,6 @@
 import { PageContextProvider } from "./api";
-import { LocalStorageContextProvider, Widget } from "./components";
-import { LoadingScreenContextProvider } from "./components/LoadingScreenProvider";
+import { Widget } from "./components";
+import { LoadingScreenProvider, LocalStorageProvider } from "./providers";
 
 /**
  * Root application component that sets up all context providers and renders the main widget.
@@ -10,11 +10,11 @@ import { LoadingScreenContextProvider } from "./components/LoadingScreenProvider
 export const App = () => {
 	return (
 		<PageContextProvider>
-			<LocalStorageContextProvider>
-				<LoadingScreenContextProvider>
+			<LocalStorageProvider>
+				<LoadingScreenProvider>
 					<Widget />
-				</LoadingScreenContextProvider>
-			</LocalStorageContextProvider>
+				</LoadingScreenProvider>
+			</LocalStorageProvider>
 		</PageContextProvider>
 	);
 };

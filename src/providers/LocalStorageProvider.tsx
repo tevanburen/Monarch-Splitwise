@@ -51,9 +51,7 @@ const localStorageId = "MonarchSplitwiseLocalStorage";
  *
  * @component
  */
-export const LocalStorageContextProvider = ({
-	children,
-}: PropsWithChildren) => {
+export const LocalStorageProvider = ({ children }: PropsWithChildren) => {
 	/**
 	 * State
 	 */

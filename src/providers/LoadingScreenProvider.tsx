@@ -44,9 +44,7 @@ export const useLoadingScreenContext = (): LoadingScreenContextComponents => {
  *
  * @component
  */
-export const LoadingScreenContextProvider = ({
-	children,
-}: PropsWithChildren) => {
+export const LoadingScreenProvider = ({ children }: PropsWithChildren) => {
 	/**
 	 * State
 	 */
