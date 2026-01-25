@@ -12,6 +12,7 @@ export default {
 	build: {
 		outDir: resolve(__dirname, "./dist"),
 		emptyOutDir: true,
+		cssCodeSplit: false,
 		rollupOptions: {
 			input: {
 				app: "./src/index.tsx",
@@ -19,11 +20,15 @@ export default {
 			},
 			output: {
 				entryFileNames: "[name].js",
-				assetFileNames: "[name].[ext]",
+				assetFileNames: (assetInfo: { name?: string }) => {
+					if (assetInfo.name?.endsWith(".css")) {
+						return "app.css";
+					}
+					return "[name].[ext]";
+				},
 				format: "es",
 			},
 		},
-		cssCodeSplit: false, // Bundle all CSS into one file
 	},
 	plugins: [react(), tailwindcss()],
 };
