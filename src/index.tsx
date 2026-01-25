@@ -12,9 +12,7 @@ const shadowRoot = hostElement.attachShadow({ mode: "open" });
 
 // Create wrapper
 const wrapper = document.createElement("div");
-// Set base inheritable properties to prevent host page inheritance
-wrapper.style.all = "initial";
-wrapper.style.fontSize = "16px";
+wrapper.className = "shadow-root-wrapper";
 shadowRoot.appendChild(wrapper);
 
 // Fetch and inject styles into shadow DOM

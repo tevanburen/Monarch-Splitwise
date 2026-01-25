@@ -18,7 +18,7 @@ export const WidgetCard = ({
 	return (
 		<div
 			className={cn(
-				"fixed bottom-2 z-[999999] pointer-events-auto p-2 bg-card border rounded-lg shadow-md",
+				"fixed bottom-2 z-99999 pointer-events-auto p-2 bg-pink-100 border rounded-lg shadow-widget isolate",
 				cornerPosition === "right" ? "right-2" : "left-2",
 			)}
 		>
