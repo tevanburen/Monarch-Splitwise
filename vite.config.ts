@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 
 export default {
 	root: "./src",
+	base: "./",
 	resolve: {
 		alias: {
 			"@": resolve(__dirname, "./src"),
@@ -16,6 +17,7 @@ export default {
 			input: {
 				app: "./src/index.tsx",
 				"page-context-injection": "./src/api/page-context-injection.ts",
+				iframe: "./src/iframe.html",
 			},
 			output: {
 				entryFileNames: "[name].js",

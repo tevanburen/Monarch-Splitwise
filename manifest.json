@@ -5,13 +5,17 @@
 	"content_scripts": [
 		{
 			"js": ["dist/app.js"],
-			"css": ["dist/app.css"],
 			"matches": ["*://app.monarch.com/*"]
 		}
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["dist/page-context-injection.js"],
+			"resources": [
+				"dist/page-context-injection.js",
+				"dist/iframe.html",
+				"dist/iframe.js",
+				"dist/iframe.css"
+			],
 			"matches": ["*://app.monarch.com/*"]
 		}
 	]
