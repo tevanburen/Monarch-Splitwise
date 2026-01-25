@@ -23,6 +23,7 @@ export default {
 				format: "es",
 			},
 		},
+		cssCodeSplit: false, // Bundle all CSS into one file
 	},
 	plugins: [react(), tailwindcss()],
 };
