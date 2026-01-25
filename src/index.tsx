@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "../globals.css";
-import { WidgetCard } from "./components";
+import { App } from "./App";
 
 // Create host element with shadow DOM
 const host = document.createElement("div");
@@ -13,7 +13,7 @@ shadow.appendChild(root);
 
 // Load CSS into shadow DOM
 const style = document.createElement("style");
-fetch(chrome.runtime.getURL("dist/app.css"))
+fetch(chrome.runtime.getURL("dist/style.css"))
 	.then((res) => res.text())
 	.then((css) => {
 		style.textContent = css;
@@ -21,8 +21,4 @@ fetch(chrome.runtime.getURL("dist/app.css"))
 	});
 
 // Render widget
-createRoot(root).render(
-	<WidgetCard>
-		<div>tvbtvbtvb</div>
-	</WidgetCard>,
-);
+createRoot(root).render(<App />);
