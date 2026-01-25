@@ -20,12 +20,7 @@ export default {
 			},
 			output: {
 				entryFileNames: "[name].js",
-				assetFileNames: (assetInfo: { name?: string }) => {
-					if (assetInfo.name?.endsWith(".css")) {
-						return "app.css";
-					}
-					return "[name].[ext]";
-				},
+				assetFileNames: "[name].[ext]",
 				format: "es",
 			},
 		},
