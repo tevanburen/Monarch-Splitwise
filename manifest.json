@@ -5,14 +5,13 @@
 	"content_scripts": [
 		{
 			"js": ["dist/app.js"],
-			"css": ["dist/app.css"],
-			"matches": ["*://app.monarch.com/*"]
+			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["dist/page-context-injection.js"],
-			"matches": ["*://app.monarch.com/*"]
+			"resources": ["dist/page-context-injection.js", "dist/style.css"],
+			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	]
 }
