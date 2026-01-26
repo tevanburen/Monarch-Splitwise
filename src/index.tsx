@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "../globals.css";
 import { App } from "./App";
+import { ShadowRootProvider } from "./providers";
 
 // Create host element with shadow DOM
 const host = document.createElement("div");
@@ -21,4 +22,8 @@ fetch(chrome.runtime.getURL("dist/style.css"))
 	});
 
 // Render widget
-createRoot(root).render(<App />);
+createRoot(root).render(
+	<ShadowRootProvider shadowRoot={shadow}>
+		<App />
+	</ShadowRootProvider>,
+);

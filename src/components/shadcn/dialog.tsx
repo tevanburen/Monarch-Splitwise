@@ -5,6 +5,7 @@ import { XIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { useShadowRoot } from "@/providers";
 
 function Dialog({
 	...props
@@ -54,8 +55,10 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
 	showCloseButton?: boolean;
 }) {
+	const { shadowRoot } = useShadowRoot();
 	return (
-		<DialogPortal data-slot="dialog-portal">
+		<DialogPortal container={shadowRoot} data-slot="dialog-portal">
+			<DialogOverlay />
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				className={cn(
