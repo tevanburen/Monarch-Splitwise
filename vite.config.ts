@@ -18,7 +18,7 @@ export default {
 				"inject-ui": "./src/scripts/content/inject-ui.ts",
 				"fetch-interceptor": "./src/scripts/page/fetch-interceptor.ts",
 				background: "./src/scripts/background/index.ts",
-				ui: "./src/scripts/ui/index.html",
+				ui: "./src/ui.html",
 			},
 			output: {
 				entryFileNames: "[name].js",
