@@ -4,17 +4,26 @@
 	iframe.src = chrome.runtime.getURL("dist/inner-root.html");
 	iframe.name = "monarch-splitwise-iframe";
 
-	// Minimal styling - just positioning
 	iframe.style.position = "fixed";
 	iframe.style.top = "20px";
 	iframe.style.right = "20px";
 	iframe.style.width = "400px";
-	iframe.style.height = "300px";
+	iframe.style.height = "auto";
 	iframe.style.border = "none";
-	iframe.style.zIndex = "9999";
+	iframe.style.zIndex = "2147483647";
 	iframe.style.pointerEvents = "auto";
 
-	document.body.appendChild(iframe);
+	// Listen for resize messages from the iframe
+	window.addEventListener("message", (event) => {
+		if (
+			event.data?.type === "resize-iframe" &&
+			event.source === iframe.contentWindow
+		) {
+			iframe.style.height = `${event.data.height}px`;
+		}
+	});
+
+	document.documentElement.appendChild(iframe);
 })();
 
 // inject page-context-injection

@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./inner-root.css";
+import { StrictMode } from "react";
 import { ExampleComponent } from "./test";
 
 const el = document.getElementById("root");
@@ -8,4 +9,16 @@ if (!el) {
 }
 
 const root = createRoot(el);
-root.render(<ExampleComponent />);
+root.render(
+	<StrictMode>
+		<ExampleComponent />
+	</StrictMode>,
+);
+
+// Observe content size changes and notify parent to resize iframe
+const resizeObserver = new ResizeObserver(() => {
+	const height = document.body.scrollHeight;
+	window.parent.postMessage({ type: "resize-iframe", height }, "*");
+});
+
+resizeObserver.observe(document.body);
