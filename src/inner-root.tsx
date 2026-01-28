@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "./inner-root.css";
 import { StrictMode } from "react";
+import { RuntimeStateProvider } from "./providers";
 import { ExampleComponent } from "./test";
 
 const el = document.getElementById("root");
@@ -11,7 +12,9 @@ if (!el) {
 const root = createRoot(el);
 root.render(
 	<StrictMode>
-		<ExampleComponent />
+		<RuntimeStateProvider>
+			<ExampleComponent />
+		</RuntimeStateProvider>
 	</StrictMode>,
 );
 

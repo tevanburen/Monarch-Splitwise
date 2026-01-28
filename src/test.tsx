@@ -9,9 +9,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "./components/shadcn/card";
+import { useRuntimeStateContext } from "./providers/RuntimeStateProvider";
 
 export const ExampleComponent = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
+	const { clickNumber, incrementClickNumber } = useRuntimeStateContext();
 
 	return (
 		<Card className="pointer-events-auto">
@@ -26,6 +28,9 @@ export const ExampleComponent = () => {
 			</CardHeader>
 			<CardContent>
 				<p>Card Content</p>
+				<div className="mt-4">
+					<Button onClick={incrementClickNumber}>Clicks: {clickNumber}</Button>
+				</div>
 				{isExpanded && (
 					<div className="mt-4 space-y-2">
 						<p>Extra line 1</p>

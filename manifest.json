@@ -2,6 +2,9 @@
 	"name": "Monarch-Splitwise",
 	"version": "1.0",
 	"manifest_version": 3,
+	"background": {
+		"service_worker": "dist/background.js"
+	},
 	"content_scripts": [
 		{
 			"js": ["dist/outer-root.js"],

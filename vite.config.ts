@@ -18,6 +18,7 @@ export default {
 				"outer-root": "./src/outer-root.tsx",
 				"page-context-injection": "./src/api/page-context-injection.ts",
 				"inner-root": "./src/inner-root.html",
+				background: "./src/background.ts",
 			},
 			output: {
 				entryFileNames: "[name].js",
