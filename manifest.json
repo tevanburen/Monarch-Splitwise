@@ -5,7 +5,7 @@
 	"content_scripts": [
 		{
 			"js": ["dist/outer-root.js"],
-			"matches": ["*://app.monarch.com/*"]
+			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	],
 	"web_accessible_resources": [
@@ -16,7 +16,7 @@
 				"dist/inner-root.js",
 				"dist/inner-root.css"
 			],
-			"matches": ["*://app.monarch.com/*"]
+			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	]
 }

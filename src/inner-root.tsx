@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./inner-root.css";
+import { ExampleComponent } from "./test";
 
 const el = document.getElementById("root");
 if (!el) {
@@ -7,6 +8,4 @@ if (!el) {
 }
 
 const root = createRoot(el);
-root.render(
-		<div>tvbtvbtvb</div>
-);
+root.render(<ExampleComponent />);
