@@ -7,17 +7,17 @@
 	},
 	"content_scripts": [
 		{
-			"js": ["dist/outer-root.js"],
+			"js": ["dist/inject-ui.js"],
 			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	],
 	"web_accessible_resources": [
 		{
 			"resources": [
-				"dist/page-context-injection.js",
-				"dist/inner-root.html",
-				"dist/inner-root.js",
-				"dist/inner-root.css"
+				"dist/fetch-interceptor.js",
+				"dist/ui.html",
+				"dist/ui.js",
+				"dist/ui.css"
 			],
 			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}

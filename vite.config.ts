@@ -15,10 +15,10 @@ export default {
 		emptyOutDir: true,
 		rollupOptions: {
 			input: {
-				"outer-root": "./src/outer-root.tsx",
-				"page-context-injection": "./src/api/page-context-injection.ts",
-				"inner-root": "./src/inner-root.html",
-				background: "./src/background.ts",
+				"inject-ui": "./src/scripts/content/inject-ui.ts",
+				"fetch-interceptor": "./src/scripts/page/fetch-interceptor.ts",
+				background: "./src/scripts/background/index.ts",
+				ui: "./src/scripts/ui/index.html",
 			},
 			output: {
 				entryFileNames: "[name].js",

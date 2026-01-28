@@ -1,4 +1,4 @@
-import type { PageContextMessage } from "./api.types";
+import type { PageContextMessage } from "@/types";
 
 /**
  * Page context injection script that intercepts fetch requests to capture auth tokens.

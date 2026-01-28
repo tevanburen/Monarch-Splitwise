@@ -1,7 +1,12 @@
+/**
+ * Content script that injects the extension UI iframe into the page.
+ * Runs in content script context with Chrome API access.
+ */
+
 // Create and inject an iframe to isolate CSS from the host page
 (() => {
 	const iframe = document.createElement("iframe");
-	iframe.src = chrome.runtime.getURL("dist/inner-root.html");
+	iframe.src = chrome.runtime.getURL("dist/ui.html");
 	iframe.name = "monarch-splitwise-iframe";
 
 	iframe.style.position = "fixed";
@@ -26,10 +31,10 @@
 	document.documentElement.appendChild(iframe);
 })();
 
-// inject page-context-injection
+// Inject page context script for fetch interception
 (() => {
 	const script = document.createElement("script");
-	script.src = chrome.runtime.getURL("dist/page-context-injection.js");
+	script.src = chrome.runtime.getURL("dist/fetch-interceptor.js");
 	script.onload = () => script.remove();
 	(document.head || document.documentElement).appendChild(script);
 })();

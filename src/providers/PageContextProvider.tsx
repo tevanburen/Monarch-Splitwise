@@ -5,7 +5,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import type { PageContextMessage } from "./api.types";
+import type { PageContextMessage } from "@/types";
 
 /**
  * Context interface providing access to page-level data like auth tokens.

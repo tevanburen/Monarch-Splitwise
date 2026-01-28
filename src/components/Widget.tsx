@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { usePageContext } from "@/api";
 import { Separator } from "@/components/shadcn/separator";
 import { driveAccount } from "@/methods";
-import { useLoadingScreenContext, useLocalStorageContext } from "@/providers";
+import {
+	useLoadingScreenContext,
+	useLocalStorageContext,
+	usePageContext,
+} from "@/providers";
 import type { TvbAccountStatus } from "@/types";
 import { AccountRows } from "./AccountRows";
 import { WidgetCard } from "./library";

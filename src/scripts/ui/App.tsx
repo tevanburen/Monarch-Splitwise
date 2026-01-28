@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "./components/shadcn/button";
+import { Button } from "@/components/shadcn/button";
 import {
 	Card,
 	CardAction,
@@ -8,10 +8,10 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "./components/shadcn/card";
-import { useRuntimeStateContext } from "./providers/RuntimeStateProvider";
+} from "@/components/shadcn/card";
+import { useRuntimeStateContext } from "@/providers";
 
-export const ExampleComponent = () => {
+export const App = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const { clickNumber, incrementClickNumber } = useRuntimeStateContext();
 
