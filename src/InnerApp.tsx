@@ -7,7 +7,7 @@ import { LoadingScreenProvider, LocalStorageProvider } from "./providers";
  *
  * @component
  */
-export const App = () => {
+export const InnerApp = () => {
 	return (
 		<PageContextProvider>
 			<LocalStorageProvider>

@@ -4,7 +4,7 @@
 	"manifest_version": 3,
 	"content_scripts": [
 		{
-			"js": ["dist/app.js"],
+			"js": ["dist/outer-root.js"],
 			"matches": ["*://app.monarch.com/*"]
 		}
 	],
@@ -12,9 +12,9 @@
 		{
 			"resources": [
 				"dist/page-context-injection.js",
-				"dist/iframe.html",
-				"dist/iframe.js",
-				"dist/iframe.css"
+				"dist/inner-root.html",
+				"dist/inner-root.js",
+				"dist/inner-root.css"
 			],
 			"matches": ["*://app.monarch.com/*"]
 		}

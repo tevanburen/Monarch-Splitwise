@@ -15,9 +15,9 @@ export default {
 		emptyOutDir: true,
 		rollupOptions: {
 			input: {
-				app: "./src/index.tsx",
+				"outer-root": "./src/outer-root.tsx",
 				"page-context-injection": "./src/api/page-context-injection.ts",
-				iframe: "./src/iframe.html",
+				"inner-root": "./src/inner-root.html",
 			},
 			output: {
 				entryFileNames: "[name].js",

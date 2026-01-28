@@ -1,6 +1,5 @@
 import { createRoot } from "react-dom/client";
-import "../globals.css";
-import { WidgetCard } from "./components";
+import "./inner-root.css";
 
 const el = document.getElementById("root");
 if (!el) {
@@ -9,7 +8,5 @@ if (!el) {
 
 const root = createRoot(el);
 root.render(
-	<WidgetCard>
 		<div>tvbtvbtvb</div>
-	</WidgetCard>,
 );
