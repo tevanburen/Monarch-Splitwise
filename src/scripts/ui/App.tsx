@@ -13,7 +13,7 @@ import { useRuntimeStateContext } from "@/providers";
 
 export const App = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
-	const { clickNumber, incrementClickNumber } = useRuntimeStateContext();
+	const { clickNumber, updateSingleTempState } = useRuntimeStateContext();
 
 	return (
 		<Card className="pointer-events-auto">
@@ -29,7 +29,13 @@ export const App = () => {
 			<CardContent>
 				<p>Card Content</p>
 				<div className="mt-4">
-					<Button onClick={incrementClickNumber}>Clicks: {clickNumber}</Button>
+					<Button
+						onClick={() =>
+							updateSingleTempState("clickNumber", (prev: number) => prev + 1)
+						}
+					>
+						Clicks: {clickNumber}
+					</Button>
 				</div>
 				{isExpanded && (
 					<div className="mt-4 space-y-2">

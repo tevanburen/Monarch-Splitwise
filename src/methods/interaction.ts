@@ -1,4 +1,4 @@
-import { widgetInputId } from "@/components";
+import { WIDGET_INPUT_ID } from "@/constants";
 
 /**
  * Finds and clicks an HTML element matching the specified criteria.
@@ -67,7 +67,7 @@ export const uploadFilesToInput = async (
 		const inputs = Array.from(
 			document.querySelectorAll('input[type="file"]'),
 		) as HTMLInputElement[];
-		const input = inputs.find((el) => el.id !== widgetInputId);
+		const input = inputs.find((el) => el.id !== WIDGET_INPUT_ID);
 
 		if (!input) {
 			return input;

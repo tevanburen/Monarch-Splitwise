@@ -1,36 +1,45 @@
+import type {
+	BackgroundState,
+	GetStateMessage,
+	UpdateStateMessage,
+	UpdateStateMessagePayload,
+} from "@/types";
+
 /**
  * Background service worker that maintains global state for the extension.
  * Handles state synchronization across all extension contexts (iframes, popups, etc).
  */
 
-interface BackgroundState {
-	clickNumber: number;
-}
-
 // Initialize state
 const state: BackgroundState = {
-	clickNumber: 0,
+	syncData: {
+		lastSynced: undefined,
+		location: "right",
+	},
+	tempData: {
+		clickNumber: 0,
+		tempLocation: "left",
+		status: "idle",
+	},
 };
-
-// Message types
-type BackgroundMessage =
-	| { type: "GET_STATE" }
-	| { type: "INCREMENT_CLICK" }
-	| { type: "STATE_UPDATE"; payload: BackgroundState };
 
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
-	(message: BackgroundMessage, _sender, sendResponse) => {
+	(message: GetStateMessage | UpdateStateMessage, _sender, sendResponse) => {
 		switch (message.type) {
-			case "GET_STATE":
+			case "GET_STATE_MESSAGE":
 				sendResponse(state);
 				break;
 
-			case "INCREMENT_CLICK":
-				state.clickNumber++;
+			case "UPDATE_STATE_MESSAGE":
+				// Update temp data
+				state.tempData = { ...state.tempData, ...message.payload.tempData };
+
+				// For now, treat sync data similarly
+				state.syncData = { ...state.syncData, ...message.payload.syncData };
+
 				// Broadcast state update to all extension contexts
-				broadcastStateUpdate();
-				sendResponse(state);
+				broadcastStateUpdate(message.payload);
 				break;
 
 			default:
@@ -43,10 +52,10 @@ chrome.runtime.onMessage.addListener(
 /**
  * Broadcast state updates to all extension contexts
  */
-function broadcastStateUpdate() {
-	const message: BackgroundMessage = {
-		type: "STATE_UPDATE",
-		payload: { ...state },
+const broadcastStateUpdate = (payload: UpdateStateMessagePayload) => {
+	const message: UpdateStateMessage = {
+		type: "UPDATE_STATE_MESSAGE",
+		payload,
 	};
 
 	// Send to all tabs (content scripts/iframes)
@@ -64,4 +73,4 @@ function broadcastStateUpdate() {
 	chrome.runtime.sendMessage(message).catch(() => {
 		// Ignore if no listeners
 	});
-}
+};

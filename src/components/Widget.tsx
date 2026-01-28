@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Separator } from "@/components/shadcn/separator";
+import { WIDGET_INPUT_ID } from "@/constants";
 import { driveAccount } from "@/methods";
 import {
 	useLoadingScreenContext,
@@ -11,8 +12,6 @@ import { AccountRows } from "./AccountRows";
 import { WidgetCard } from "./library";
 import { SettingsModal } from "./settings-modal";
 import { TitleUpload } from "./TitleUpload";
-
-export const widgetInputId = "MonarchSplitwiseInput";
 
 /**
  * Main widget component that handles file uploads and displays account status.
@@ -76,7 +75,7 @@ export const Widget = () => {
 			<WidgetCard cornerPosition={cornerPosition}>
 				<div className="flex flex-col gap-2">
 					<TitleUpload
-						id={widgetInputId}
+						id={WIDGET_INPUT_ID}
 						onUpload={processFiles}
 						onClick={
 							isAccountsEmpty ? () => setIsSettingsModalOpen(true) : undefined
