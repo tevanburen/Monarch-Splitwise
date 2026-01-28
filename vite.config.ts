@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 
 export default {
 	root: "./src",
+	base: "./",
 	resolve: {
 		alias: {
 			"@": resolve(__dirname, "./src"),
@@ -14,8 +15,10 @@ export default {
 		emptyOutDir: true,
 		rollupOptions: {
 			input: {
-				app: "./src/index.tsx",
-				"page-context-injection": "./src/api/page-context-injection.ts",
+				"inject-ui": "./src/scripts/content/inject-ui.ts",
+				"fetch-interceptor": "./src/scripts/page/fetch-interceptor.ts",
+				background: "./src/scripts/background/index.ts",
+				ui: "./src/ui.html",
 			},
 			output: {
 				entryFileNames: "[name].js",
