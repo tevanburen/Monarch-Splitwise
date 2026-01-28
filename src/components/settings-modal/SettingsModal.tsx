@@ -1,13 +1,7 @@
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { ModalCard } from "@/components/library";
 import { Button } from "@/components/shadcn/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
 import { Separator } from "@/components/shadcn/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/shadcn/toggle-group";
@@ -71,15 +65,8 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 	}, [resetAccounts, open]);
 
 	return (
-		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-			<DialogContent
-				className="max-w-2xl"
-				showCloseButton={true}
-				onPointerDownOutside={(e) => e.preventDefault()}
-			>
-				<DialogHeader>
-					<DialogTitle>Settings</DialogTitle>
-				</DialogHeader>
+		<ModalCard open={open} onClose={onClose} title="Settings">
+			<div className="flex flex-col gap-4">
 				<Separator />
 				{isLocalStorageLoading ? (
 					<div className="h-16 w-full flex items-center justify-center">
@@ -180,7 +167,8 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 						</div>
 					</div>
 				)}
-				<DialogFooter>
+				<Separator />
+				<div className="flex justify-end gap-2">
 					<Button variant="outline" onClick={() => resetAccounts()}>
 						Reset
 					</Button>
@@ -201,8 +189,8 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
 					>
 						Save
 					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				</div>
+			</div>
+		</ModalCard>
 	);
 };
