@@ -1,4 +1,4 @@
-import { NewWidget } from "@/components";
+import { EditingModal, NewWidget } from "@/components";
 import { useRuntimeStateContext } from "@/providers";
 
 export const App = () => {
@@ -17,6 +17,7 @@ export const App = () => {
 			>
 				<NewWidget />
 			</div>
+			<EditingModal />
 		</div>
 	);
 };

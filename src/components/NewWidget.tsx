@@ -10,6 +10,7 @@ import {
 	CardTitle,
 } from "@/components/shadcn/card";
 import { useRuntimeStateContext } from "@/providers";
+import type { WidgetStatus } from "@/types";
 
 export const NewWidget = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -39,13 +40,21 @@ export const NewWidget = () => {
 					</Button>
 					<Button
 						onClick={() =>
-							updateSingleTempState("status", (prev: string) =>
-								prev === "idle" ? "loading" : "idle",
+							updateSingleTempState("status", (prev: WidgetStatus) =>
+								prev === "running" ? "idle" : "running",
 							)
 						}
 						variant="outline"
 					>
-						{status === "idle" ? "Get big" : "Get small"}
+						{status === "running" ? "Stop" : "Start"} Running
+					</Button>
+					<Button
+						onClick={() =>
+							updateSingleTempState<WidgetStatus>("status", "editing")
+						}
+						variant="outline"
+					>
+						Open Dialog
 					</Button>
 					<Button
 						onClick={() =>
