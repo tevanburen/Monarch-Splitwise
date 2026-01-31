@@ -21,7 +21,8 @@ root.render(
 // Observe content size changes and notify parent to resize iframe
 const resizeObserver = new ResizeObserver(() => {
 	const height = document.body.scrollHeight;
-	window.parent.postMessage({ type: "resize-iframe", height }, "*");
+	const width = document.body.scrollWidth;
+	window.parent.postMessage({ type: "resize-iframe", height, width }, "*");
 });
 
 resizeObserver.observe(document.body);

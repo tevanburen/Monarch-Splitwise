@@ -25,7 +25,7 @@ export const App = () => {
 	}, [isLoading]);
 
 	return (
-		<Card className="pointer-events-auto">
+		<Card className="pointer-events-auto w-100">
 			<CardHeader>
 				<CardTitle>Card Title</CardTitle>
 				<CardDescription>Card Description</CardDescription>

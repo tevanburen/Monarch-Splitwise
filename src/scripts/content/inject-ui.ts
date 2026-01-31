@@ -12,7 +12,7 @@
 	iframe.style.position = "fixed";
 	iframe.style.top = "20px";
 	iframe.style.right = "20px";
-	iframe.style.width = "400px";
+	iframe.style.width = "auto";
 	iframe.style.height = "auto";
 	iframe.style.border = "none";
 	iframe.style.zIndex = "2147483647";
@@ -26,6 +26,7 @@
 
 		if (event.data?.type === "resize-iframe" && !isFullscreen) {
 			iframe.style.height = `${event.data.height}px`;
+			iframe.style.width = `${event.data.width}px`;
 		}
 
 		if (event.data?.type === "toggle-fullscreen") {
@@ -41,7 +42,7 @@
 				// Normal mode
 				iframe.style.top = "20px";
 				iframe.style.right = "20px";
-				iframe.style.width = "400px";
+				iframe.style.width = "auto";
 				iframe.style.height = "auto";
 			}
 		}
