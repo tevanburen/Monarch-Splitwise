@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import {
 	Card,
@@ -13,7 +13,16 @@ import { useRuntimeStateContext } from "@/providers";
 
 export const App = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const { clickNumber, updateSingleTempState } = useRuntimeStateContext();
+
+	// Notify parent to toggle fullscreen when loading state changes
+	useEffect(() => {
+		window.parent.postMessage(
+			{ type: "toggle-fullscreen", fullscreen: isLoading },
+			"*",
+		);
+	}, [isLoading]);
 
 	return (
 		<Card className="pointer-events-auto">
@@ -28,13 +37,16 @@ export const App = () => {
 			</CardHeader>
 			<CardContent>
 				<p>Card Content</p>
-				<div className="mt-4">
+				<div className="mt-4 space-y-2">
 					<Button
 						onClick={() =>
 							updateSingleTempState("clickNumber", (prev: number) => prev + 1)
 						}
 					>
 						Clicks: {clickNumber}
+					</Button>
+					<Button onClick={() => setIsLoading(!isLoading)} variant="outline">
+						{isLoading ? "Stop Loading" : "Start Loading"}
 					</Button>
 				</div>
 				{isExpanded && (

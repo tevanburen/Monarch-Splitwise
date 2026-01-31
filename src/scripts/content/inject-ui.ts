@@ -18,13 +18,32 @@
 	iframe.style.zIndex = "2147483647";
 	iframe.style.pointerEvents = "auto";
 
-	// Listen for resize messages from the iframe
+	// Listen for resize and fullscreen messages from the iframe
+	let isFullscreen = false;
+
 	window.addEventListener("message", (event) => {
-		if (
-			event.data?.type === "resize-iframe" &&
-			event.source === iframe.contentWindow
-		) {
+		if (event.source !== iframe.contentWindow) return;
+
+		if (event.data?.type === "resize-iframe" && !isFullscreen) {
 			iframe.style.height = `${event.data.height}px`;
+		}
+
+		if (event.data?.type === "toggle-fullscreen") {
+			isFullscreen = event.data.fullscreen;
+
+			if (event.data.fullscreen) {
+				// Fullscreen mode
+				iframe.style.top = "0";
+				iframe.style.right = "0";
+				iframe.style.width = "100vw";
+				iframe.style.height = "100vh";
+			} else {
+				// Normal mode
+				iframe.style.top = "20px";
+				iframe.style.right = "20px";
+				iframe.style.width = "400px";
+				iframe.style.height = "auto";
+			}
 		}
 	});
 
