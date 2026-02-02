@@ -1,6 +1,7 @@
 import type {
 	BackgroundState,
 	GetStateMessage,
+	RunDriverMessage,
 	UpdateStateMessage,
 	UpdateStateMessagePayload,
 } from "@/types";
@@ -25,7 +26,11 @@ const state: BackgroundState = {
 
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
-	(message: GetStateMessage | UpdateStateMessage, _sender, sendResponse) => {
+	(
+		message: GetStateMessage | UpdateStateMessage | RunDriverMessage,
+		_sender,
+		sendResponse,
+	) => {
 		switch (message.type) {
 			case "GET_STATE_MESSAGE":
 				sendResponse(state);
@@ -40,6 +45,21 @@ chrome.runtime.onMessage.addListener(
 
 				// Broadcast state update to all extension contexts
 				broadcastStateUpdate(message.payload);
+				break;
+
+			case "RUN_DRIVER_MESSAGE":
+				// The main driver method
+
+				// Set state to running
+				state.tempData = { ...state.tempData, status: "running" };
+				broadcastStateUpdate({ tempData: { status: "running" } });
+
+				// Simulate data loading (replace with real logic)
+				setTimeout(() => {
+					// Update state to completed
+					state.tempData = { ...state.tempData, status: "idle" };
+					broadcastStateUpdate({ tempData: { status: "idle" } });
+				}, 5000);
 				break;
 
 			default:

@@ -35,3 +35,7 @@ export type UpdateStateMessage = {
 	type: "UPDATE_STATE_MESSAGE";
 	payload: UpdateStateMessagePayload;
 };
+
+export type RunDriverMessage = {
+	type: "RUN_DRIVER_MESSAGE";
+};

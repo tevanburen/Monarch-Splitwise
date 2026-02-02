@@ -31,6 +31,7 @@ interface RuntimeStateContextComponents {
 		field: keyof BackgroundStateTempData,
 		value: T | ((prev: T) => T),
 	) => void;
+	runDriver: () => void;
 }
 
 const RuntimeStateContext = createContext<
@@ -177,6 +178,15 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 		[],
 	);
 
+	/**
+	 * Trigger the driver method in background
+	 */
+	const runDriver = useCallback(() => {
+		chrome.runtime.sendMessage({
+			type: "RUN_DRIVER_MESSAGE",
+		});
+	}, []);
+
 	return (
 		<RuntimeStateContext.Provider
 			value={
@@ -187,6 +197,7 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 					lastSynced,
 					tempLocation,
 					status,
+					runDriver,
 				} satisfies RuntimeStateContextComponents
 			}
 		>

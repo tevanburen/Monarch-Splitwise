@@ -14,7 +14,7 @@ import type { WidgetStatus } from "@/types";
 
 export const NewWidget = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
-	const { clickNumber, updateSingleTempState, status, tempLocation } =
+	const { clickNumber, updateSingleTempState, tempLocation, runDriver } =
 		useRuntimeStateContext();
 
 	return (
@@ -38,15 +38,8 @@ export const NewWidget = () => {
 					>
 						Clicks: {clickNumber}
 					</Button>
-					<Button
-						onClick={() =>
-							updateSingleTempState("status", (prev: WidgetStatus) =>
-								prev === "running" ? "idle" : "running",
-							)
-						}
-						variant="outline"
-					>
-						{status === "running" ? "Stop" : "Start"} Running
+					<Button onClick={runDriver} variant="outline">
+						Run Driver
 					</Button>
 					<Button
 						onClick={() =>
