@@ -11,6 +11,20 @@ import type {
  * Handles state synchronization across all extension contexts (iframes, popups, etc).
  */
 
+/**
+ * Check if a tab is on Splitwise
+ */
+const getTabType = (tab: chrome.tabs.Tab): "splitwise" | "monarch" | null => {
+	if (!tab.url) {
+		return null;
+	} else if (tab.url.includes("secure.splitwise.com")) {
+		return "splitwise";
+	} else if (tab.url.includes("app.monarch.com")) {
+		return "monarch";
+	}
+	return null;
+};
+
 // Initialize state
 const state: BackgroundState = {
 	syncData: {
@@ -24,11 +38,17 @@ const state: BackgroundState = {
 	},
 };
 
+// Driver data
+const driverData = {
+	primarySplitwiseTabId: null as number | null,
+	primaryMonarchTabId: null as number | null,
+}
+
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
 	(
 		message: GetStateMessage | UpdateStateMessage | RunDriverMessage,
-		_sender,
+		sender,
 		sendResponse,
 	) => {
 		switch (message.type) {
@@ -54,12 +74,22 @@ chrome.runtime.onMessage.addListener(
 				state.tempData = { ...state.tempData, status: "running" };
 				broadcastStateUpdate({ tempData: { status: "running" } });
 
-				// Simulate data loading (replace with real logic)
-				setTimeout(() => {
-					// Update state to completed
+				// Set tab as primary based on type
+				if (sender.tab) {
+					const tabType = getTabType(sender.tab);
+					if (tabType === "splitwise") {
+						driverData.primarySplitwiseTabId = sender.tab.id || null;
+					} else if (tabType === "monarch") {
+						driverData.primaryMonarchTabId = sender.tab.id || null;
+					}
+				}
+
+				driver().finally(() => {
+					// Set state to idle
 					state.tempData = { ...state.tempData, status: "idle" };
 					broadcastStateUpdate({ tempData: { status: "idle" } });
-				}, 5000);
+				});
+
 				break;
 
 			default:
@@ -94,3 +124,19 @@ const broadcastStateUpdate = (payload: UpdateStateMessagePayload) => {
 		// Ignore if no listeners
 	});
 };
+
+const driver = async () => {
+	try {
+		const response = fetchRowsFromSplitwise();
+	} catch {
+		// skip
+	}
+}
+
+const fetchRowsFromSplitwise: unknown = async () => {
+	if (driverData.primarySplitwiseTabId === null) {
+		throw new Error("No primary Splitwise tab set");
+	}
+	
+	const response = await chrome.scripting.executeScript();
+}
