@@ -1,11 +1,33 @@
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
 import "../globals.css";
+import { App } from "./App";
+import { ShadowRootProvider } from "./providers";
 
-const wrapper = document.createElement("div");
-wrapper.style.cssText =
-	"position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; pointer-events: none";
-document.body.appendChild(wrapper);
+// Create host element with shadow DOM
+const host = document.createElement("div");
+host.id = "monarch-splitwise-widget-host";
+host.style.cssText =
+	"all: initial; position: fixed; inset: 0; pointer-events: none; z-index: 2147483647;";
+document.body.appendChild(host);
 
-const root = createRoot(wrapper);
-root.render(<App />);
+const shadow = host.attachShadow({ mode: "open" });
+const root = document.createElement("div");
+root.style.cssText =
+	"position: relative; width: 100%; height: 100%; background: transparent;";
+shadow.appendChild(root);
+
+// Load CSS into shadow DOM
+const style = document.createElement("style");
+fetch(chrome.runtime.getURL("dist/style.css"))
+	.then((res) => res.text())
+	.then((css) => {
+		style.textContent = css;
+		shadow.insertBefore(style, root);
+	});
+
+// Render widget
+createRoot(root).render(
+	<ShadowRootProvider shadowRoot={shadow}>
+		<App />
+	</ShadowRootProvider>,
+);

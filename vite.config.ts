@@ -12,6 +12,7 @@ export default {
 	build: {
 		outDir: resolve(__dirname, "./dist"),
 		emptyOutDir: true,
+		cssCodeSplit: false,
 		rollupOptions: {
 			input: {
 				app: "./src/index.tsx",
