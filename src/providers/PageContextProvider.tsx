@@ -5,15 +5,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import type { PageContextMessage } from "./api.types";
-
-// inject page-context-injection
-(() => {
-	const script = document.createElement("script");
-	script.src = chrome.runtime.getURL("dist/page-context-injection.js");
-	script.onload = () => script.remove();
-	(document.head || document.documentElement).appendChild(script);
-})();
+import type { PageContextMessage } from "@/types";
 
 /**
  * Context interface providing access to page-level data like auth tokens.
