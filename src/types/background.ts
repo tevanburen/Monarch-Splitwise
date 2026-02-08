@@ -52,3 +52,7 @@ export type SplitwiseRowResponseMessage = {
 	type: "SPLITWISE_ROW_RESPONSE_MESSAGE";
 	payload: string[];
 };
+
+export type KeepAliveMessage = {
+	type: "KEEP_ALIVE_MESSAGE";
+};

@@ -2,28 +2,20 @@ import type {
 	BackgroundState,
 	GetStateMessage,
 	RunDriverMessage,
+	SplitwiseRowRequestMessage,
+	SplitwiseRowResponseMessage,
 	UpdateStateMessage,
-	UpdateStateMessagePayload,
 } from "@/types";
+import {
+	broadcastStateUpdate,
+	getTabType,
+	sendMessageWithKeepAlive,
+} from "./background.utils";
 
 /**
  * Background service worker that maintains global state for the extension.
  * Handles state synchronization across all extension contexts (iframes, popups, etc).
  */
-
-/**
- * Check if a tab is on Splitwise
- */
-const getTabType = (tab: chrome.tabs.Tab): "splitwise" | "monarch" | null => {
-	if (!tab.url) {
-		return null;
-	} else if (tab.url.includes("secure.splitwise.com")) {
-		return "splitwise";
-	} else if (tab.url.includes("app.monarch.com")) {
-		return "monarch";
-	}
-	return null;
-};
 
 // Initialize state
 const state: BackgroundState = {
@@ -100,32 +92,6 @@ chrome.runtime.onMessage.addListener(
 	},
 );
 
-/**
- * Broadcast state updates to all extension contexts
- */
-const broadcastStateUpdate = (payload: UpdateStateMessagePayload) => {
-	const message: UpdateStateMessage = {
-		type: "UPDATE_STATE_MESSAGE",
-		payload,
-	};
-
-	// Send to all tabs (content scripts/iframes)
-	chrome.tabs.query({}, (tabs) => {
-		for (const tab of tabs) {
-			if (tab.id) {
-				chrome.tabs.sendMessage(tab.id, message).catch(() => {
-					// Ignore errors for tabs that don't have listeners
-				});
-			}
-		}
-	});
-
-	// Note: Extension pages (like iframes) will receive via runtime.onMessage
-	chrome.runtime.sendMessage(message).catch(() => {
-		// Ignore if no listeners
-	});
-};
-
 const driver = async () => {
 	// Request auth tokens from all tabs
 	chrome.tabs.query({}, (tabs) => {
@@ -151,12 +117,12 @@ const fetchRowsFromSplitwise = async (): Promise<string[]> => {
 		throw new Error("No primary Splitwise tab set");
 	}
 
-	// Send request to content script on the Splitwise tab and await response
-	const response = await chrome.tabs.sendMessage(
+	// Send request to content script on the Splitwise tab with keep-alive monitoring
+	const response = await sendMessageWithKeepAlive<SplitwiseRowResponseMessage>(
 		driverData.primarySplitwiseTabId,
 		{
 			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
-		},
+		} satisfies SplitwiseRowRequestMessage,
 	);
 
 	// Extract rows from response payload

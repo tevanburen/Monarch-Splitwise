@@ -28,6 +28,7 @@ import {
 	createIframeManager,
 	initAuthTokenListener,
 	printAuthToken,
+	withKeepAlive,
 } from "./lib";
 
 // ============================================================================
@@ -43,6 +44,8 @@ const apiClient = createApiClient();
 /** Manages page automation (clicking, file uploads, etc) (TODO: implement) */
 // const pageAutomation = createPageAutomation();
 
+// ============================================================================
+// Helper function for long-running operations
 // ============================================================================
 // Set up auth token listening
 // ============================================================================
@@ -128,8 +131,8 @@ chrome.runtime.onMessage.addListener(
 			// Log current auth token for debugging
 			printAuthToken();
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
-			apiClient.fetchSplitwiseRows().then((rows) => {
-				// Do something with the rows
+			// Wrap the API call with keep-alive messaging
+			withKeepAlive(() => apiClient.fetchSplitwiseRows()).then((rows) => {
 				sendResponse({
 					type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
 					payload: rows,
