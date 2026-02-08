@@ -15,7 +15,7 @@ export default {
 		emptyOutDir: true,
 		rollupOptions: {
 			input: {
-				"inject-ui": "./src/scripts/content/inject-ui.ts",
+				"inject-ui": "./src/scripts/content/index.ts",
 				"fetch-interceptor": "./src/scripts/page/fetch-interceptor.ts",
 				background: "./src/scripts/background/index.ts",
 				ui: "./src/ui.html",
