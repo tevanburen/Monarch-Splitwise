@@ -43,3 +43,12 @@ export type RunDriverMessage = {
 export type PrintAuthTokenMessage = {
 	type: "PRINT_AUTH_TOKEN_MESSAGE";
 };
+
+export type SplitwiseRowRequestMessage = {
+	type: "SPLITWISE_ROW_REQUEST_MESSAGE";
+};
+
+export type SplitwiseRowResponseMessage = {
+	type: "SPLITWISE_ROW_RESPONSE_MESSAGE";
+	payload: string[];
+};

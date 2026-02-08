@@ -141,12 +141,24 @@ const driver = async () => {
 			}
 		}
 	});
+
+	const rowsFromSplitwise = await fetchRowsFromSplitwise();
+	console.log("Rows from Splitwise:", rowsFromSplitwise);
 };
 
-// const fetchRowsFromSplitwise: unknown = async () => {
-// 	if (driverData.primarySplitwiseTabId === null) {
-// 		throw new Error("No primary Splitwise tab set");
-// 	}
+const fetchRowsFromSplitwise = async (): Promise<string[]> => {
+	if (driverData.primarySplitwiseTabId === null) {
+		throw new Error("No primary Splitwise tab set");
+	}
 
-// 	const response = await chrome.scripting.executeScript();
-// }
+	// Send request to content script on the Splitwise tab and await response
+	const response = await chrome.tabs.sendMessage(
+		driverData.primarySplitwiseTabId,
+		{
+			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
+		},
+	);
+
+	// Extract rows from response payload
+	return response.payload;
+};

@@ -30,14 +30,7 @@ let authToken: string | null = null;
  * Interface for API client operations.
  */
 export interface ApiClient {
-	/**
-	 * Executes an API call with the provided parameters.
-	 *
-	 * @param params Configuration for the API call
-	 * @returns Promise resolving to the API response
-	 * @throws Error if the API call fails
-	 */
-	makeCall(params: unknown): Promise<unknown>;
+	fetchSplitwiseRows(): Promise<string[]>;
 }
 
 /**
@@ -78,21 +71,14 @@ export const printAuthToken = () => {
  * @returns ApiClient instance for making API requests
  */
 export const createApiClient = (): ApiClient => {
-	/**
-	 * Executes an API call to an external service.
-	 * Currently a stub - to be implemented with actual API logic.
-	 *
-	 * @param params API call configuration (endpoint, method, body, etc.)
-	 * @throws Error indicating that the API client is not yet implemented
-	 */
-	const makeCall = async (params: unknown): Promise<unknown> => {
+	const fetchSplitwiseRows = async (): Promise<string[]> => {
 		// TODO: Implement API call logic
-		// authToken will be available here for authenticated requests
-		console.warn("TODO: API client not yet implemented", params);
-		throw new Error("API client not implemented");
+		// Wait 10 seconds for testing
+		await new Promise((resolve) => setTimeout(resolve, 10000));
+		return ["row1", "row2", "row3"];
 	};
 
 	return {
-		makeCall,
+		fetchSplitwiseRows,
 	};
 };

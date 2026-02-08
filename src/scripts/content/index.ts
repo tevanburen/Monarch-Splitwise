@@ -19,9 +19,12 @@
 import type {
 	BackgroundState,
 	PrintAuthTokenMessage,
+	SplitwiseRowRequestMessage,
+	SplitwiseRowResponseMessage,
 	UpdateStateMessage,
 } from "@/types";
 import {
+	createApiClient,
 	createIframeManager,
 	initAuthTokenListener,
 	printAuthToken,
@@ -35,7 +38,7 @@ import {
 const iframeManager = createIframeManager();
 
 /** Manages API calls to external services (TODO: implement) */
-// const apiClient = createApiClient();
+const apiClient = createApiClient();
 
 /** Manages page automation (clicking, file uploads, etc) (TODO: implement) */
 // const pageAutomation = createPageAutomation();
@@ -102,9 +105,12 @@ initializeFromBackground();
  */
 chrome.runtime.onMessage.addListener(
 	(
-		message: UpdateStateMessage | PrintAuthTokenMessage,
+		message:
+			| UpdateStateMessage
+			| PrintAuthTokenMessage
+			| SplitwiseRowRequestMessage,
 		_sender,
-		_sendResponse,
+		sendResponse,
 	) => {
 		if (message.type === "UPDATE_STATE_MESSAGE") {
 			// Update iframe fullscreen state when status changes
@@ -121,6 +127,14 @@ chrome.runtime.onMessage.addListener(
 		} else if (message.type === "PRINT_AUTH_TOKEN_MESSAGE") {
 			// Log current auth token for debugging
 			printAuthToken();
+		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
+			apiClient.fetchSplitwiseRows().then((rows) => {
+				// Do something with the rows
+				sendResponse({
+					type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
+					payload: rows,
+				} satisfies SplitwiseRowResponseMessage);
+			});
 		}
 		// TODO: Handle additional message types for API calls and page automation
 		// else if (message.type === "API_CALL_REQUEST") {
