@@ -26,12 +26,18 @@ import type { PageContextMessage } from "@/types";
 
 			const token = headers.Authorization || headers.authorization;
 			if (token) {
-				window.postMessage({
+				const message: PageContextMessage = {
 					isTvbMessage: true,
 					source: "page-context",
 					type: "authToken",
 					payload: token,
-				} satisfies PageContextMessage);
+				};
+
+				// Dispatch custom DOM event for content script to listen to
+				const event = new CustomEvent("monarch-auth-token", {
+					detail: message,
+				});
+				document.dispatchEvent(event);
 			}
 		}
 

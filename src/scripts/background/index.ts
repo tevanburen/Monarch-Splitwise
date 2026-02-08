@@ -42,7 +42,7 @@ const state: BackgroundState = {
 const driverData = {
 	primarySplitwiseTabId: null as number | null,
 	primaryMonarchTabId: null as number | null,
-}
+};
 
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
@@ -56,6 +56,7 @@ chrome.runtime.onMessage.addListener(
 				sendResponse(state);
 				break;
 
+			// TODO: Deprecate this in favor of RunDriver and specific update messages for the edit modal
 			case "UPDATE_STATE_MESSAGE":
 				// Update temp data
 				state.tempData = { ...state.tempData, ...message.payload.tempData };
@@ -126,17 +127,26 @@ const broadcastStateUpdate = (payload: UpdateStateMessagePayload) => {
 };
 
 const driver = async () => {
-	try {
-		const response = fetchRowsFromSplitwise();
-	} catch {
-		// skip
-	}
-}
+	// Request auth tokens from all tabs
+	chrome.tabs.query({}, (tabs) => {
+		for (const tab of tabs) {
+			if (tab.id) {
+				chrome.tabs
+					.sendMessage(tab.id, {
+						type: "PRINT_AUTH_TOKEN_MESSAGE",
+					})
+					.catch(() => {
+						// Ignore errors for tabs that don't have listeners
+					});
+			}
+		}
+	});
+};
 
-const fetchRowsFromSplitwise: unknown = async () => {
-	if (driverData.primarySplitwiseTabId === null) {
-		throw new Error("No primary Splitwise tab set");
-	}
-	
-	const response = await chrome.scripting.executeScript();
-}
+// const fetchRowsFromSplitwise: unknown = async () => {
+// 	if (driverData.primarySplitwiseTabId === null) {
+// 		throw new Error("No primary Splitwise tab set");
+// 	}
+
+// 	const response = await chrome.scripting.executeScript();
+// }

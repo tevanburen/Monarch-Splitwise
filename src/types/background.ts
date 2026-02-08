@@ -39,3 +39,7 @@ export type UpdateStateMessage = {
 export type RunDriverMessage = {
 	type: "RUN_DRIVER_MESSAGE";
 };
+
+export type PrintAuthTokenMessage = {
+	type: "PRINT_AUTH_TOKEN_MESSAGE";
+};

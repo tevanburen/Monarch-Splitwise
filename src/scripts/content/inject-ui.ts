@@ -3,7 +3,11 @@
  * Runs in content script context with Chrome API access.
  */
 
-import type { BackgroundState, UpdateStateMessage } from "@/types";
+import type {
+	BackgroundState,
+	PrintAuthTokenMessage,
+	UpdateStateMessage,
+} from "@/types";
 
 // Create and inject an iframe to isolate CSS from the host page
 (() => {
@@ -87,6 +91,9 @@ import type { BackgroundState, UpdateStateMessage } from "@/types";
 		}
 	};
 
+	// Store auth token from page context
+	let authToken: string | null = null;
+
 	// Listen for resize messages from the iframe
 	window.addEventListener("message", (event) => {
 		if (event.source !== iframe.contentWindow) return;
@@ -97,23 +104,41 @@ import type { BackgroundState, UpdateStateMessage } from "@/types";
 		}
 	});
 
-	// Listen for state updates from background service worker
-	chrome.runtime.onMessage.addListener((message: UpdateStateMessage) => {
-		if (message.type === "UPDATE_STATE_MESSAGE") {
-			const status = message.payload?.tempData?.status;
-			if (status !== undefined) {
-				setFullscreen(status !== "idle");
-			}
+	// Listen for auth tokens from page context fetch interceptor
+	document.addEventListener("monarch-auth-token", ((event: Event) => {
+		const customEvent = event as CustomEvent;
+		const message = customEvent.detail;
 
-			const location = message.payload?.tempData?.tempLocation;
-			if (location !== undefined) {
-				tempLocation = location;
-				if (!isFullscreen) {
-					updatePosition();
-				}
-			}
+		if (
+			message?.isTvbMessage &&
+			message?.source === "page-context" &&
+			message?.type === "authToken"
+		) {
+			authToken = message.payload;
 		}
-	});
+	}) as EventListener);
+
+	// Listen for state updates from background service worker
+	chrome.runtime.onMessage.addListener(
+		(message: UpdateStateMessage | PrintAuthTokenMessage) => {
+			if (message.type === "UPDATE_STATE_MESSAGE") {
+				const status = message.payload?.tempData?.status;
+				if (status !== undefined) {
+					setFullscreen(status !== "idle");
+				}
+
+				const location = message.payload?.tempData?.tempLocation;
+				if (location !== undefined) {
+					tempLocation = location;
+					if (!isFullscreen) {
+						updatePosition();
+					}
+				}
+			} else if (message.type === "PRINT_AUTH_TOKEN_MESSAGE") {
+				console.log("Current auth token:", authToken);
+			}
+		},
+	);
 
 	document.documentElement.appendChild(iframe);
 
