@@ -22,6 +22,11 @@ export interface BackgroundStateTempData {
 	// account success, etc
 }
 
+export type BackgroundDriverData = {
+	primarySplitwiseTabId: number | null;
+	primaryMonarchTabId: number | null;
+};
+
 export type GetStateMessage = {
 	type: "GET_STATE_MESSAGE";
 };
