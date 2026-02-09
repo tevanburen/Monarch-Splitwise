@@ -2,15 +2,10 @@ import type {
 	BackgroundState,
 	GetStateMessage,
 	RunDriverMessage,
-	SplitwiseRowRequestMessage,
-	SplitwiseRowResponseMessage,
 	UpdateStateMessage,
 } from "@/types";
-import {
-	broadcastStateUpdate,
-	getTabType,
-	sendMessageWithKeepAlive,
-} from "./background.utils";
+import { broadcastStateUpdate, getTabType } from "./background.utils";
+import { fetchRowsFromSplitwise } from "./steps";
 
 /**
  * Background service worker that maintains global state for the extension.
@@ -108,23 +103,8 @@ const driver = async () => {
 		}
 	});
 
-	const rowsFromSplitwise = await fetchRowsFromSplitwise();
-	console.log("Rows from Splitwise:", rowsFromSplitwise);
-};
-
-const fetchRowsFromSplitwise = async (): Promise<string[]> => {
-	if (driverData.primarySplitwiseTabId === null) {
-		throw new Error("No primary Splitwise tab set");
-	}
-
-	// Send request to content script on the Splitwise tab with keep-alive monitoring
-	const response = await sendMessageWithKeepAlive<SplitwiseRowResponseMessage>(
+	const rowsFromSplitwise = await fetchRowsFromSplitwise(
 		driverData.primarySplitwiseTabId,
-		{
-			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
-		} satisfies SplitwiseRowRequestMessage,
 	);
-
-	// Extract rows from response payload
-	return response.payload;
+	console.log("Rows from Splitwise:", rowsFromSplitwise);
 };
