@@ -1,9 +1,9 @@
 import { RefreshCw, Settings } from "lucide-react";
-import { Button } from "@/components/shadcn/button";
-import { Card } from "@/components/shadcn/card";
-import { useRuntimeStateContext } from "@/providers";
+import { Button } from "@/scripts/ui/components/shadcn/button";
+import { Card } from "@/scripts/ui/components/shadcn/card";
+import { useRuntimeStateContext } from "@/scripts/ui/providers";
 
-export const NewWidget = () => {
+export const Widget = () => {
 	const { status, updateSingleTempState } = useRuntimeStateContext();
 
 	const isEditing = status === "editing";

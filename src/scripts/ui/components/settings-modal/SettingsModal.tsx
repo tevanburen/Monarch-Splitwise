@@ -5,11 +5,11 @@ import {
 	DialogHeader,
 	DialogOverlay,
 	DialogTitle,
-} from "@/components/shadcn/dialog";
-import { useRuntimeStateContext } from "@/providers";
+} from "@/scripts/ui/components/shadcn/dialog";
+import { useRuntimeStateContext } from "@/scripts/ui/providers";
 import type { WidgetStatus } from "@/types";
 
-export const EditingModal = () => {
+export const SettingsModal = () => {
 	const { status, updateSingleTempState } = useRuntimeStateContext();
 
 	return (

@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { StrictMode } from "react";
-import { RuntimeStateProvider } from "@/providers";
+import { RuntimeStateProvider } from "@/scripts/ui/providers";
 import { App } from "./App";
 
 const el = document.getElementById("root");
