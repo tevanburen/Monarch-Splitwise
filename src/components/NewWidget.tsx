@@ -1,11 +1,4 @@
-import { RefreshCw, Settings } from "lucide-react";
-import { Button } from "@/components/shadcn/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/shadcn/card";
+import { Card, CardHeader, CardTitle } from "@/components/shadcn/card";
 
 export const NewWidget = () => {
 	return (
