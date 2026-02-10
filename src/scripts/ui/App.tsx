@@ -7,7 +7,7 @@ export const App = () => {
 	const isFullscreen = status !== "idle";
 
 	return (
-		<div className={isFullscreen ? "relative h-screen w-screen" : ""}>
+		<div className={isFullscreen ? "h-screen w-screen" : ""}>
 			<div
 				className={
 					isFullscreen
