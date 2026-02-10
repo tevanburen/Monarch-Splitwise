@@ -1,3 +1,5 @@
+import type { TvbAccount } from "./accounts";
+
 /**
  * Background service worker state interface
  */
@@ -9,6 +11,7 @@ export interface BackgroundState {
 export interface BackgroundStateSyncData {
 	lastSynced?: number;
 	location: WidgetLocation;
+	accounts: TvbAccount[];
 	// accounts, etc
 }
 
@@ -19,6 +22,7 @@ export interface BackgroundStateTempData {
 	clickNumber: number;
 	tempLocation: WidgetLocation;
 	status: WidgetStatus;
+	accounts: TvbAccount[];
 	// account success, etc
 }
 

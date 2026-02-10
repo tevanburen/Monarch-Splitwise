@@ -2,11 +2,11 @@
  * Configuration for a single account that links Monarch and Splitwise.
  */
 export interface TvbAccount {
-	monarchName: string;
-	splitwiseName: string;
+	accountName: string;
 	monarchId: string;
+	splitwiseId: string;
 	startDate: string | null;
-	invisible?: boolean;
+	inactive?: boolean;
 }
 
 /**

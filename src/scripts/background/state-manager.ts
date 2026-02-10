@@ -22,6 +22,7 @@ export interface StateManager {
 /**
  * Creates and returns a state manager instance for the background worker.
  * Manages both the extension state and driver data.
+ * Sync data is persisted to Chrome storage.sync and restored on initialization.
  *
  * @returns StateManager instance
  */
@@ -31,11 +32,13 @@ export const createStateManager = (): StateManager => {
 		syncData: {
 			lastSynced: undefined,
 			location: "right",
+			accounts: [],
 		},
 		tempData: {
 			clickNumber: 0,
-			tempLocation: "left",
+			tempLocation: "right",
 			status: "idle",
+			accounts: [],
 		},
 	};
 
@@ -44,6 +47,34 @@ export const createStateManager = (): StateManager => {
 		primarySplitwiseTabId: null,
 		primaryMonarchTabId: null,
 	};
+
+	/**
+	 * Persists sync data to Chrome storage.sync
+	 */
+	const persistSyncData = async (): Promise<void> => {
+		try {
+			await chrome.storage.sync.set({ syncData: state.syncData });
+		} catch (error) {
+			console.error("Failed to persist sync data:", error);
+		}
+	};
+
+	/**
+	 * Loads sync data from Chrome storage.sync
+	 */
+	const loadSyncData = async (): Promise<void> => {
+		try {
+			const result = await chrome.storage.sync.get("syncData");
+			if (result.syncData) {
+				state.syncData = { ...state.syncData, ...result.syncData };
+			}
+		} catch (error) {
+			console.error("Failed to load sync data:", error);
+		}
+	};
+
+	// Load sync data on initialization (fire and forget)
+	loadSyncData();
 
 	return {
 		getState: () => state,
@@ -57,6 +88,10 @@ export const createStateManager = (): StateManager => {
 			// Update sync data
 			if (partialNewState.syncData) {
 				state.syncData = { ...state.syncData, ...partialNewState.syncData };
+				// Persist sync data to Chrome storage
+				persistSyncData().catch((error) => {
+					console.error("Error persisting sync data:", error);
+				});
 			}
 
 			// Broadcast state update to all extension contexts
