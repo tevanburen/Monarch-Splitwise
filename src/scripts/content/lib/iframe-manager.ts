@@ -102,6 +102,7 @@ export const createIframeManager = (): IframeManager => {
 
 			// Handle resize events from iframe - directly apply to iframe styles
 			if (event.data?.type === "resize-iframe" && !isFullscreen) {
+				console.log({ height: event.data.height, width: event.data.width });
 				iframe.style.height = `${event.data.height}px`;
 				iframe.style.width = `${event.data.width}px`;
 			}

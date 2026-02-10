@@ -1,81 +1,34 @@
-import { useState } from "react";
+import { RefreshCw, Settings } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import {
 	Card,
-	CardAction,
 	CardContent,
-	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/shadcn/card";
-import { useRuntimeStateContext } from "@/providers";
-import type { WidgetStatus } from "@/types";
 
 export const NewWidget = () => {
-	const [isExpanded, setIsExpanded] = useState(false);
-	const { clickNumber, updateSingleTempState, tempLocation, runDriver } =
-		useRuntimeStateContext();
-
 	return (
-		<Card className="w-100">
-			<CardHeader>
-				<CardTitle>Card Title</CardTitle>
-				<CardDescription>Card Description</CardDescription>
-				<CardAction>
-					<Button onClick={() => setIsExpanded(!isExpanded)}>
-						{isExpanded ? "Shrink" : "Expand"}
-					</Button>
-				</CardAction>
+		<Card className="p-2">
+			<CardHeader className="p-0 gap-0">
+				{/* I don't know why the following line needs pr-2 */}
+				<CardTitle className="text-xl whitespace-nowrap pr-2">
+					<span className="text-orange-500">Monarch</span>
+					{" - "}
+					<span className="text-green-500">Splitwise</span>
+				</CardTitle>
 			</CardHeader>
-			<CardContent>
-				<p>Card Content</p>
-				<div className="mt-4 space-y-2">
-					<Button
-						onClick={() =>
-							updateSingleTempState("clickNumber", (prev: number) => prev + 1)
-						}
-					>
-						Clicks: {clickNumber}
+			{/* <CardContent className="bg-pink-400">
+				<div className="flex gap-2 w-fit mx-auto bg-yellow-300">
+					<Button variant="outline" size="icon">
+						<Settings size={18} />
 					</Button>
-					<Button onClick={runDriver} variant="outline">
-						Run Driver
-					</Button>
-					<Button
-						onClick={() =>
-							updateSingleTempState<WidgetStatus>("status", "editing")
-						}
-						variant="outline"
-					>
-						Open Dialog
-					</Button>
-					<Button
-						onClick={() =>
-							updateSingleTempState("tempLocation", (prev: string) =>
-								prev === "left" ? "right" : "left",
-							)
-						}
-						variant="secondary"
-					>
-						Move to {tempLocation === "left" ? "right" : "left"}
+					<Button className="gap-2 flex-1">
+						<RefreshCw size={18} />
+						Sync
 					</Button>
 				</div>
-				{isExpanded && (
-					<div className="mt-4 space-y-2">
-						<p>Extra line 1</p>
-						<p>Extra line 2</p>
-						<p>Extra line 3</p>
-						<p>Extra line 4</p>
-						<p>Extra line 5</p>
-						<p>Extra line 6</p>
-						<p>Extra line 7</p>
-						<p>Extra line 8</p>
-					</div>
-				)}
-			</CardContent>
-			<CardFooter>
-				<p>Card Footer</p>
-			</CardFooter>
+			</CardContent> */}
 		</Card>
 	);
 };
