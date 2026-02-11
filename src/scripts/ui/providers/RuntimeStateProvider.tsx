@@ -12,6 +12,7 @@ import type {
 	BackgroundState,
 	BackgroundStateTempData,
 	GetStateMessage,
+	TvbAccount,
 	UpdateStateMessage,
 	UpdateStateMessagePayload,
 	WidgetLocation,
@@ -26,6 +27,7 @@ interface RuntimeStateContextComponents {
 	clickNumber: number;
 	lastSynced: number;
 	tempLocation: WidgetLocation;
+	tempAccounts: TvbAccount[];
 	status: WidgetStatus;
 	updateSingleTempState: <T>(
 		field: keyof BackgroundStateTempData,
@@ -71,7 +73,8 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 	const [lastSynced, setLastSynced] = useState<number>(0);
 
 	// tempData
-	const [tempLocation, setTempLocation] = useState<WidgetLocation>("left");
+	const [tempLocation, setTempLocation] = useState<WidgetLocation>("right");
+	const [tempAccounts, setTempAccounts] = useState<TvbAccount[]>([]);
 	const [status, setStatus] = useState<WidgetStatus>("idle");
 	const [clickNumber, setClickNumber] = useState<number>(0);
 
@@ -93,6 +96,9 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 			}
 			if (state.tempData.clickNumber !== undefined) {
 				setClickNumber(state.tempData.clickNumber);
+			}
+			if (state.tempData.tempAccounts !== undefined) {
+				setTempAccounts(state.tempData.tempAccounts);
 			}
 		}
 	}, []);
@@ -154,6 +160,9 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 				case "status":
 					setState = setStatus as Dispatch<SetStateAction<T>>;
 					break;
+				case "tempAccounts":
+					setState = setTempAccounts as Dispatch<SetStateAction<T>>;
+					break;
 				default:
 					throw new Error(`Unknown tempData field: ${field}`);
 			}
@@ -196,6 +205,7 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 					updateSingleTempState,
 					lastSynced,
 					tempLocation,
+					tempAccounts,
 					status,
 					runDriver,
 				} satisfies RuntimeStateContextComponents

@@ -38,7 +38,7 @@ export const createStateManager = (): StateManager => {
 			clickNumber: 0,
 			tempLocation: "right",
 			status: "idle",
-			accounts: [],
+			tempAccounts: [],
 		},
 	};
 

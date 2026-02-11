@@ -1,5 +1,4 @@
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/scripts/ui/components/shadcn/button";
 import {
 	Dialog,
@@ -16,17 +15,8 @@ import { useRuntimeStateContext } from "@/scripts/ui/providers";
 import type { TvbAccount, WidgetStatus } from "@/types";
 
 export const SettingsModal = () => {
-	const { status, updateSingleTempState } = useRuntimeStateContext();
-	const [isVisible, setIsVisible] = useState(true);
-
-	const accounts: TvbAccount[] = [
-		{
-			monarchId: "2088366408340938630834093863",
-			splitwiseId: "65530658",
-			accountName: "Example Account",
-			startDate: "2024-01-01",
-		},
-	];
+	const { status, updateSingleTempState, tempAccounts } =
+		useRuntimeStateContext();
 
 	const handleCancel = () => {
 		updateSingleTempState<WidgetStatus>("status", "idle");
@@ -35,6 +25,41 @@ export const SettingsModal = () => {
 	const handleSave = () => {
 		// TODO: Implement save logic
 		updateSingleTempState<WidgetStatus>("status", "idle");
+	};
+
+	const handleChange = (
+		index: number,
+		field: keyof TvbAccount,
+		value: string | boolean,
+	) => {
+		updateSingleTempState("tempAccounts", (prev: TvbAccount[]) => {
+			const updatedAccounts = [...prev];
+			updatedAccounts[index] = {
+				...updatedAccounts[index],
+				[field]: value,
+			};
+			return updatedAccounts;
+		});
+	};
+
+	const handleAdd = () => {
+		updateSingleTempState("tempAccounts", (prev: TvbAccount[]) => {
+			return [
+				{
+					splitwiseId: "",
+					monarchId: "",
+					startDate: "",
+					accountName: "",
+				} satisfies TvbAccount,
+				...prev,
+			];
+		});
+	};
+
+	const handleDelete = (index: number) => {
+		updateSingleTempState("tempAccounts", (prev: TvbAccount[]) => {
+			return prev.filter((_, i) => i !== index);
+		});
 	};
 
 	return (
@@ -61,65 +86,104 @@ export const SettingsModal = () => {
 							Configure system preferences here
 						</div>
 					</div>
-					<div className="space-y-3 flex flex-col">
-						<h3 className="text-sm font-semibold">Accounts</h3>
-						<div className="border rounded-lg overflow-hidden flex flex-col max-h-64">
+					<div className="space-y-4 flex flex-col">
+						<div className="flex items-center justify-between">
+							<h3 className="text-sm font-semibold">Accounts</h3>
+							<Button variant="outline" size="sm" onClick={handleAdd}>
+								<Plus className="h-4 w-4 mr-2" />
+								Add account
+							</Button>
+						</div>
+						<div className="border rounded-lg overflow-hidden flex flex-col max-h-96">
 							<div className="overflow-y-auto">
-								{accounts.map((account, index) => (
-									<div key={account.monarchId}>
-										<div className="p-4 space-y-3">
-											<div className="grid grid-cols-2 gap-3">
-												<div className="flex-1">
-													<Field className="gap-1">
+								{tempAccounts.length === 0 ? (
+									<div className="p-4 text-center text-sm text-muted-foreground">
+										No accounts yet. Click "Add account" to get started.
+									</div>
+								) : (
+									tempAccounts.map((account, index) => (
+										<div key={account.monarchId}>
+											<div className="p-4 space-y-2">
+												<div className="flex gap-2 items-start">
+													<Field className="flex-1 gap-0.5">
 														<Input
 															value={account.accountName}
 															placeholder="Enter account name"
+															onChange={(e) =>
+																handleChange(
+																	index,
+																	"accountName",
+																	e.target.value,
+																)
+															}
+															className="font-bold"
 														/>
 														<FieldDescription>Account Name</FieldDescription>
 													</Field>
-												</div>
-												<div className="flex-1 flex gap-3 items-start">
-													<Field className="gap-1 flex-1">
+													<Field className="flex-1 gap-0.5">
 														<Input
 															type="date"
 															value={account.startDate ?? "hi"}
+															onChange={(e) =>
+																handleChange(index, "startDate", e.target.value)
+															}
 														/>
 														<FieldDescription>Start Date</FieldDescription>
 													</Field>
 													<Button
 														variant="ghost"
 														size="sm"
-														onClick={() => setIsVisible(!isVisible)}
+														onClick={() =>
+															handleChange(index, "inactive", !account.inactive)
+														}
 														className="mt-0.5"
 													>
-														{isVisible ? (
+														{!account.inactive ? (
 															<Eye className="h-4 w-4 text-secondary" />
 														) : (
 															<EyeOff className="h-4 w-4 text-primary" />
 														)}
 													</Button>
 												</div>
+												<div className="flex gap-2 items-start">
+													<Field className="flex-1 gap-0.5">
+														<Input
+															value={account.monarchId}
+															placeholder="Enter Monarch ID"
+															onChange={(e) =>
+																handleChange(index, "monarchId", e.target.value)
+															}
+														/>
+														<FieldDescription>Monarch ID</FieldDescription>
+													</Field>
+													<Field className="flex-1 gap-0.5">
+														<Input
+															value={account.splitwiseId}
+															placeholder="Enter Splitwise ID"
+															onChange={(e) =>
+																handleChange(
+																	index,
+																	"splitwiseId",
+																	e.target.value,
+																)
+															}
+														/>
+														<FieldDescription>Splitwise ID</FieldDescription>
+													</Field>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="mt-0.5"
+														onClick={() => handleDelete(index)}
+													>
+														<Trash2 className="h-4 w-4 text-primary" />
+													</Button>
+												</div>
 											</div>
-											<div className="grid grid-cols-2 gap-3">
-												<Field className="gap-1">
-													<Input
-														value={account.monarchId}
-														placeholder="Enter Monarch ID"
-													/>
-													<FieldDescription>Monarch ID</FieldDescription>
-												</Field>
-												<Field className="gap-1">
-													<Input
-														value={account.splitwiseId}
-														placeholder="Enter Splitwise ID"
-													/>
-													<FieldDescription>Splitwise ID</FieldDescription>
-												</Field>
-											</div>
+											{index < tempAccounts.length - 1 && <Separator />}
 										</div>
-										{index < accounts.length - 1 && <Separator />}
-									</div>
-								))}
+									))
+								)}
 							</div>
 						</div>
 					</div>

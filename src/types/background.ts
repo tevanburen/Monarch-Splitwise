@@ -22,7 +22,7 @@ export interface BackgroundStateTempData {
 	clickNumber: number;
 	tempLocation: WidgetLocation;
 	status: WidgetStatus;
-	accounts: TvbAccount[];
+	tempAccounts: TvbAccount[];
 	// account success, etc
 }
 
