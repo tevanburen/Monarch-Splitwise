@@ -7,19 +7,22 @@ import {
 	DialogOverlay,
 	DialogTitle,
 } from "@/scripts/ui/components/shadcn/dialog";
+import { Field, FieldLabel } from "@/scripts/ui/components/shadcn/field";
+import { Input } from "@/scripts/ui/components/shadcn/input";
 import { Separator } from "@/scripts/ui/components/shadcn/separator";
 import { useRuntimeStateContext } from "@/scripts/ui/providers";
-import type { WidgetStatus } from "@/types";
+import type { TvbAccount, WidgetStatus } from "@/types";
 
 export const SettingsModal = () => {
 	const { status, updateSingleTempState } = useRuntimeStateContext();
 
-	const accounts = [
-		"Account 1",
-		"Account 2",
-		"Account 3",
-		"Account 4",
-		"Account 5",
+	const accounts: TvbAccount[] = [
+		{
+			monarchId: "example",
+			splitwiseId: "example",
+			accountName: "Example Account",
+			startDate: "2024-01-01",
+		},
 	];
 
 	const handleCancel = () => {
@@ -60,10 +63,38 @@ export const SettingsModal = () => {
 						<div className="border rounded-lg overflow-hidden flex flex-col max-h-64">
 							<div className="overflow-y-auto">
 								{accounts.map((account, index) => (
-									<div key={account}>
+									<div key={account.monarchId}>
 										<div className="p-4 space-y-3">
-											<div className="text-sm font-medium">{account}</div>
-											<div>todo: figure out inputs</div>
+											<div className="space-y-3">
+												<Field>
+													<FieldLabel>Account Name</FieldLabel>
+													<Input
+														value={account.accountName}
+														placeholder="Enter account name"
+													/>
+												</Field>
+												<Field>
+													<FieldLabel>Monarch ID</FieldLabel>
+													<Input
+														value={account.monarchId}
+														placeholder="Enter Monarch ID"
+													/>
+												</Field>
+												<Field>
+													<FieldLabel>Splitwise ID</FieldLabel>
+													<Input
+														value={account.splitwiseId}
+														placeholder="Enter Splitwise ID"
+													/>
+												</Field>
+												<Field>
+													<FieldLabel>Start Date</FieldLabel>
+													<Input
+														type="date"
+														value={account.startDate ?? "hi"}
+													/>
+												</Field>
+											</div>
 										</div>
 										{index < accounts.length - 1 && <Separator />}
 									</div>
