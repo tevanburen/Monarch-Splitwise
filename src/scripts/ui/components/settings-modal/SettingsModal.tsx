@@ -1,3 +1,5 @@
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/scripts/ui/components/shadcn/button";
 import {
 	Dialog,
@@ -15,6 +17,7 @@ import type { TvbAccount, WidgetStatus } from "@/types";
 
 export const SettingsModal = () => {
 	const { status, updateSingleTempState } = useRuntimeStateContext();
+	const [isVisible, setIsVisible] = useState(true);
 
 	const accounts: TvbAccount[] = [
 		{
@@ -66,20 +69,36 @@ export const SettingsModal = () => {
 									<div key={account.monarchId}>
 										<div className="p-4 space-y-3">
 											<div className="grid grid-cols-2 gap-3">
-												<Field className="gap-1">
-													<Input
-														value={account.accountName}
-														placeholder="Enter account name"
-													/>
-													<FieldDescription>Account Name</FieldDescription>
-												</Field>
-												<Field className="gap-1">
-													<Input
-														type="date"
-														value={account.startDate ?? "hi"}
-													/>
-													<FieldDescription>Start Date</FieldDescription>
-												</Field>
+												<div className="flex-1">
+													<Field className="gap-1">
+														<Input
+															value={account.accountName}
+															placeholder="Enter account name"
+														/>
+														<FieldDescription>Account Name</FieldDescription>
+													</Field>
+												</div>
+												<div className="flex-1 flex gap-3 items-start">
+													<Field className="gap-1 flex-1">
+														<Input
+															type="date"
+															value={account.startDate ?? "hi"}
+														/>
+														<FieldDescription>Start Date</FieldDescription>
+													</Field>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => setIsVisible(!isVisible)}
+														className="mt-0.5"
+													>
+														{isVisible ? (
+															<Eye className="h-4 w-4 text-secondary" />
+														) : (
+															<EyeOff className="h-4 w-4 text-primary" />
+														)}
+													</Button>
+												</div>
 											</div>
 											<div className="grid grid-cols-2 gap-3">
 												<Field className="gap-1">
