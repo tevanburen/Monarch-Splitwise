@@ -7,7 +7,7 @@ import {
 	DialogOverlay,
 	DialogTitle,
 } from "@/scripts/ui/components/shadcn/dialog";
-import { Field, FieldLabel } from "@/scripts/ui/components/shadcn/field";
+import { Field, FieldDescription } from "@/scripts/ui/components/shadcn/field";
 import { Input } from "@/scripts/ui/components/shadcn/input";
 import { Separator } from "@/scripts/ui/components/shadcn/separator";
 import { useRuntimeStateContext } from "@/scripts/ui/providers";
@@ -18,8 +18,8 @@ export const SettingsModal = () => {
 
 	const accounts: TvbAccount[] = [
 		{
-			monarchId: "example",
-			splitwiseId: "example",
+			monarchId: "2088366408340938630834093863",
+			splitwiseId: "65530658",
 			accountName: "Example Account",
 			startDate: "2024-01-01",
 		},
@@ -65,34 +65,36 @@ export const SettingsModal = () => {
 								{accounts.map((account, index) => (
 									<div key={account.monarchId}>
 										<div className="p-4 space-y-3">
-											<div className="space-y-3">
-												<Field>
-													<FieldLabel>Account Name</FieldLabel>
+											<div className="grid grid-cols-2 gap-3">
+												<Field className="gap-1">
 													<Input
 														value={account.accountName}
 														placeholder="Enter account name"
 													/>
+													<FieldDescription>Account Name</FieldDescription>
 												</Field>
-												<Field>
-													<FieldLabel>Monarch ID</FieldLabel>
-													<Input
-														value={account.monarchId}
-														placeholder="Enter Monarch ID"
-													/>
-												</Field>
-												<Field>
-													<FieldLabel>Splitwise ID</FieldLabel>
-													<Input
-														value={account.splitwiseId}
-														placeholder="Enter Splitwise ID"
-													/>
-												</Field>
-												<Field>
-													<FieldLabel>Start Date</FieldLabel>
+												<Field className="gap-1">
 													<Input
 														type="date"
 														value={account.startDate ?? "hi"}
 													/>
+													<FieldDescription>Start Date</FieldDescription>
+												</Field>
+											</div>
+											<div className="grid grid-cols-2 gap-3">
+												<Field className="gap-1">
+													<Input
+														value={account.monarchId}
+														placeholder="Enter Monarch ID"
+													/>
+													<FieldDescription>Monarch ID</FieldDescription>
+												</Field>
+												<Field className="gap-1">
+													<Input
+														value={account.splitwiseId}
+														placeholder="Enter Splitwise ID"
+													/>
+													<FieldDescription>Splitwise ID</FieldDescription>
 												</Field>
 											</div>
 										</div>
