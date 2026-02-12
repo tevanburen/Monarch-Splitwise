@@ -40,8 +40,13 @@ export type UpdateStateMessagePayload = {
 	tempData?: Partial<BackgroundStateTempData>;
 };
 
-export type UpdateStateMessage = {
-	type: "UPDATE_STATE_MESSAGE";
+export type UpdateStateRequestMessage = {
+	type: "UPDATE_STATE_REQUEST_MESSAGE";
+	payload: UpdateStateMessagePayload;
+};
+
+export type UpdateStateBroadcastMessage = {
+	type: "UPDATE_STATE_BROADCAST_MESSAGE";
 	payload: UpdateStateMessagePayload;
 };
 

@@ -5,7 +5,7 @@
 
 import type {
 	KeepAliveMessage,
-	UpdateStateMessage,
+	UpdateStateBroadcastMessage,
 	UpdateStateMessagePayload,
 } from "@/types";
 
@@ -101,8 +101,8 @@ export const sendMessageWithKeepAlive = async <T = unknown>(
  * @param payload The state update payload containing tempData and/or syncData changes
  */
 export const broadcastStateUpdate = (payload: UpdateStateMessagePayload) => {
-	const message: UpdateStateMessage = {
-		type: "UPDATE_STATE_MESSAGE",
+	const message: UpdateStateBroadcastMessage = {
+		type: "UPDATE_STATE_BROADCAST_MESSAGE",
 		payload,
 	};
 

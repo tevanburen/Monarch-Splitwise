@@ -1,7 +1,7 @@
 import type {
 	GetStateMessage,
 	RunDriverMessage,
-	UpdateStateMessage,
+	UpdateStateRequestMessage,
 } from "@/types";
 import { getTabType } from "./background.utils";
 import { driver } from "./driver";
@@ -18,7 +18,7 @@ const stateManager = createStateManager();
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
 	(
-		message: GetStateMessage | UpdateStateMessage | RunDriverMessage,
+		message: GetStateMessage | UpdateStateRequestMessage | RunDriverMessage,
 		sender,
 		sendResponse,
 	) => {
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(
 				break;
 
 			// TODO: Deprecate this in favor of RunDriver and specific update messages for the edit modal
-			case "UPDATE_STATE_MESSAGE":
+			case "UPDATE_STATE_REQUEST_MESSAGE":
 				// Update state (automatically broadcasts to all contexts)
 				stateManager.updateState(message.payload);
 				break;

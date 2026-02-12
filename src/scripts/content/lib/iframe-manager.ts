@@ -15,7 +15,7 @@ export interface IframeManager {
 	/** Toggles between fullscreen and windowed mode */
 	setFullscreen(shouldBeFullscreen: boolean): void;
 	/** Updates iframe position (left or right corner) */
-	updatePosition(location: "left" | "right"): void;
+	updatePosition(newLocation: "left" | "right"): void;
 }
 
 /**
@@ -59,8 +59,8 @@ export const createIframeManager = (): IframeManager => {
 			iframe.style.left = "0";
 			iframe.style.right = "0";
 			iframe.style.bottom = "0";
-			iframe.style.width = "100vw";
-			iframe.style.height = "100vh";
+			iframe.style.width = "100%";
+			iframe.style.height = "100%";
 		} else {
 			// Normal windowed mode - reposition to corner
 			updatePosition(tempLocation);
@@ -71,8 +71,10 @@ export const createIframeManager = (): IframeManager => {
 	 * Updates the iframe position to the specified corner.
 	 * Only applies when not in fullscreen mode.
 	 */
-	const updatePosition = (location: "left" | "right") => {
-		tempLocation = location;
+	const updatePosition = (newLocation: "left" | "right") => {
+		tempLocation = newLocation;
+
+		if (isFullscreen) return;
 
 		// Reset to windowed dimensions
 		iframe.style.top = "";
@@ -81,7 +83,7 @@ export const createIframeManager = (): IframeManager => {
 		iframe.style.height = "auto";
 
 		// Position in specified corner
-		if (location === "left") {
+		if (newLocation === "left") {
 			iframe.style.left = "20px";
 			iframe.style.right = "";
 		} else {
@@ -102,7 +104,6 @@ export const createIframeManager = (): IframeManager => {
 
 			// Handle resize events from iframe - directly apply to iframe styles
 			if (event.data?.type === "resize-iframe" && !isFullscreen) {
-				console.log({ height: event.data.height, width: event.data.width });
 				iframe.style.height = `${event.data.height}px`;
 				iframe.style.width = `${event.data.width}px`;
 			}

@@ -13,8 +13,9 @@ import type {
 	BackgroundStateTempData,
 	GetStateMessage,
 	TvbAccount,
-	UpdateStateMessage,
+	UpdateStateBroadcastMessage,
 	UpdateStateMessagePayload,
+	UpdateStateRequestMessage,
 	WidgetLocation,
 	WidgetStatus,
 } from "@/types";
@@ -132,10 +133,10 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 	 */
 	useEffect(() => {
 		const handleMessage = (
-			message: UpdateStateMessage,
+			message: UpdateStateBroadcastMessage,
 			_sender: chrome.runtime.MessageSender,
 		) => {
-			if (message.type === "UPDATE_STATE_MESSAGE") {
+			if (message.type === "UPDATE_STATE_BROADCAST_MESSAGE") {
 				syncState(message.payload);
 			}
 		};
@@ -171,15 +172,16 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 				const resolvedValue =
 					typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
 
-				// Send update to background
-				chrome.runtime.sendMessage({
-					type: "UPDATE_STATE_MESSAGE",
-					payload: {
-						tempData: {
-							[field]: resolvedValue,
+				if (prev !== resolvedValue) {
+					chrome.runtime.sendMessage({
+						type: "UPDATE_STATE_REQUEST_MESSAGE",
+						payload: {
+							tempData: {
+								[field]: resolvedValue,
+							},
 						},
-					},
-				} satisfies UpdateStateMessage);
+					} satisfies UpdateStateRequestMessage);
+				}
 
 				return resolvedValue;
 			});

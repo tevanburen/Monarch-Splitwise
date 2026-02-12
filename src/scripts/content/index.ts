@@ -21,7 +21,7 @@ import type {
 	PrintAuthTokenMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
-	UpdateStateMessage,
+	UpdateStateBroadcastMessage,
 } from "@/types";
 import {
 	createApiClient,
@@ -109,13 +109,13 @@ initializeFromBackground();
 chrome.runtime.onMessage.addListener(
 	(
 		message:
-			| UpdateStateMessage
+			| UpdateStateBroadcastMessage
 			| PrintAuthTokenMessage
 			| SplitwiseRowRequestMessage,
 		_sender,
 		sendResponse,
 	) => {
-		if (message.type === "UPDATE_STATE_MESSAGE") {
+		if (message.type === "UPDATE_STATE_BROADCAST_MESSAGE") {
 			// Update iframe fullscreen state when status changes
 			const status = message.payload?.tempData?.status;
 			if (status !== undefined) {
