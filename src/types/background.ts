@@ -54,6 +54,11 @@ export type RunDriverMessage = {
 	type: "RUN_DRIVER_MESSAGE";
 };
 
+export type ExitSettingsMessage = {
+	type: "EXIT_SETTINGS_MESSAGE";
+	payload: boolean;
+};
+
 export type PrintAuthTokenMessage = {
 	type: "PRINT_AUTH_TOKEN_MESSAGE";
 };

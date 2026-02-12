@@ -20,17 +20,13 @@ import { useRuntimeStateContext } from "@/scripts/ui/providers";
 import type { TvbAccount, WidgetLocation, WidgetStatus } from "@/types";
 
 export const SettingsModal = () => {
-	const { status, updateSingleTempState, tempAccounts, tempLocation } =
-		useRuntimeStateContext();
-
-	const handleCancel = () => {
-		updateSingleTempState<WidgetStatus>("status", "idle");
-	};
-
-	const handleSave = () => {
-		// TODO: Implement save logic
-		updateSingleTempState<WidgetStatus>("status", "idle");
-	};
+	const {
+		status,
+		updateSingleTempState,
+		tempAccounts,
+		tempLocation,
+		exitSettings,
+	} = useRuntimeStateContext();
 
 	const handleChange = (
 		index: number,
@@ -215,11 +211,11 @@ export const SettingsModal = () => {
 					<Button
 						variant="outline"
 						className="text-primary"
-						onClick={handleCancel}
+						onClick={() => exitSettings(false)}
 					>
 						Cancel
 					</Button>
-					<Button variant="secondary" onClick={handleSave}>
+					<Button variant="secondary" onClick={() => exitSettings(true)}>
 						Save
 					</Button>
 				</DialogFooter>
