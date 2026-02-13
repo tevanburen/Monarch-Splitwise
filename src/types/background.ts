@@ -59,10 +59,6 @@ export type ExitSettingsMessage = {
 	payload: boolean;
 };
 
-export type PrintAuthTokenMessage = {
-	type: "PRINT_AUTH_TOKEN_MESSAGE";
-};
-
 export type SplitwiseRowRequestMessage = {
 	type: "SPLITWISE_ROW_REQUEST_MESSAGE";
 };

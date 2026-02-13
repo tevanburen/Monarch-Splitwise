@@ -59,7 +59,6 @@ export const initAuthTokenListener = () => {
 
 /**
  * Logs the current auth token to the console.
- * Used for debugging purposes via PRINT_AUTH_TOKEN_MESSAGE from background.
  */
 export const printAuthToken = () => {
 	console.log("Current auth token:", authToken);

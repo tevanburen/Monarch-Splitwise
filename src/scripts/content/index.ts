@@ -18,7 +18,6 @@
 
 import type {
 	BackgroundState,
-	PrintAuthTokenMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
@@ -27,7 +26,6 @@ import {
 	createApiClient,
 	createIframeManager,
 	initAuthTokenListener,
-	printAuthToken,
 	withKeepAlive,
 } from "./lib";
 
@@ -101,17 +99,13 @@ initializeFromBackground();
  *
  * Message types:
  * - UPDATE_STATE_MESSAGE: State updates (handles fullscreen and position changes)
- * - PRINT_AUTH_TOKEN_MESSAGE: Debug logging of current auth token
  * - API_CALL_REQUEST: Make API call (TODO: implement)
  * - CLICK_BUTTON_REQUEST: Click element on page (TODO: implement)
  * - FILE_UPLOAD_REQUEST: Upload file (TODO: implement)
  */
 chrome.runtime.onMessage.addListener(
 	(
-		message:
-			| UpdateStateBroadcastMessage
-			| PrintAuthTokenMessage
-			| SplitwiseRowRequestMessage,
+		message: UpdateStateBroadcastMessage | SplitwiseRowRequestMessage,
 		_sender,
 		sendResponse,
 	) => {
@@ -127,9 +121,6 @@ chrome.runtime.onMessage.addListener(
 			if (location !== undefined) {
 				iframeManager.updatePosition(location);
 			}
-		} else if (message.type === "PRINT_AUTH_TOKEN_MESSAGE") {
-			// Log current auth token for debugging
-			printAuthToken();
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
 			withKeepAlive(() => apiClient.fetchSplitwiseRows()).then((rows) => {
