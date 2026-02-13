@@ -3,6 +3,7 @@ import { Button } from "@/scripts/ui/components/shadcn/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogOverlay,
@@ -79,41 +80,40 @@ export const SettingsModal = () => {
 			>
 				<DialogHeader>
 					<DialogTitle>Settings</DialogTitle>
+					<DialogDescription>
+						Configure widget preferences and add your Splitwise-Monarch account
+						mappings below.
+					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
-					<div className="space-y-2">
-						<h3 className="text-sm font-semibold">System Settings</h3>
-						<div className="flex items-center gap-2">
-							<div className="text-xs font-semibold text-muted-foreground">
-								Widget location:
-							</div>
-							<Tabs value={tempLocation}>
-								<TabsList>
-									<TabsTrigger
-										value="left"
-										onClick={() =>
-											updateSingleTempState<WidgetLocation>(
-												"tempLocation",
-												"left",
-											)
-										}
-									>
-										Left
-									</TabsTrigger>
-									<TabsTrigger
-										value="right"
-										onClick={() =>
-											updateSingleTempState<WidgetLocation>(
-												"tempLocation",
-												"right",
-											)
-										}
-									>
-										Right
-									</TabsTrigger>
-								</TabsList>
-							</Tabs>
-						</div>
+					<div className="flex items-center justify-between">
+						<h3 className="text-sm font-semibold">Widget location</h3>
+						<Tabs value={tempLocation}>
+							<TabsList>
+								<TabsTrigger
+									value="left"
+									onClick={() =>
+										updateSingleTempState<WidgetLocation>(
+											"tempLocation",
+											"left",
+										)
+									}
+								>
+									Left
+								</TabsTrigger>
+								<TabsTrigger
+									value="right"
+									onClick={() =>
+										updateSingleTempState<WidgetLocation>(
+											"tempLocation",
+											"right",
+										)
+									}
+								>
+									Right
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</div>
 					<div className="flex items-center justify-between">
 						<h3 className="text-sm font-semibold">Accounts</h3>
@@ -122,7 +122,7 @@ export const SettingsModal = () => {
 							Add account
 						</Button>
 					</div>
-					<div className="border rounded-lg overflow-hidden flex flex-col max-h-96">
+					<div className="border rounded-lg overflow-hidden flex flex-col max-h-96 -mt-2">
 						<div className="overflow-y-auto">
 							{tempAccounts.length === 0 ? (
 								<div className="p-4 text-center text-sm text-muted-foreground">
