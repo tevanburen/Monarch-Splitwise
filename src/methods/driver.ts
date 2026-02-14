@@ -7,7 +7,6 @@ import {
 	fetchMonarchCsv,
 	monarchRowsToTvbRows,
 	rowsToCsvFile,
-	splitwiseRowsToTvbRows,
 	tvbBalanceRowsToMonarchBalanceRows,
 	tvbRowsToMonarchRows,
 	tvbRowsToTvbBalanceRows,
@@ -17,7 +16,6 @@ import {
 import type {
 	MonarchBalanceRow,
 	MonarchRow,
-	SplitwiseRow,
 	TvbAccount,
 	TvbAccountStatus,
 	TvbBalanceRow,
