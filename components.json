@@ -15,7 +15,7 @@
 		"components": "@/scripts/ui/components",
 		"utils": "@/scripts/ui/methods/utils",
 		"ui": "@/scripts/ui/components/shadcn",
-		"lib": "@/methods",
+		"lib": "@/scripts/ui/methods",
 		"hooks": "@/scripts/ui/methods"
 	},
 	"registries": {}

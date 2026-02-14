@@ -24,12 +24,9 @@ import type {
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
 } from "@/types";
-import {
-	createApiClient,
-	createIframeManager,
-	initAuthTokenListener,
-	withKeepAlive,
-} from "./lib";
+import { initAuthTokenListener } from "./auth";
+import { fetchMonarchRows, fetchSplitwiseRows } from "./data";
+import { createIframeManager, withKeepAlive } from "./lib";
 
 // ============================================================================
 // Initialize all managers
@@ -37,9 +34,6 @@ import {
 
 /** Manages iframe injection and positioning */
 const iframeManager = createIframeManager();
-
-/** Manages API calls to external services (TODO: implement) */
-const apiClient = createApiClient();
 
 /** Manages page automation (clicking, file uploads, etc) (TODO: implement) */
 // const pageAutomation = createPageAutomation();
@@ -128,24 +122,20 @@ chrome.runtime.onMessage.addListener(
 			}
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
-			withKeepAlive(() => apiClient.fetchSplitwiseRows(message.payload)).then(
-				(rows) => {
-					sendResponse({
-						type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
-						payload: rows,
-					} satisfies SplitwiseRowResponseMessage);
-				},
-			);
+			withKeepAlive(() => fetchSplitwiseRows(message.payload)).then((rows) => {
+				sendResponse({
+					type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
+					payload: rows,
+				} satisfies SplitwiseRowResponseMessage);
+			});
 		} else if (message.type === "MONARCH_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
-			withKeepAlive(() => apiClient.fetchMonarchRows(message.payload)).then(
-				(rows) => {
-					sendResponse({
-						type: "MONARCH_ROW_RESPONSE_MESSAGE",
-						payload: rows,
-					} satisfies MonarchRowResponseMessage);
-				},
-			);
+			withKeepAlive(() => fetchMonarchRows(message.payload)).then((rows) => {
+				sendResponse({
+					type: "MONARCH_ROW_RESPONSE_MESSAGE",
+					payload: rows,
+				} satisfies MonarchRowResponseMessage);
+			});
 		}
 		// TODO: Handle additional message types for API calls and page automation
 		// else if (message.type === "API_CALL_REQUEST") {
