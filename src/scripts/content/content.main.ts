@@ -20,12 +20,18 @@ import type {
 	BackgroundState,
 	MonarchRowRequestMessage,
 	MonarchRowResponseMessage,
+	MonarchRowUploadRequestMessage,
+	MonarchRowUploadResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
 } from "@/types";
 import { withKeepAlive } from "./content.utils";
-import { fetchMonarchRows, fetchSplitwiseRows } from "./data";
+import {
+	fetchMonarchRows,
+	fetchSplitwiseRows,
+	uploadMonarchRows,
+} from "./data";
 import { setFullscreen, updatePosition } from "./iframe-manager";
 
 // ============================================================================
@@ -78,7 +84,8 @@ chrome.runtime.onMessage.addListener(
 		message:
 			| UpdateStateBroadcastMessage
 			| SplitwiseRowRequestMessage
-			| MonarchRowRequestMessage,
+			| MonarchRowRequestMessage
+			| MonarchRowUploadRequestMessage,
 		_sender,
 		sendResponse,
 	) => {
@@ -110,6 +117,17 @@ chrome.runtime.onMessage.addListener(
 					payload: rows,
 				} satisfies MonarchRowResponseMessage);
 			});
+		} else if (message.type === "MONARCH_ROW_UPLOAD_REQUEST_MESSAGE") {
+			// Handle Monarch row upload request
+			withKeepAlive(() => uploadMonarchRows(message.payload)).then(
+				(response) => {
+					console.log("Monarch row upload response:", response);
+					sendResponse({
+						type: "MONARCH_ROW_UPLOAD_RESPONSE_MESSAGE",
+						payload: response,
+					} satisfies MonarchRowUploadResponseMessage);
+				},
+			);
 		}
 		// TODO: Handle additional message types for API calls and page automation
 		// else if (message.type === "API_CALL_REQUEST") {

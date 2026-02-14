@@ -6,7 +6,7 @@
  * - State management and synchronization
  */
 
-import type { AccountFetchResult } from "./rows";
+import type { AccountFetchResult, AccountUploadResult, TvbRow } from "./rows";
 import type { BackgroundStateSyncData, BackgroundStateTempData } from "./state";
 
 // ============================================================================
@@ -93,4 +93,14 @@ export type MonarchRowRequestMessage = {
 export type MonarchRowResponseMessage = {
 	type: "MONARCH_ROW_RESPONSE_MESSAGE";
 	payload: Record<string, AccountFetchResult>;
+};
+
+export type MonarchRowUploadRequestMessage = {
+	type: "MONARCH_ROW_UPLOAD_REQUEST_MESSAGE";
+	payload: Record<string, TvbRow[]>;
+};
+
+export type MonarchRowUploadResponseMessage = {
+	type: "MONARCH_ROW_UPLOAD_RESPONSE_MESSAGE";
+	payload: Record<string, AccountUploadResult>;
 };

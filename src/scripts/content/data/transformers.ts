@@ -34,7 +34,7 @@ const splitwiseRowsToTvbRows = (
 	memberName: string,
 ): TvbRow[] => {
 	const rowToRow = (row: SplitwiseRow): TvbRow => ({
-		date: row.Date,
+		date: new Date(row.Date),
 		delta: row[memberName],
 		description: row.Description,
 	});
