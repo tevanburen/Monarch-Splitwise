@@ -6,10 +6,25 @@
  * processed transaction data in the internal TvbRow format.
  */
 
-import type { AccountFetchResult, AccountUploadResult, TvbRow } from "@/types";
+import type {
+	AccountFetchResult,
+	AccountUploadResult,
+	MonarchRow,
+	TvbRow,
+} from "@/types";
 import { getSplitwiseUserName } from "../auth";
+import {
+	clickElement,
+	navigateToAccountPage,
+	uploadFilesToInput,
+} from "../interaction";
 import { fetchMonarchCsv, fetchSplitwiseCsv } from "./fetcher";
-import { ingestMonarchCsvText, ingestSplitwiseCsvText } from "./transformers";
+import {
+	ingestMonarchCsvText,
+	ingestSplitwiseCsvText,
+	rowsToCsvFile,
+	tvbRowsToMonarchRows,
+} from "./transformers";
 
 /**
  * Fetches and transforms Splitwise transaction data for multiple accounts.
@@ -26,7 +41,6 @@ export const fetchSplitwiseRows = async (
 	if (!userName) {
 		const errorMsg =
 			"Splitwise user name not available. Please visit Splitwise first to capture your user name.";
-		console.error(errorMsg);
 		// Return error state for all requested accounts
 		for (const accountId of accountIds) {
 			results[accountId] = { rows: [], error: errorMsg };
@@ -81,17 +95,111 @@ export const fetchMonarchRows = async (
 	return results;
 };
 
+/**
+ * Uploads transaction rows to Monarch for multiple accounts.
+ *
+ * @param accountMap - Map of Monarch account IDs to transaction rows to upload
+ * @returns Promise resolving to a map of account ID → upload result with optional error
+ */
 export const uploadMonarchRows = async (
 	accountMap: Record<string, TvbRow[]>,
 ): Promise<Record<string, AccountUploadResult>> => {
-	// Simulate upload delay
-	await new Promise((resolve) => setTimeout(resolve, 3000));
-	console.log("Simulated upload rows to Monarch:", accountMap);
-
-	// Simulate success for all accounts
 	const results: Record<string, AccountUploadResult> = {};
-	Object.keys(accountMap).forEach((accountId) => {
-		results[accountId] = {};
-	});
+
+	// Process each account sequentially to avoid UI conflicts
+	for (const [accountId, rows] of Object.entries(accountMap)) {
+		try {
+			// Skip if no rows to upload
+			if (rows.length === 0) {
+				results[accountId] = {};
+				continue;
+			}
+
+			// Make sure that dates are dates
+			rows.forEach((row) => {
+				if (typeof row.date === "string") {
+					row.date = new Date(row.date);
+				}
+			});
+
+			// Navigate to the account page
+			const navigated = await navigateToAccountPage(accountId);
+			if (!navigated) {
+				results[accountId] = {
+					error: `Failed to navigate to account page for ${accountId}`,
+				};
+				continue;
+			}
+
+			// Upload the rows
+			const uploaded = await uploadRowsForAccount(rows);
+			if (!uploaded) {
+				results[accountId] = {
+					error: `Failed to upload transactions for account ${accountId}`,
+				};
+				continue;
+			}
+
+			// Success
+			results[accountId] = {};
+		} catch (error) {
+			const errorMsg = `Error uploading rows for account ${accountId}: ${error instanceof Error ? error.message : String(error)}`;
+			console.error(errorMsg);
+			results[accountId] = { error: errorMsg };
+		}
+	}
+
 	return results;
+};
+
+/**
+ * Converts transaction rows to Monarch format and uploads them via the UI.
+ * Follows the Monarch import flow: Edit → Import → Upload → Steps → Import.
+ *
+ * @param rows - Array of transaction rows to upload
+ * @returns True if upload was successful, false otherwise
+ */
+const uploadRowsForAccount = async (rows: TvbRow[]): Promise<boolean> => {
+	// Transform tvb to monarch
+	const monarchRows = tvbRowsToMonarchRows(rows);
+
+	// Write to a file
+	const newFile = rowsToCsvFile(monarchRows, "Monarch-Splitwise.csv", [
+		"Date",
+		"Merchant",
+		"Category",
+		"Account",
+		"Original Statement",
+		"Notes",
+		"Amount",
+		"Tags",
+	] satisfies (keyof MonarchRow)[]);
+
+	// Navigate through the Monarch import flow (as of January 2026)
+	return Boolean(
+		// Start import flow
+		(await clickElement("button", /^Edit[\s\W]*$/)) &&
+			(await clickElement("div", /^Import transactions$/)) &&
+			// Upload the file
+			(await uploadFilesToInput(newFile)) &&
+			// Go through import steps
+			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Column mapping
+			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Tags
+			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Categories
+			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Priorities
+			// Configure import options
+			(await clickElement<HTMLButtonElement>(
+				"span",
+				/^Prioritize Monarch transactions$/,
+			)) &&
+			(await clickElement<HTMLButtonElement>(
+				"input",
+				/^shouldUpdateBalance$/,
+			)) &&
+			// Complete import
+			(await clickElement<HTMLButtonElement>(
+				"button",
+				/^Import \d+ transactions$/,
+			)),
+	);
 };

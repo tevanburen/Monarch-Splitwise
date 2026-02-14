@@ -121,7 +121,6 @@ chrome.runtime.onMessage.addListener(
 			// Handle Monarch row upload request
 			withKeepAlive(() => uploadMonarchRows(message.payload)).then(
 				(response) => {
-					console.log("Monarch row upload response:", response);
 					sendResponse({
 						type: "MONARCH_ROW_UPLOAD_RESPONSE_MESSAGE",
 						payload: response,

@@ -102,3 +102,54 @@ export const ingestMonarchCsvText = (csvText: string): TvbRow[] => {
 
 	return tvbArr;
 };
+
+/**
+ * Converts internal transaction rows to Monarch CSV format for uploading.
+ *
+ * @param rows - Array of normalized transaction rows
+ * @returns Array of Monarch-formatted rows ready for CSV export
+ */
+export const tvbRowsToMonarchRows = (rows: TvbRow[]): MonarchRow[] => {
+	const rowToRow = (row: TvbRow): MonarchRow => ({
+		Date: dateToString(row.date),
+		Amount: row.delta,
+		Notes: row.description,
+		Account: "",
+		Merchant: "Splitwise",
+		Category: "Uncategorized",
+		Tags: "",
+		"Original Statement": "",
+	});
+	return rows.map(rowToRow);
+};
+
+/**
+ * Converts a Date object to ISO date string (YYYY-MM-DD).
+ *
+ * @param date - The date to convert
+ * @returns ISO formatted date string
+ */
+const dateToString = (date: Date): string => date.toISOString().split("T")[0];
+
+/**
+ * Converts an array of objects to a CSV file.
+ *
+ * @param rows - Array of objects to convert
+ * @param fileName - Name for the generated file
+ * @param columns - Optional array of column names to include and their order
+ * @returns File object containing CSV data
+ */
+export const rowsToCsvFile = (
+	rows: unknown[],
+	fileName: string,
+	columns?: string[],
+): File => {
+	const worksheet = XLSXutils.json_to_sheet(rows, {
+		header: columns,
+		skipHeader: false,
+	});
+	const csv = XLSXutils.sheet_to_csv(worksheet);
+	return new File([csv], fileName, {
+		type: "text/csv",
+	});
+};
