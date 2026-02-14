@@ -1,46 +1,9 @@
-import { read as XLSXread, utils as XLSXutils } from "xlsx";
 import type {
 	MonarchBalanceRow,
 	MonarchRow,
-	SplitwiseRow,
 	TvbBalanceRow,
 	TvbRow,
 } from "@/types";
-
-/**
- * Converts Splitwise CSV rows to internal transaction format.
- * Filters for transactions involving the specified member.
- *
- * @param rows - Array of Splitwise CSV rows
- * @param memberName - The member name to extract transactions for
- * @returns Array of normalized transaction rows
- */
-export const splitwiseRowsToTvbRows = (
-	rows: SplitwiseRow[],
-	memberName: string,
-): TvbRow[] => {
-	const rowToRow = (row: SplitwiseRow): TvbRow => ({
-		date: row.Date,
-		delta: row[memberName],
-		description: row.Description,
-	});
-	return rows.map(rowToRow);
-};
-
-/**
- * Converts Monarch CSV rows to internal transaction format.
- *
- * @param rows - Array of Monarch CSV rows
- * @returns Array of normalized transaction rows
- */
-export const monarchRowsToTvbRows = (rows: MonarchRow[]): TvbRow[] => {
-	const rowToRow = (row: MonarchRow): TvbRow => ({
-		date: new Date(row.Date),
-		delta: row.Amount,
-		description: row.Notes,
-	});
-	return rows.map(rowToRow);
-};
 
 /**
  * Converts internal transaction rows to Monarch CSV format for uploading.
@@ -69,18 +32,6 @@ export const tvbRowsToMonarchRows = (rows: TvbRow[]): MonarchRow[] => {
  * @returns ISO formatted date string
  */
 const dateToString = (date: Date): string => date.toISOString().split("T")[0];
-
-/**
- * Parses CSV text into an array of typed objects.
- *
- * @template K - The expected type of each row object
- * @param text - The CSV text content
- * @returns Array of parsed row objects
- */
-export const csvTextToRows = <K>(text: string): K[] => {
-	const workbook = XLSXread(text, { type: "string", cellDates: true });
-	return XLSXutils.sheet_to_json<K>(workbook.Sheets[workbook.SheetNames[0]]);
-};
 
 /**
  * Comparison function for sorting transaction rows.

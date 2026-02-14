@@ -5,20 +5,17 @@ import type {
 	SplitwiseRowResponseMessage,
 } from "@/types";
 import { sendMessageWithKeepAlive } from "./background.utils";
-import type { StateManager } from "./state-manager";
+import { getDriverData, getState } from "./state-manager";
 
-export const driver = async (stateManager: StateManager) => {
-	const rowsFromSplitwise = await fetchRowsFromSplitwise(stateManager);
+export const driver = async () => {
+	const rowsFromSplitwise = await fetchRowsFromSplitwise();
 	console.log("Rows from Splitwise:", rowsFromSplitwise);
-	const rowsFromMonarch = await fetchRowsFromMonarch(stateManager);
+	const rowsFromMonarch = await fetchRowsFromMonarch();
 	console.log("Rows from Monarch:", rowsFromMonarch);
 };
 
-const fetchRowsFromSplitwise = async (
-	stateManager: StateManager,
-): Promise<Record<string, unknown[]>> => {
-	const primarySplitwiseTabId =
-		stateManager.getDriverData().primarySplitwiseTabId;
+const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
+	const primarySplitwiseTabId = getDriverData().primarySplitwiseTabId;
 	if (primarySplitwiseTabId === null) {
 		throw new Error("No primary Splitwise tab set");
 	}
@@ -28,8 +25,7 @@ const fetchRowsFromSplitwise = async (
 		primarySplitwiseTabId,
 		{
 			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
-			payload: stateManager
-				.getState()
+			payload: getState()
 				.syncData.accounts.filter((account) => !account.inactive)
 				.map((account) => account.splitwiseId),
 		} satisfies SplitwiseRowRequestMessage,
@@ -39,10 +35,8 @@ const fetchRowsFromSplitwise = async (
 	return response.payload;
 };
 
-const fetchRowsFromMonarch = async (
-	stateManager: StateManager,
-): Promise<Record<string, unknown[]>> => {
-	const primaryMonarchTabId = stateManager.getDriverData().primaryMonarchTabId;
+const fetchRowsFromMonarch = async (): Promise<Record<string, unknown[]>> => {
+	const primaryMonarchTabId = getDriverData().primaryMonarchTabId;
 	if (primaryMonarchTabId === null) {
 		throw new Error("No primary Monarch tab set");
 	}
@@ -52,8 +46,7 @@ const fetchRowsFromMonarch = async (
 		primaryMonarchTabId,
 		{
 			type: "MONARCH_ROW_REQUEST_MESSAGE",
-			payload: stateManager
-				.getState()
+			payload: getState()
 				.syncData.accounts.filter((account) => !account.inactive)
 				.map((account) => account.monarchId),
 		} satisfies MonarchRowRequestMessage,

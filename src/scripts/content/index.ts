@@ -24,41 +24,9 @@ import type {
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
 } from "@/types";
-import {
-	createApiClient,
-	createIframeManager,
-	initAuthTokenListener,
-	withKeepAlive,
-} from "./lib";
-
-// ============================================================================
-// Initialize all managers
-// ============================================================================
-
-/** Manages iframe injection and positioning */
-const iframeManager = createIframeManager();
-
-/** Manages API calls to external services (TODO: implement) */
-const apiClient = createApiClient();
-
-/** Manages page automation (clicking, file uploads, etc) (TODO: implement) */
-// const pageAutomation = createPageAutomation();
-
-// ============================================================================
-// Helper function for long-running operations
-// ============================================================================
-// Set up auth token listening
-// ============================================================================
-
-// Start listening for auth tokens from page context
-initAuthTokenListener();
-
-// ============================================================================
-// Set up iframe
-// ============================================================================
-
-// Inject iframe into page
-iframeManager.init();
+import { withKeepAlive } from "./content.utils";
+import { fetchMonarchRows, fetchSplitwiseRows } from "./data";
+import { setFullscreen, updatePosition } from "./iframe-manager";
 
 // ============================================================================
 // Initialize state from background
@@ -75,10 +43,10 @@ const initializeFromBackground = async (): Promise<void> => {
 		});
 
 		if (state?.tempData?.status !== "idle") {
-			iframeManager.setFullscreen(true);
+			setFullscreen(true);
 		}
 		if (state?.tempData?.tempLocation) {
-			iframeManager.updatePosition(state.tempData.tempLocation);
+			updatePosition(state.tempData.tempLocation);
 		}
 	} catch (error) {
 		console.error("Failed to initialize state from background:", error);
@@ -118,34 +86,30 @@ chrome.runtime.onMessage.addListener(
 			// Update iframe fullscreen state when status changes
 			const status = message.payload?.tempData?.status;
 			if (status !== undefined) {
-				iframeManager.setFullscreen(status !== "idle");
+				setFullscreen(status !== "idle");
 			}
 
 			// Update iframe position when location changes
 			const location = message.payload?.tempData?.tempLocation;
 			if (location !== undefined) {
-				iframeManager.updatePosition(location);
+				updatePosition(location);
 			}
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
-			withKeepAlive(() => apiClient.fetchSplitwiseRows(message.payload)).then(
-				(rows) => {
-					sendResponse({
-						type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
-						payload: rows,
-					} satisfies SplitwiseRowResponseMessage);
-				},
-			);
+			withKeepAlive(() => fetchSplitwiseRows(message.payload)).then((rows) => {
+				sendResponse({
+					type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
+					payload: rows,
+				} satisfies SplitwiseRowResponseMessage);
+			});
 		} else if (message.type === "MONARCH_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
-			withKeepAlive(() => apiClient.fetchMonarchRows(message.payload)).then(
-				(rows) => {
-					sendResponse({
-						type: "MONARCH_ROW_RESPONSE_MESSAGE",
-						payload: rows,
-					} satisfies MonarchRowResponseMessage);
-				},
-			);
+			withKeepAlive(() => fetchMonarchRows(message.payload)).then((rows) => {
+				sendResponse({
+					type: "MONARCH_ROW_RESPONSE_MESSAGE",
+					payload: rows,
+				} satisfies MonarchRowResponseMessage);
+			});
 		}
 		// TODO: Handle additional message types for API calls and page automation
 		// else if (message.type === "API_CALL_REQUEST") {
