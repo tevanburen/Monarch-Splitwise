@@ -4,7 +4,7 @@ import { Card } from "@/scripts/ui/components/shadcn/card";
 import { useRuntimeStateContext } from "@/scripts/ui/providers";
 
 export const Widget = () => {
-	const { status, updateSingleTempState } = useRuntimeStateContext();
+	const { status, updateSingleTempState, runDriver } = useRuntimeStateContext();
 
 	const isEditing = status === "editing";
 	const isRunning = status === "running";
@@ -27,7 +27,11 @@ export const Widget = () => {
 				>
 					<Settings className={isEditing ? "animate-spin" : ""} />
 				</Button>
-				<Button variant="outline" className="gap-2 flex-1 text-primary">
+				<Button
+					variant="outline"
+					className="gap-2 flex-1 text-primary"
+					onClick={runDriver}
+				>
 					<RefreshCw className={isRunning ? "animate-spin" : ""} />
 					Sync
 				</Button>

@@ -3,11 +3,9 @@ import {
 	clickLink,
 	compareTvbRows,
 	csvFileToRows,
-	csvTextToRows,
 	fetchMonarchCsv,
 	monarchRowsToTvbRows,
 	rowsToCsvFile,
-	splitwiseRowsToTvbRows,
 	tvbBalanceRowsToMonarchBalanceRows,
 	tvbRowsToMonarchRows,
 	tvbRowsToTvbBalanceRows,
@@ -17,7 +15,6 @@ import {
 import type {
 	MonarchBalanceRow,
 	MonarchRow,
-	SplitwiseRow,
 	TvbAccount,
 	TvbAccountStatus,
 	TvbBalanceRow,
@@ -199,37 +196,6 @@ const navigateToPage = async (monarchId: string): Promise<boolean> => {
 };
 
 /**
- * Reads and processes a Splitwise CSV file, filtering for transactions involving the specified member.
- *
- * @param file - The Splitwise CSV file to process
- * @param memberName - The name of the member to filter transactions for
- * @returns Array of transaction rows involving the specified member
- */
-const ingestSplitwiseCsvFile = async (
-	file: File,
-	memberName: string,
-): Promise<TvbRow[]> => {
-	// read splitwise rows
-	const splitwiseArr = await csvFileToRows<SplitwiseRow>(file);
-
-	// need to remove the "total balance" row
-	splitwiseArr.pop();
-
-	// need to clean the strings otherwise Monarch throws a fit
-	splitwiseArr.forEach((row) => {
-		row.Description = (row.Description as number | string)
-			.toString()
-			.replace(/[^a-zA-Z0-9 ]+/g, "");
-	});
-
-	// transform splitwise to tvb
-	const tvbArr = splitwiseRowsToTvbRows(splitwiseArr, memberName);
-
-	// filter out charges that don't involve me
-	return tvbArr.filter((row) => row.delta);
-};
-
-/**
  * Reads and processes a Monarch CSV file.
  *
  * @deprecated Use ingestMonarchCsvText instead
@@ -239,22 +205,6 @@ const ingestSplitwiseCsvFile = async (
 const _ingestMonarchCsvFile = async (file: File): Promise<TvbRow[]> => {
 	// read splitwise rows
 	const splitwiseArr = await csvFileToRows<MonarchRow>(file);
-
-	// transform splitwise to tvb
-	const tvbArr = monarchRowsToTvbRows(splitwiseArr);
-
-	return tvbArr;
-};
-
-/**
- * Parses Monarch CSV text data into transaction rows.
- *
- * @param text - The CSV text content from Monarch
- * @returns Array of transaction rows
- */
-const ingestMonarchCsvText = (text: string): TvbRow[] => {
-	// read splitwise rows
-	const splitwiseArr = csvTextToRows<MonarchRow>(text);
 
 	// transform splitwise to tvb
 	const tvbArr = monarchRowsToTvbRows(splitwiseArr);

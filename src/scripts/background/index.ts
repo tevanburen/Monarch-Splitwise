@@ -1,4 +1,5 @@
 import type {
+	ExitSettingsMessage,
 	GetStateMessage,
 	RunDriverMessage,
 	UpdateStateRequestMessage,
@@ -18,7 +19,11 @@ const stateManager = createStateManager();
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
 	(
-		message: GetStateMessage | UpdateStateRequestMessage | RunDriverMessage,
+		message:
+			| GetStateMessage
+			| UpdateStateRequestMessage
+			| RunDriverMessage
+			| ExitSettingsMessage,
 		sender,
 		sendResponse,
 	) => {
@@ -31,6 +36,10 @@ chrome.runtime.onMessage.addListener(
 			case "UPDATE_STATE_REQUEST_MESSAGE":
 				// Update state (automatically broadcasts to all contexts)
 				stateManager.updateState(message.payload);
+				break;
+
+			case "EXIT_SETTINGS_MESSAGE":
+				stateManager.exitSettings(message.payload);
 				break;
 
 			case "RUN_DRIVER_MESSAGE":

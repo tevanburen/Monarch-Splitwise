@@ -17,6 +17,8 @@ export interface StateManager {
 	updateState: (partialNewState: UpdateStateMessagePayload) => void;
 	/** Update driver data with partial changes */
 	updateDriverData: (partialNewData: Partial<BackgroundDriverData>) => void;
+	/** Exit settings, either reverting or saving the data */
+	exitSettings: (save?: boolean) => void;
 }
 
 /**
@@ -67,6 +69,8 @@ export const createStateManager = (): StateManager => {
 			const result = await chrome.storage.sync.get("syncData");
 			if (result.syncData) {
 				state.syncData = { ...state.syncData, ...result.syncData };
+				state.tempData.tempLocation = state.syncData.location;
+				state.tempData.tempAccounts = state.syncData.accounts;
 			}
 		} catch (error) {
 			console.error("Failed to load sync data:", error);
@@ -76,26 +80,55 @@ export const createStateManager = (): StateManager => {
 	// Load sync data on initialization (fire and forget)
 	loadSyncData();
 
+	const updateState = (partialNewState: UpdateStateMessagePayload) => {
+		// Update temp data
+		if (partialNewState.tempData) {
+			state.tempData = { ...state.tempData, ...partialNewState.tempData };
+		}
+
+		// Update sync data
+		if (partialNewState.syncData) {
+			state.syncData = {
+				...state.syncData,
+				...partialNewState.syncData,
+				lastSynced: Date.now(),
+			};
+			// Persist sync data to Chrome storage
+			persistSyncData().catch((error) => {
+				console.error("Error persisting sync data:", error);
+			});
+		}
+
+		// Broadcast state update to all extension contexts
+		broadcastStateUpdate(partialNewState);
+	};
+
 	return {
 		getState: () => state,
 		getDriverData: () => driverData,
-		updateState: (partialNewState: UpdateStateMessagePayload) => {
-			// Update temp data
-			if (partialNewState.tempData) {
-				state.tempData = { ...state.tempData, ...partialNewState.tempData };
-			}
-
-			// Update sync data
-			if (partialNewState.syncData) {
-				state.syncData = { ...state.syncData, ...partialNewState.syncData };
-				// Persist sync data to Chrome storage
-				persistSyncData().catch((error) => {
-					console.error("Error persisting sync data:", error);
-				});
-			}
-
-			// Broadcast state update to all extension contexts
-			broadcastStateUpdate(partialNewState);
+		updateState,
+		exitSettings: (save: boolean = false) => {
+			updateState(
+				save
+					? {
+							tempData: {
+								status: "idle",
+							},
+							syncData: {
+								accounts: state.tempData.tempAccounts,
+								location: state.tempData.tempLocation,
+							},
+						}
+					: {
+							tempData: {
+								status: "idle",
+								tempAccounts: state.syncData.accounts,
+							},
+							syncData: {
+								location: state.tempData.tempLocation,
+							},
+						},
+			);
 		},
 		updateDriverData: (partialNewData: Partial<BackgroundDriverData>) => {
 			if (partialNewData.primarySplitwiseTabId !== undefined) {

@@ -8,18 +8,19 @@
 	},
 	"content_scripts": [
 		{
+			"js": ["dist/fetch-interceptor.js"],
+			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"],
+			"run_at": "document_start",
+			"world": "MAIN"
+		},
+		{
 			"js": ["dist/inject-ui.js"],
 			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	],
 	"web_accessible_resources": [
 		{
-			"resources": [
-				"dist/fetch-interceptor.js",
-				"dist/ui.html",
-				"dist/ui.js",
-				"dist/ui.css"
-			],
+			"resources": ["dist/ui.html", "dist/ui.js", "dist/ui.css"],
 			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	]

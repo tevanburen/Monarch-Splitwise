@@ -3,6 +3,7 @@ import { Button } from "@/scripts/ui/components/shadcn/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogOverlay,
@@ -20,17 +21,13 @@ import { useRuntimeStateContext } from "@/scripts/ui/providers";
 import type { TvbAccount, WidgetLocation, WidgetStatus } from "@/types";
 
 export const SettingsModal = () => {
-	const { status, updateSingleTempState, tempAccounts, tempLocation } =
-		useRuntimeStateContext();
-
-	const handleCancel = () => {
-		updateSingleTempState<WidgetStatus>("status", "idle");
-	};
-
-	const handleSave = () => {
-		// TODO: Implement save logic
-		updateSingleTempState<WidgetStatus>("status", "idle");
-	};
+	const {
+		status,
+		updateSingleTempState,
+		tempAccounts,
+		tempLocation,
+		exitSettings,
+	} = useRuntimeStateContext();
 
 	const handleChange = (
 		index: number,
@@ -83,41 +80,40 @@ export const SettingsModal = () => {
 			>
 				<DialogHeader>
 					<DialogTitle>Settings</DialogTitle>
+					<DialogDescription>
+						Configure widget preferences and add your Splitwise-Monarch account
+						mappings below.
+					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
-					<div className="space-y-2">
-						<h3 className="text-sm font-semibold">System Settings</h3>
-						<div className="flex items-center gap-2">
-							<div className="text-xs font-semibold text-muted-foreground">
-								Widget location:
-							</div>
-							<Tabs value={tempLocation}>
-								<TabsList>
-									<TabsTrigger
-										value="left"
-										onClick={() =>
-											updateSingleTempState<WidgetLocation>(
-												"tempLocation",
-												"left",
-											)
-										}
-									>
-										Left
-									</TabsTrigger>
-									<TabsTrigger
-										value="right"
-										onClick={() =>
-											updateSingleTempState<WidgetLocation>(
-												"tempLocation",
-												"right",
-											)
-										}
-									>
-										Right
-									</TabsTrigger>
-								</TabsList>
-							</Tabs>
-						</div>
+					<div className="flex items-center justify-between">
+						<h3 className="text-sm font-semibold">Widget location</h3>
+						<Tabs value={tempLocation}>
+							<TabsList>
+								<TabsTrigger
+									value="left"
+									onClick={() =>
+										updateSingleTempState<WidgetLocation>(
+											"tempLocation",
+											"left",
+										)
+									}
+								>
+									Left
+								</TabsTrigger>
+								<TabsTrigger
+									value="right"
+									onClick={() =>
+										updateSingleTempState<WidgetLocation>(
+											"tempLocation",
+											"right",
+										)
+									}
+								>
+									Right
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</div>
 					<div className="flex items-center justify-between">
 						<h3 className="text-sm font-semibold">Accounts</h3>
@@ -126,7 +122,7 @@ export const SettingsModal = () => {
 							Add account
 						</Button>
 					</div>
-					<div className="border rounded-lg overflow-hidden flex flex-col max-h-96">
+					<div className="border rounded-lg overflow-hidden flex flex-col max-h-96 -mt-2">
 						<div className="overflow-y-auto">
 							{tempAccounts.length === 0 ? (
 								<div className="p-4 text-center text-sm text-muted-foreground">
@@ -215,11 +211,11 @@ export const SettingsModal = () => {
 					<Button
 						variant="outline"
 						className="text-primary"
-						onClick={handleCancel}
+						onClick={() => exitSettings(false)}
 					>
 						Cancel
 					</Button>
-					<Button variant="secondary" onClick={handleSave}>
+					<Button variant="secondary" onClick={() => exitSettings(true)}>
 						Save
 					</Button>
 				</DialogFooter>

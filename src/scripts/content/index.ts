@@ -18,7 +18,8 @@
 
 import type {
 	BackgroundState,
-	PrintAuthTokenMessage,
+	MonarchRowRequestMessage,
+	MonarchRowResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
@@ -27,7 +28,6 @@ import {
 	createApiClient,
 	createIframeManager,
 	initAuthTokenListener,
-	printAuthToken,
 	withKeepAlive,
 } from "./lib";
 
@@ -101,7 +101,6 @@ initializeFromBackground();
  *
  * Message types:
  * - UPDATE_STATE_MESSAGE: State updates (handles fullscreen and position changes)
- * - PRINT_AUTH_TOKEN_MESSAGE: Debug logging of current auth token
  * - API_CALL_REQUEST: Make API call (TODO: implement)
  * - CLICK_BUTTON_REQUEST: Click element on page (TODO: implement)
  * - FILE_UPLOAD_REQUEST: Upload file (TODO: implement)
@@ -110,8 +109,8 @@ chrome.runtime.onMessage.addListener(
 	(
 		message:
 			| UpdateStateBroadcastMessage
-			| PrintAuthTokenMessage
-			| SplitwiseRowRequestMessage,
+			| SplitwiseRowRequestMessage
+			| MonarchRowRequestMessage,
 		_sender,
 		sendResponse,
 	) => {
@@ -127,17 +126,26 @@ chrome.runtime.onMessage.addListener(
 			if (location !== undefined) {
 				iframeManager.updatePosition(location);
 			}
-		} else if (message.type === "PRINT_AUTH_TOKEN_MESSAGE") {
-			// Log current auth token for debugging
-			printAuthToken();
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
-			withKeepAlive(() => apiClient.fetchSplitwiseRows()).then((rows) => {
-				sendResponse({
-					type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
-					payload: rows,
-				} satisfies SplitwiseRowResponseMessage);
-			});
+			withKeepAlive(() => apiClient.fetchSplitwiseRows(message.payload)).then(
+				(rows) => {
+					sendResponse({
+						type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
+						payload: rows,
+					} satisfies SplitwiseRowResponseMessage);
+				},
+			);
+		} else if (message.type === "MONARCH_ROW_REQUEST_MESSAGE") {
+			// Wrap the API call with keep-alive messaging
+			withKeepAlive(() => apiClient.fetchMonarchRows(message.payload)).then(
+				(rows) => {
+					sendResponse({
+						type: "MONARCH_ROW_RESPONSE_MESSAGE",
+						payload: rows,
+					} satisfies MonarchRowResponseMessage);
+				},
+			);
 		}
 		// TODO: Handle additional message types for API calls and page automation
 		// else if (message.type === "API_CALL_REQUEST") {
@@ -151,19 +159,3 @@ chrome.runtime.onMessage.addListener(
 		return true; // Keep channel open for async response
 	},
 );
-
-// ============================================================================
-// Inject page context script for fetch interception
-// ============================================================================
-
-/**
- * The page context script runs in the window context (not extension context).
- * This allows it to wrap window.fetch and capture authorization headers.
- * We inject it as an external script so it runs in the correct context.
- */
-(() => {
-	const script = document.createElement("script");
-	script.src = chrome.runtime.getURL("dist/fetch-interceptor.js");
-	script.onload = () => script.remove(); // Clean up script tag after loading
-	(document.head || document.documentElement).appendChild(script);
-})();

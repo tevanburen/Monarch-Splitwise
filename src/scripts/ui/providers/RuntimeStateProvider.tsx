@@ -11,7 +11,9 @@ import {
 import type {
 	BackgroundState,
 	BackgroundStateTempData,
+	ExitSettingsMessage,
 	GetStateMessage,
+	RunDriverMessage,
 	TvbAccount,
 	UpdateStateBroadcastMessage,
 	UpdateStateMessagePayload,
@@ -34,6 +36,7 @@ interface RuntimeStateContextComponents {
 		field: keyof BackgroundStateTempData,
 		value: T | ((prev: T) => T),
 	) => void;
+	exitSettings: (save?: boolean) => void;
 	runDriver: () => void;
 }
 
@@ -173,14 +176,16 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 					typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
 
 				if (prev !== resolvedValue) {
-					chrome.runtime.sendMessage({
-						type: "UPDATE_STATE_REQUEST_MESSAGE",
-						payload: {
-							tempData: {
-								[field]: resolvedValue,
+					chrome.runtime
+						.sendMessage({
+							type: "UPDATE_STATE_REQUEST_MESSAGE",
+							payload: {
+								tempData: {
+									[field]: resolvedValue,
+								},
 							},
-						},
-					} satisfies UpdateStateRequestMessage);
+						} satisfies UpdateStateRequestMessage)
+						.then(() => null);
 				}
 
 				return resolvedValue;
@@ -190,12 +195,26 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 	);
 
 	/**
+	 * Exit the settings modal
+	 */
+	const exitSettings = useCallback((save: boolean = false) => {
+		chrome.runtime
+			.sendMessage({
+				type: "EXIT_SETTINGS_MESSAGE",
+				payload: save || false,
+			} satisfies ExitSettingsMessage)
+			.finally(() => null);
+	}, []);
+
+	/**
 	 * Trigger the driver method in background
 	 */
 	const runDriver = useCallback(() => {
-		chrome.runtime.sendMessage({
-			type: "RUN_DRIVER_MESSAGE",
-		});
+		chrome.runtime
+			.sendMessage({
+				type: "RUN_DRIVER_MESSAGE",
+			} satisfies RunDriverMessage)
+			.finally(() => null);
 	}, []);
 
 	return (
@@ -210,6 +229,7 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 					tempAccounts,
 					status,
 					runDriver,
+					exitSettings,
 				} satisfies RuntimeStateContextComponents
 			}
 		>
