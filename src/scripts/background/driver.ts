@@ -5,8 +5,8 @@ import type {
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 } from "@/types";
-import { sendMessageWithKeepAlive } from "./background.utils";
-import { getState } from "./state-manager";
+import { sendMessageWithKeepAlive, withLock } from "./background.utils";
+import { getState, updateState } from "./state-manager";
 
 // Driver data
 const driverData: BackgroundDriverData = {
@@ -28,12 +28,17 @@ export const updateDriverData = (
 	}
 };
 
-export const driver = async () => {
-	const rowsFromSplitwise = await fetchRowsFromSplitwise();
-	console.log("Rows from Splitwise:", rowsFromSplitwise);
-	const rowsFromMonarch = await fetchRowsFromMonarch();
-	console.log("Rows from Monarch:", rowsFromMonarch);
-};
+export const driver = withLock(async () => {
+	updateState({ tempData: { status: "running" } });
+	try {
+		const rowsFromSplitwise = await fetchRowsFromSplitwise();
+		console.log("Rows from Splitwise:", rowsFromSplitwise);
+		const rowsFromMonarch = await fetchRowsFromMonarch();
+		console.log("Rows from Monarch:", rowsFromMonarch);
+	} finally {
+		updateState({ tempData: { status: "idle" } });
+	}
+});
 
 const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
 	const primarySplitwiseTabId = driverData.primarySplitwiseTabId;

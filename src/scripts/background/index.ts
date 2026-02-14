@@ -56,13 +56,7 @@ chrome.runtime.onMessage.addListener(
 			case "RUN_DRIVER_MESSAGE":
 				// The main driver method
 
-				// Set state to running (automatically broadcasts)
-				updateState({ tempData: { status: "running" } });
-
-				driver().finally(() => {
-					// Set state to idle (automatically broadcasts)
-					updateState({ tempData: { status: "idle" } });
-				});
+				driver();
 
 				break;
 
