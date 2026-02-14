@@ -10,18 +10,15 @@
  * 1. Page context fetch wrapper intercepts Monarch API requests
  * 2. Extracts Authorization header and dispatches custom DOM event
  * 3. This module listens for the event and stores the token
- * 4. Token is used in API calls to Monarch, Splitwise, or other services
+ * 4. Token is used in API calls to Monarch (not Splitwise - that uses cookies)
  *
  * The background worker can request API calls through chrome.runtime.sendMessage,
  * and this client will execute them using the content script's network access.
  *
- * TODO: Implement API call functionality
- * - Handle different API endpoints (Monarch, Splitwise)
- * - Parse and return responses to background worker
- * - Handle errors and retries
- * - Support different HTTP methods (GET, POST, etc.)
- * - Handle request/response serialization
  */
+
+import { csvTextToRows, splitwiseRowsToTvbRows } from "@/methods";
+import type { SplitwiseRow, TvbRow } from "@/types";
 
 /** Stores the most recently captured auth token from Monarch API requests */
 let authToken: string | null = null;
@@ -30,7 +27,7 @@ let authToken: string | null = null;
  * Interface for API client operations.
  */
 export interface ApiClient {
-	fetchSplitwiseRows(accountIds: string[]): Promise<Record<string, unknown[]>>;
+	fetchSplitwiseRows(accountIds: string[]): Promise<Record<string, TvbRow[]>>;
 }
 
 /**
@@ -65,6 +62,37 @@ export const printAuthToken = () => {
 };
 
 /**
+ * Processes Splitwise CSV text, filtering for transactions involving the specified member.
+ *
+ * @param csvText - The Splitwise CSV text to process
+ * @param memberName - The name of the member to filter transactions for
+ * @returns Array of transaction rows involving the specified member
+ */
+const ingestSplitwiseCsvText = (
+	csvText: string,
+	memberName: string,
+): TvbRow[] => {
+	// Parse CSV text to splitwise rows
+	const splitwiseArr = csvTextToRows<SplitwiseRow>(csvText);
+
+	// Remove the "total balance" row (last row)
+	splitwiseArr.pop();
+
+	// Clean the strings otherwise Monarch throws a fit
+	splitwiseArr.forEach((row) => {
+		row.Description = (row.Description as number | string)
+			.toString()
+			.replace(/[^a-zA-Z0-9 ]+/g, "");
+	});
+
+	// Transform splitwise to tvb
+	const tvbArr = splitwiseRowsToTvbRows(splitwiseArr, memberName);
+
+	// Filter out charges that don't involve me
+	return tvbArr.filter((row) => row.delta);
+};
+
+/**
  * Creates and returns an API client instance.
  *
  * @returns ApiClient instance for making API requests
@@ -72,17 +100,44 @@ export const printAuthToken = () => {
 export const createApiClient = (): ApiClient => {
 	const fetchSplitwiseRows = async (
 		accountIds: string[],
-	): Promise<Record<string, unknown[]>> => {
-		// TODO: Implement API call logic
-		// Wait 10 seconds for testing
-		await new Promise((resolve) => setTimeout(resolve, 10000));
-		return accountIds.reduce(
-			(acc, accountId) => {
-				acc[accountId] = ["row1", "row2", "row3"];
-				return acc;
-			},
-			{} as Record<string, unknown[]>,
+	): Promise<Record<string, TvbRow[]>> => {
+		const results: Record<string, TvbRow[]> = {};
+
+		const memberName = "TODO: fetch from page";
+
+		// Fetch data for each account ID in parallel
+		await Promise.all(
+			accountIds.map(async (accountId) => {
+				try {
+					const url = `https://secure.splitwise.com/api/v3.0/export_group/${accountId}.csv`;
+
+					// Splitwise uses cookie-based authentication, not the Monarch auth token
+					const response = await fetch(url, {
+						method: "GET",
+						credentials: "include", // Include cookies for Splitwise authentication
+					});
+
+					if (!response.ok) {
+						console.error(
+							`Failed to fetch data for account ${accountId}: ${response.status} ${response.statusText}`,
+						);
+						results[accountId] = [];
+						return;
+					}
+
+					const csvText = await response.text();
+					console.log(`CSV data for account ${accountId}:`, csvText);
+
+					// Process and filter the CSV data
+					results[accountId] = ingestSplitwiseCsvText(csvText, memberName);
+				} catch (error) {
+					console.error(`Error fetching data for account ${accountId}:`, error);
+					results[accountId] = [];
+				}
+			}),
 		);
+
+		return results;
 	};
 
 	return {

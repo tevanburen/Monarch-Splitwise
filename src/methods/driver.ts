@@ -199,37 +199,6 @@ const navigateToPage = async (monarchId: string): Promise<boolean> => {
 };
 
 /**
- * Reads and processes a Splitwise CSV file, filtering for transactions involving the specified member.
- *
- * @param file - The Splitwise CSV file to process
- * @param memberName - The name of the member to filter transactions for
- * @returns Array of transaction rows involving the specified member
- */
-const ingestSplitwiseCsvFile = async (
-	file: File,
-	memberName: string,
-): Promise<TvbRow[]> => {
-	// read splitwise rows
-	const splitwiseArr = await csvFileToRows<SplitwiseRow>(file);
-
-	// need to remove the "total balance" row
-	splitwiseArr.pop();
-
-	// need to clean the strings otherwise Monarch throws a fit
-	splitwiseArr.forEach((row) => {
-		row.Description = (row.Description as number | string)
-			.toString()
-			.replace(/[^a-zA-Z0-9 ]+/g, "");
-	});
-
-	// transform splitwise to tvb
-	const tvbArr = splitwiseRowsToTvbRows(splitwiseArr, memberName);
-
-	// filter out charges that don't involve me
-	return tvbArr.filter((row) => row.delta);
-};
-
-/**
  * Reads and processes a Monarch CSV file.
  *
  * @deprecated Use ingestMonarchCsvText instead
