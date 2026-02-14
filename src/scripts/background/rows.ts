@@ -22,7 +22,10 @@ const compareTvbRows = (rowA: TvbRow, rowB: TvbRow): number =>
  * @param rowsB - Second array of transaction rows
  * @returns Array of rows that were found in both input arrays
  */
-const _removeSimilarRows = (rowsA: TvbRow[], rowsB: TvbRow[]): TvbRow[] => {
+export const removeSimilarRows = (
+	rowsA: TvbRow[],
+	rowsB: TvbRow[],
+): TvbRow[] => {
 	// sort both arrays
 	// these are sorted a->z
 	rowsA.sort(compareTvbRows);

@@ -6,7 +6,7 @@
  * processed transaction data in the internal TvbRow format.
  */
 
-import type { AccountFetchResult } from "@/types";
+import type { AccountFetchResult, AccountUploadResult, TvbRow } from "@/types";
 import { getSplitwiseUserName } from "../auth";
 import { fetchMonarchCsv, fetchSplitwiseCsv } from "./fetcher";
 import { ingestMonarchCsvText, ingestSplitwiseCsvText } from "./transformers";
@@ -78,5 +78,20 @@ export const fetchMonarchRows = async (
 		}),
 	);
 
+	return results;
+};
+
+export const uploadMonarchRows = async (
+	accountMap: Record<string, TvbRow[]>,
+): Promise<Record<string, AccountUploadResult>> => {
+	// Simulate upload delay
+	await new Promise((resolve) => setTimeout(resolve, 3000));
+	console.log("Simulated upload rows to Monarch:", accountMap);
+
+	// Simulate success for all accounts
+	const results: Record<string, AccountUploadResult> = {};
+	Object.keys(accountMap).forEach((accountId) => {
+		results[accountId] = {};
+	});
 	return results;
 };

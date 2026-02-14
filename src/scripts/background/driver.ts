@@ -3,6 +3,8 @@ import type {
 	BackgroundDriverData,
 	MonarchRowRequestMessage,
 	MonarchRowResponseMessage,
+	MonarchRowUploadRequestMessage,
+	MonarchRowUploadResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 	TvbAccount,
@@ -13,7 +15,7 @@ import {
 	sendMessageWithKeepAlive,
 	withLock,
 } from "./background.utils";
-import { spliceElementsBS } from "./rows";
+import { removeSimilarRows, spliceElementsBS } from "./rows";
 import { getState, updateState } from "./state-manager";
 
 // Driver data
@@ -46,8 +48,8 @@ export const driver = withLock(async () => {
 					acc[account.monarchId] = {
 						...account,
 						error: false,
-						monarchRows: [],
-						splitwiseRows: [],
+						oldRows: [],
+						newRows: [],
 					};
 					return acc;
 				},
@@ -55,8 +57,8 @@ export const driver = withLock(async () => {
 					string,
 					TvbAccount & {
 						error: boolean;
-						monarchRows: TvbRow[];
-						splitwiseRows: TvbRow[];
+						oldRows: TvbRow[];
+						newRows: TvbRow[];
 					}
 				>,
 			);
@@ -72,7 +74,7 @@ export const driver = withLock(async () => {
 						account.error ||= Boolean(
 							splitwiseResult[account.splitwiseId].error,
 						);
-						account.splitwiseRows = splitwiseResult[account.splitwiseId].rows;
+						account.newRows = splitwiseResult[account.splitwiseId].rows;
 					} else {
 						account.error = true;
 					}
@@ -85,7 +87,7 @@ export const driver = withLock(async () => {
 				Object.values(activeAccountMap).forEach((account) => {
 					if (monarchResult[account.monarchId]) {
 						account.error ||= Boolean(monarchResult[account.monarchId].error);
-						account.monarchRows = monarchResult[account.monarchId].rows;
+						account.oldRows = monarchResult[account.monarchId].rows;
 					} else {
 						account.error = true;
 					}
@@ -100,21 +102,43 @@ export const driver = withLock(async () => {
 			// trim rows to startDate
 			if (account.startDate) {
 				spliceElementsBS<TvbRow, Date>(
-					account.splitwiseRows,
+					account.newRows,
 					(row) => row.date,
 					new Date(account.startDate),
 					(a, b) => a.getTime() - b.getTime(),
 				);
 				spliceElementsBS<TvbRow, Date>(
-					account.monarchRows,
+					account.oldRows,
 					(row) => row.date,
 					new Date(account.startDate),
 					(a, b) => a.getTime() - b.getTime(),
 				);
 			}
+
+			// Remove similar rows between Splitwise and Monarch
+			removeSimilarRows(account.newRows, account.oldRows);
+
+			// warn of floating old charges
+			if (account.oldRows.length) {
+				console.warn("The following rows are unmatched:", account.oldRows);
+			}
 		});
 
+		// Log the active account map for debugging
 		console.log(activeAccountMap);
+
+		// Upload new rows to Monarch
+		await uploadRowsToMonarch(
+			Object.values(activeAccountMap)
+				.filter((account) => !account.error)
+				.reduce(
+					(acc, account) => {
+						acc[account.monarchId] = account.newRows;
+						return acc;
+					},
+					{} as Record<string, TvbRow[]>,
+				),
+		);
 	} finally {
 		updateState({ tempData: { status: "idle" } });
 	}
@@ -194,4 +218,31 @@ const fetchRowsFromMonarch = async (
 
 	// Extract rows from response payload
 	return response.payload;
+};
+
+const uploadRowsToMonarch = async (accountMap: Record<string, TvbRow[]>) => {
+	// Ensure a Monarch tab exists and is ready
+	const primaryMonarchTabId = await ensureMonarchTab();
+
+	// Send rows to Monarch for upload
+	const response =
+		await sendMessageWithKeepAlive<MonarchRowUploadResponseMessage>(
+			primaryMonarchTabId,
+			{
+				type: "MONARCH_ROW_UPLOAD_REQUEST_MESSAGE",
+				payload: accountMap,
+			} satisfies MonarchRowUploadRequestMessage,
+		);
+
+	// Process the response payload to confirm upload
+	Object.entries(response.payload).forEach(([accountId, result]) => {
+		if (result.error) {
+			console.error(
+				`Error uploading rows for account ${accountId}`,
+				result.error,
+			);
+		} else {
+			console.log(`Successfully uploaded rows for account ${accountId}`);
+		}
+	});
 };

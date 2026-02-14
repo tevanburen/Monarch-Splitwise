@@ -8,13 +8,3 @@ export interface TvbAccount {
 	startDate: string | null;
 	inactive?: boolean;
 }
-
-/**
- * Status tracking for an account processing operation.
- * Indicates which steps were attempted and their success/failure state.
- */
-export interface TvbAccountStatus {
-	transactions?: boolean;
-	balances?: boolean;
-	attempted: boolean;
-}

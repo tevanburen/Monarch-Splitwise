@@ -2,18 +2,13 @@ import {
 	clickElement,
 	clickLink,
 	compareTvbRows,
-	csvFileToRows,
 	fetchMonarchCsv,
-	monarchRowsToTvbRows,
 	rowsToCsvFile,
-	tvbBalanceRowsToMonarchBalanceRows,
 	tvbRowsToMonarchRows,
 	tvbRowsToTvbBalanceRows,
 	uploadFilesToInput,
-	wait,
 } from "@/methods";
 import type {
-	MonarchBalanceRow,
 	MonarchRow,
 	TvbAccount,
 	TvbAccountStatus,
@@ -196,23 +191,6 @@ const navigateToPage = async (monarchId: string): Promise<boolean> => {
 };
 
 /**
- * Reads and processes a Monarch CSV file.
- *
- * @deprecated Use ingestMonarchCsvText instead
- * @param file - The Monarch CSV file to process
- * @returns Array of transaction rows
- */
-const _ingestMonarchCsvFile = async (file: File): Promise<TvbRow[]> => {
-	// read splitwise rows
-	const splitwiseArr = await csvFileToRows<MonarchRow>(file);
-
-	// transform splitwise to tvb
-	const tvbArr = monarchRowsToTvbRows(splitwiseArr);
-
-	return tvbArr;
-};
-
-/**
  * Converts transaction rows to Monarch format and uploads them via the UI.
  *
  * @param rows - Array of transaction rows to upload
@@ -279,68 +257,4 @@ const uploadRowsToMonarch = async (rows: TvbRow[]): Promise<boolean> => {
 				/^Import \d+ transactions$/,
 			)),
 	);
-};
-
-/**
- * Converts balance rows to Monarch format and uploads them via the UI.
- *
- * @param rows - Array of balance rows to upload
- * @returns True if upload was successful, false otherwise
- * @deprecated as of January 2026 due to Monarch changes
- */
-const _uploadBalanceRowsToMonarch = async (
-	rows: TvbBalanceRow[],
-): Promise<boolean> => {
-	// transform tvb to monarch
-	const monarchRows = tvbBalanceRowsToMonarchBalanceRows(rows);
-
-	// write to a file
-	const newFile = rowsToCsvFile(monarchRows, "Monarch-Splitwise-Balance.csv", [
-		"Date",
-		"Balance",
-		"Account",
-	] satisfies (keyof MonarchBalanceRow)[]);
-
-	// open the modal
-	return Boolean(
-		// here we can assume the edit modal is open due to the bridge function
-		(await clickElement("div", /^Import balance history$/)) &&
-			// drop in the file
-			(await uploadFilesToInput(newFile)) &&
-			// hit go
-			(await clickElement<HTMLButtonElement>("button", /^Add to account$/)) &&
-			// sometimes it doesn't update today's balance, so go hit save
-			(await wait(500)) &&
-			(await clickElement("button", /^Edit[\s\W]*$/, 5000)) &&
-			(await clickElement("div", /^Edit balance history$/)) &&
-			(await wait(500)) &&
-			(await clickElement("button", /^Save changes$/, 5000)),
-	);
-};
-
-/**
- * Bridges the transaction upload flow to the balance upload flow.
- * Handles the conditional confirmation dialog that Monarch may or may not show.
- *
- * @returns Tuple indicating [transactionsFinished, balancesStarted]
- * @deprecated as of January 2026 due to Monarch changes
- */
-const _bridgeTransactionsBalance = async (): Promise<[boolean, boolean]> => {
-	const finishTransactions = async () =>
-		await clickElement<HTMLButtonElement>("button", /^Confirm$/, 5000);
-	const startBalances = async () =>
-		await clickElement("button", /^Edit[\s\W]*$/);
-
-	const finishTransactionsPromise = finishTransactions();
-	const startBalancesPromise = startBalances();
-
-	if (await startBalancesPromise) {
-		// balance upload has been started, so
-		return [true, true];
-	} else if (await finishTransactionsPromise) {
-		// transactions were finished, so give balance one more shot
-		return [true, Boolean(await startBalances())];
-	}
-
-	return [false, false];
 };
