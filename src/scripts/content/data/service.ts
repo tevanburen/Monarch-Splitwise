@@ -7,9 +7,9 @@
  */
 
 import type { TvbRow } from "@/types";
-import * as auth from "../auth";
-import * as fetcher from "./fetcher";
-import * as transformers from "./transformers";
+import { getSplitwiseUserName } from "../auth";
+import { fetchMonarchCsv, fetchSplitwiseCsv } from "./fetcher";
+import { ingestMonarchCsvText, ingestSplitwiseCsvText } from "./transformers";
 
 /**
  * Fetches and transforms Splitwise transaction data for multiple accounts.
@@ -21,7 +21,7 @@ export const fetchSplitwiseRows = async (
 	accountIds: string[],
 ): Promise<Record<string, TvbRow[]>> => {
 	const results: Record<string, TvbRow[]> = {};
-	const userName = auth.getSplitwiseUserName();
+	const userName = getSplitwiseUserName();
 
 	if (!userName) {
 		console.error(
@@ -34,11 +34,8 @@ export const fetchSplitwiseRows = async (
 	await Promise.all(
 		accountIds.map(async (accountId) => {
 			try {
-				const csvText = await fetcher.fetchSplitwiseCsv(accountId);
-				results[accountId] = transformers.ingestSplitwiseCsvText(
-					csvText,
-					userName,
-				);
+				const csvText = await fetchSplitwiseCsv(accountId);
+				results[accountId] = ingestSplitwiseCsvText(csvText, userName);
 			} catch (error) {
 				console.error(
 					`Error fetching Splitwise data for account ${accountId}:`,
@@ -67,8 +64,8 @@ export const fetchMonarchRows = async (
 	await Promise.all(
 		accountIds.map(async (accountId) => {
 			try {
-				const csvText = await fetcher.fetchMonarchCsv(accountId);
-				results[accountId] = transformers.ingestMonarchCsvText(csvText);
+				const csvText = await fetchMonarchCsv(accountId);
+				results[accountId] = ingestMonarchCsvText(csvText);
 			} catch (error) {
 				console.error(
 					`Error fetching Monarch data for account ${accountId}:`,

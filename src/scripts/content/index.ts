@@ -26,7 +26,7 @@ import type {
 } from "@/types";
 import { withKeepAlive } from "./content.utils";
 import { fetchMonarchRows, fetchSplitwiseRows } from "./data";
-import * as iframeManager from "./iframe-manager";
+import { setFullscreen, updatePosition } from "./iframe-manager";
 
 // ============================================================================
 // Initialize state from background
@@ -43,10 +43,10 @@ const initializeFromBackground = async (): Promise<void> => {
 		});
 
 		if (state?.tempData?.status !== "idle") {
-			iframeManager.setFullscreen(true);
+			setFullscreen(true);
 		}
 		if (state?.tempData?.tempLocation) {
-			iframeManager.updatePosition(state.tempData.tempLocation);
+			updatePosition(state.tempData.tempLocation);
 		}
 	} catch (error) {
 		console.error("Failed to initialize state from background:", error);
@@ -86,13 +86,13 @@ chrome.runtime.onMessage.addListener(
 			// Update iframe fullscreen state when status changes
 			const status = message.payload?.tempData?.status;
 			if (status !== undefined) {
-				iframeManager.setFullscreen(status !== "idle");
+				setFullscreen(status !== "idle");
 			}
 
 			// Update iframe position when location changes
 			const location = message.payload?.tempData?.tempLocation;
 			if (location !== undefined) {
-				iframeManager.updatePosition(location);
+				updatePosition(location);
 			}
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging

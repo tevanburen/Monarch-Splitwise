@@ -5,7 +5,7 @@
  * to fetch transaction data in CSV format.
  */
 
-import * as auth from "../auth";
+import { getMonarchToken } from "../auth";
 
 /**
  * Fetches transaction CSV data from Monarch Money API.
@@ -15,7 +15,7 @@ import * as auth from "../auth";
  * @throws Error if auth token is not available or request fails
  */
 export const fetchMonarchCsv = async (monarchId: string): Promise<string> => {
-	const authToken = auth.getMonarchToken();
+	const authToken = getMonarchToken();
 
 	if (!authToken) {
 		throw new Error(

@@ -5,7 +5,7 @@ import type {
 	SplitwiseRowResponseMessage,
 } from "@/types";
 import { sendMessageWithKeepAlive } from "./background.utils";
-import * as stateManager from "./state-manager";
+import { getDriverData, getState } from "./state-manager";
 
 export const driver = async () => {
 	const rowsFromSplitwise = await fetchRowsFromSplitwise();
@@ -15,8 +15,7 @@ export const driver = async () => {
 };
 
 const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
-	const primarySplitwiseTabId =
-		stateManager.getDriverData().primarySplitwiseTabId;
+	const primarySplitwiseTabId = getDriverData().primarySplitwiseTabId;
 	if (primarySplitwiseTabId === null) {
 		throw new Error("No primary Splitwise tab set");
 	}
@@ -26,8 +25,7 @@ const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
 		primarySplitwiseTabId,
 		{
 			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
-			payload: stateManager
-				.getState()
+			payload: getState()
 				.syncData.accounts.filter((account) => !account.inactive)
 				.map((account) => account.splitwiseId),
 		} satisfies SplitwiseRowRequestMessage,
@@ -38,7 +36,7 @@ const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
 };
 
 const fetchRowsFromMonarch = async (): Promise<Record<string, unknown[]>> => {
-	const primaryMonarchTabId = stateManager.getDriverData().primaryMonarchTabId;
+	const primaryMonarchTabId = getDriverData().primaryMonarchTabId;
 	if (primaryMonarchTabId === null) {
 		throw new Error("No primary Monarch tab set");
 	}
@@ -48,8 +46,7 @@ const fetchRowsFromMonarch = async (): Promise<Record<string, unknown[]>> => {
 		primaryMonarchTabId,
 		{
 			type: "MONARCH_ROW_REQUEST_MESSAGE",
-			payload: stateManager
-				.getState()
+			payload: getState()
 				.syncData.accounts.filter((account) => !account.inactive)
 				.map((account) => account.monarchId),
 		} satisfies MonarchRowRequestMessage,
