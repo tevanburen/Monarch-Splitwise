@@ -1,9 +1,6 @@
 /**
- * Helper utilities for managing keep-alive messages during long-running operations.
- *
- * When the content script performs long operations that take time,
- * it needs to send periodic keep-alive messages to the background worker
- * to prevent timeout. This module provides helpers to manage that communication.
+ * Content script keep-alive utilities.
+ * Sends periodic keep-alive messages during long-running operations.
  */
 
 import type { KeepAliveMessage } from "@/types";
@@ -19,7 +16,7 @@ import type { KeepAliveMessage } from "@/types";
  * @throws Re-throws any error thrown by the operation
  *
  * @example
- * const rows = await withKeepAlive(() => apiClient.fetchSplitwiseRows());
+ * const rows = await withKeepAlive(() => fetchSplitwiseRows());
  */
 export const withKeepAlive = async <T>(
 	operation: () => Promise<T>,

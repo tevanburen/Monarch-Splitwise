@@ -16,6 +16,7 @@
  * - Content Script → Background Worker (async responses via sendResponse)
  */
 
+import { withKeepAlive } from "@/shared";
 import type {
 	BackgroundState,
 	MonarchRowRequestMessage,
@@ -28,7 +29,6 @@ import {
 	createApiClient,
 	createIframeManager,
 	initAuthTokenListener,
-	withKeepAlive,
 } from "./lib";
 
 // ============================================================================

@@ -17,13 +17,10 @@
  *
  */
 
-import {
-	csvTextToRows,
-	fetchMonarchCsv,
-	fetchSplitwiseCsv,
-	monarchRowsToTvbRows,
-	splitwiseRowsToTvbRows,
-} from "@/methods";
+import { fetchMonarchCsv, fetchSplitwiseCsv } from "@/methods/api";
+import { csvTextToRows } from "@/shared/transformers/common";
+import { monarchRowsToTvbRows } from "@/shared/transformers/monarch";
+import { splitwiseRowsToTvbRows } from "@/shared/transformers/splitwise";
 import type {
 	MonarchRow,
 	PageContextMessage,

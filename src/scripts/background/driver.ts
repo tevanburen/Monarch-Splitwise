@@ -1,10 +1,10 @@
+import { sendMessageWithKeepAlive } from "@/shared";
 import type {
 	MonarchRowRequestMessage,
 	MonarchRowResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 } from "@/types";
-import { sendMessageWithKeepAlive } from "./background.utils";
 import type { StateManager } from "./state-manager";
 
 export const driver = async (stateManager: StateManager) => {
