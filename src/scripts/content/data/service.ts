@@ -132,7 +132,7 @@ export const uploadMonarchRows = async (
 			}
 
 			// Upload the rows
-			const uploaded = await uploadRowsForAccount(rows);
+			const uploaded = await uploadRowsForAccount(accountId, rows);
 			if (!uploaded) {
 				results[accountId] = {
 					error: `Failed to upload transactions for account ${accountId}`,
@@ -159,7 +159,10 @@ export const uploadMonarchRows = async (
  * @param rows - Array of transaction rows to upload
  * @returns True if upload was successful, false otherwise
  */
-const uploadRowsForAccount = async (rows: TvbRow[]): Promise<boolean> => {
+const uploadRowsForAccount = async (
+	accountId: string,
+	rows: TvbRow[],
+): Promise<boolean> => {
 	// Transform tvb to monarch
 	const monarchRows = tvbRowsToMonarchRows(rows);
 
@@ -200,6 +203,9 @@ const uploadRowsForAccount = async (rows: TvbRow[]): Promise<boolean> => {
 			(await clickElement<HTMLButtonElement>(
 				"button",
 				/^Import \d+ transactions$/,
-			)),
+			)) &&
+			// Navigate back to accounts overview
+			(await clickElement("button", /^View cash flow report$/)) &&
+			(await navigateToAccountPage(accountId)),
 	);
 };
