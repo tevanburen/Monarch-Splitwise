@@ -1,4 +1,5 @@
 import type { TvbAccount } from "./accounts";
+import type { TvbRow } from "./rows";
 
 /**
  * Background service worker state interface
@@ -66,9 +67,19 @@ export type SplitwiseRowRequestMessage = {
 
 export type SplitwiseRowResponseMessage = {
 	type: "SPLITWISE_ROW_RESPONSE_MESSAGE";
-	payload: Record<string, unknown[]>;
+	payload: Record<string, TvbRow[]>;
 };
 
 export type KeepAliveMessage = {
 	type: "KEEP_ALIVE_MESSAGE";
+};
+
+export type MonarchRowRequestMessage = {
+	type: "MONARCH_ROW_REQUEST_MESSAGE";
+	payload: string[];
+};
+
+export type MonarchRowResponseMessage = {
+	type: "MONARCH_ROW_RESPONSE_MESSAGE";
+	payload: Record<string, TvbRow[]>;
 };

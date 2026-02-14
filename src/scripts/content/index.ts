@@ -18,6 +18,8 @@
 
 import type {
 	BackgroundState,
+	MonarchRowRequestMessage,
+	MonarchRowResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
@@ -105,7 +107,10 @@ initializeFromBackground();
  */
 chrome.runtime.onMessage.addListener(
 	(
-		message: UpdateStateBroadcastMessage | SplitwiseRowRequestMessage,
+		message:
+			| UpdateStateBroadcastMessage
+			| SplitwiseRowRequestMessage
+			| MonarchRowRequestMessage,
 		_sender,
 		sendResponse,
 	) => {
@@ -129,6 +134,16 @@ chrome.runtime.onMessage.addListener(
 						type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
 						payload: rows,
 					} satisfies SplitwiseRowResponseMessage);
+				},
+			);
+		} else if (message.type === "MONARCH_ROW_REQUEST_MESSAGE") {
+			// Wrap the API call with keep-alive messaging
+			withKeepAlive(() => apiClient.fetchMonarchRows(message.payload)).then(
+				(rows) => {
+					sendResponse({
+						type: "MONARCH_ROW_RESPONSE_MESSAGE",
+						payload: rows,
+					} satisfies MonarchRowResponseMessage);
 				},
 			);
 		}

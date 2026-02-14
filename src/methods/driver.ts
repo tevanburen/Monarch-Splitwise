@@ -214,22 +214,6 @@ const _ingestMonarchCsvFile = async (file: File): Promise<TvbRow[]> => {
 };
 
 /**
- * Parses Monarch CSV text data into transaction rows.
- *
- * @param text - The CSV text content from Monarch
- * @returns Array of transaction rows
- */
-const ingestMonarchCsvText = (text: string): TvbRow[] => {
-	// read splitwise rows
-	const splitwiseArr = csvTextToRows<MonarchRow>(text);
-
-	// transform splitwise to tvb
-	const tvbArr = monarchRowsToTvbRows(splitwiseArr);
-
-	return tvbArr;
-};
-
-/**
  * Converts transaction rows to Monarch format and uploads them via the UI.
  *
  * @param rows - Array of transaction rows to upload

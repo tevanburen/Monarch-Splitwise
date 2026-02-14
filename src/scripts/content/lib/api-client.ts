@@ -17,11 +17,22 @@
  *
  */
 
-import { csvTextToRows, splitwiseRowsToTvbRows } from "@/methods";
-import type { PageContextMessage, SplitwiseRow, TvbRow } from "@/types";
+import {
+	csvTextToRows,
+	fetchMonarchCsv,
+	fetchSplitwiseCsv,
+	monarchRowsToTvbRows,
+	splitwiseRowsToTvbRows,
+} from "@/methods";
+import type {
+	MonarchRow,
+	PageContextMessage,
+	SplitwiseRow,
+	TvbRow,
+} from "@/types";
 
 /** Stores the most recently captured auth token from Monarch API requests */
-let _monarchAuthToken: string | null = null;
+let monarchAuthToken: string | null = null;
 
 /** Stores the Splitwise user name captured from get_main_data response */
 let splitwiseUserName: string | null = null;
@@ -31,6 +42,7 @@ let splitwiseUserName: string | null = null;
  */
 export interface ApiClient {
 	fetchSplitwiseRows(accountIds: string[]): Promise<Record<string, TvbRow[]>>;
+	fetchMonarchRows(accountIds: string[]): Promise<Record<string, TvbRow[]>>;
 }
 
 /**
@@ -52,7 +64,7 @@ export const initAuthTokenListener = () => {
 			message?.source === "page-context" &&
 			message?.type === "monarchAuthToken"
 		) {
-			_monarchAuthToken = message.payload;
+			monarchAuthToken = message.payload;
 		}
 	}) as EventListener);
 
@@ -104,6 +116,22 @@ const ingestSplitwiseCsvText = (
 };
 
 /**
+ * Parses Monarch CSV text data into transaction rows.
+ *
+ * @param text - The CSV text content from Monarch
+ * @returns Array of transaction rows
+ */
+const ingestMonarchCsvText = (text: string): TvbRow[] => {
+	// read splitwise rows
+	const splitwiseArr = csvTextToRows<MonarchRow>(text);
+
+	// transform splitwise to tvb
+	const tvbArr = monarchRowsToTvbRows(splitwiseArr);
+
+	return tvbArr;
+};
+
+/**
  * Creates and returns an API client instance.
  *
  * @returns ApiClient instance for making API requests
@@ -125,23 +153,7 @@ export const createApiClient = (): ApiClient => {
 		await Promise.all(
 			accountIds.map(async (accountId) => {
 				try {
-					const url = `https://secure.splitwise.com/api/v3.0/export_group/${accountId}.csv`;
-
-					// Splitwise uses cookie-based authentication, not the Monarch auth token
-					const response = await fetch(url, {
-						method: "GET",
-						credentials: "include", // Include cookies for Splitwise authentication
-					});
-
-					if (!response.ok) {
-						console.error(
-							`Failed to fetch data for account ${accountId}: ${response.status} ${response.statusText}`,
-						);
-						results[accountId] = [];
-						return;
-					}
-
-					const csvText = await response.text();
+					const csvText = await fetchSplitwiseCsv(accountId);
 
 					// Process and filter the CSV data
 					results[accountId] = ingestSplitwiseCsvText(
@@ -158,7 +170,41 @@ export const createApiClient = (): ApiClient => {
 		return results;
 	};
 
+	const fetchMonarchRows = async (
+		accountIds: string[],
+	): Promise<Record<string, TvbRow[]>> => {
+		const results: Record<string, TvbRow[]> = {};
+
+		// Simulate fetching Monarch rows (replace with actual implementation)
+		await Promise.all(
+			accountIds.map(async (accountId) => {
+				try {
+					if (!monarchAuthToken) {
+						console.error(
+							"Monarch auth token not available. Please log in to Monarch first.",
+						);
+						results[accountId] = [];
+						return;
+					}
+
+					const csvText = await fetchMonarchCsv(accountId, monarchAuthToken);
+					// Process and filter the CSV data
+					results[accountId] = ingestMonarchCsvText(csvText);
+				} catch (error) {
+					console.error(
+						`Error fetching Monarch rows for account ${accountId}:`,
+						error,
+					);
+					results[accountId] = [];
+				}
+			}),
+		);
+
+		return results;
+	};
+
 	return {
 		fetchSplitwiseRows,
+		fetchMonarchRows,
 	};
 };
