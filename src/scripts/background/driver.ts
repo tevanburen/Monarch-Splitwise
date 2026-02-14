@@ -1,4 +1,5 @@
 import type {
+	AccountFetchResult,
 	BackgroundDriverData,
 	MonarchRowRequestMessage,
 	MonarchRowResponseMessage,
@@ -68,7 +69,9 @@ const ensureMonarchTab = async (): Promise<number> => {
 	);
 };
 
-const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
+const fetchRowsFromSplitwise = async (): Promise<
+	Record<string, AccountFetchResult>
+> => {
 	// Ensure a Splitwise tab exists and is ready
 	const primarySplitwiseTabId = await ensureSplitwiseTab();
 
@@ -87,7 +90,9 @@ const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
 	return response.payload;
 };
 
-const fetchRowsFromMonarch = async (): Promise<Record<string, unknown[]>> => {
+const fetchRowsFromMonarch = async (): Promise<
+	Record<string, AccountFetchResult>
+> => {
 	// Ensure a Monarch tab exists and is ready
 	const primaryMonarchTabId = await ensureMonarchTab();
 

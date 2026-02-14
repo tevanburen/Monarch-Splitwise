@@ -26,17 +26,58 @@ let monarchAuthToken: string | null = null;
 /** Stores the Splitwise user name captured from get_main_data response */
 let splitwiseUserName: string | null = null;
 
-/**
- * Gets the current Monarch auth token.
- * @returns The auth token or null if not yet captured
- */
-export const getMonarchToken = (): string | null => monarchAuthToken;
+/** Track when this module was initialized */
+const moduleStartTime = Date.now();
+
+/** Timeout duration in milliseconds */
+const TIMEOUT_MS = 5000;
+
+/** Polling interval in milliseconds */
+const POLL_INTERVAL_MS = 100;
 
 /**
- * Gets the current Splitwise user name.
- * @returns The user name or null if not yet captured
+ * Gets the current Monarch auth token, waiting up to 5 seconds if needed.
+ * @returns Promise resolving to the auth token or undefined if not available
  */
-export const getSplitwiseUserName = (): string | null => splitwiseUserName;
+export const getMonarchToken = async (): Promise<string | undefined> => {
+	// If already available, return immediately
+	if (monarchAuthToken) {
+		return monarchAuthToken;
+	}
+
+	// Wait for token to become available, polling every POLL_INTERVAL_MS
+	while (Date.now() - moduleStartTime < TIMEOUT_MS) {
+		if (monarchAuthToken) {
+			return monarchAuthToken;
+		}
+		await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+	}
+
+	// Timeout reached
+	return undefined;
+};
+
+/**
+ * Gets the current Splitwise user name, waiting up to 5 seconds if needed.
+ * @returns Promise resolving to the user name or undefined if not available
+ */
+export const getSplitwiseUserName = async (): Promise<string | undefined> => {
+	// If already available, return immediately
+	if (splitwiseUserName) {
+		return splitwiseUserName;
+	}
+
+	// Wait for user name to become available, polling every POLL_INTERVAL_MS
+	while (Date.now() - moduleStartTime < TIMEOUT_MS) {
+		if (splitwiseUserName) {
+			return splitwiseUserName;
+		}
+		await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+	}
+
+	// Timeout reached
+	return undefined;
+};
 
 // ============================================================================
 // Event Listeners (auto-initialize)

@@ -6,7 +6,7 @@
  * processed transaction data in the internal TvbRow format.
  */
 
-import type { TvbRow } from "@/types";
+import type { AccountFetchResult } from "@/types";
 import { getSplitwiseUserName } from "../auth";
 import { fetchMonarchCsv, fetchSplitwiseCsv } from "./fetcher";
 import { ingestMonarchCsvText, ingestSplitwiseCsvText } from "./transformers";
@@ -15,18 +15,22 @@ import { ingestMonarchCsvText, ingestSplitwiseCsvText } from "./transformers";
  * Fetches and transforms Splitwise transaction data for multiple accounts.
  *
  * @param accountIds - Array of Splitwise group IDs to fetch
- * @returns Promise resolving to a map of account ID → transaction rows
+ * @returns Promise resolving to a map of account ID → fetch result with rows and optional error
  */
 export const fetchSplitwiseRows = async (
 	accountIds: string[],
-): Promise<Record<string, TvbRow[]>> => {
-	const results: Record<string, TvbRow[]> = {};
-	const userName = getSplitwiseUserName();
+): Promise<Record<string, AccountFetchResult>> => {
+	const results: Record<string, AccountFetchResult> = {};
+	const userName = await getSplitwiseUserName();
 
 	if (!userName) {
-		console.error(
-			"Splitwise user name not available. Please visit Splitwise first to capture your user name.",
-		);
+		const errorMsg =
+			"Splitwise user name not available. Please visit Splitwise first to capture your user name.";
+		console.error(errorMsg);
+		// Return error state for all requested accounts
+		for (const accountId of accountIds) {
+			results[accountId] = { rows: [], error: errorMsg };
+		}
 		return results;
 	}
 
@@ -35,13 +39,12 @@ export const fetchSplitwiseRows = async (
 		accountIds.map(async (accountId) => {
 			try {
 				const csvText = await fetchSplitwiseCsv(accountId);
-				results[accountId] = ingestSplitwiseCsvText(csvText, userName);
+				const rows = ingestSplitwiseCsvText(csvText, userName);
+				results[accountId] = { rows };
 			} catch (error) {
-				console.error(
-					`Error fetching Splitwise data for account ${accountId}:`,
-					error,
-				);
-				results[accountId] = [];
+				const errorMsg = `Error fetching Splitwise data for account ${accountId}: ${error instanceof Error ? error.message : String(error)}`;
+				console.error(errorMsg);
+				results[accountId] = { rows: [], error: errorMsg };
 			}
 		}),
 	);
@@ -53,25 +56,24 @@ export const fetchSplitwiseRows = async (
  * Fetches and transforms Monarch transaction data for multiple accounts.
  *
  * @param accountIds - Array of Monarch account IDs to fetch
- * @returns Promise resolving to a map of account ID → transaction rows
+ * @returns Promise resolving to a map of account ID → fetch result with rows and optional error
  */
 export const fetchMonarchRows = async (
 	accountIds: string[],
-): Promise<Record<string, TvbRow[]>> => {
-	const results: Record<string, TvbRow[]> = {};
+): Promise<Record<string, AccountFetchResult>> => {
+	const results: Record<string, AccountFetchResult> = {};
 
 	// Fetch data for each account ID in parallel
 	await Promise.all(
 		accountIds.map(async (accountId) => {
 			try {
 				const csvText = await fetchMonarchCsv(accountId);
-				results[accountId] = ingestMonarchCsvText(csvText);
+				const rows = ingestMonarchCsvText(csvText);
+				results[accountId] = { rows };
 			} catch (error) {
-				console.error(
-					`Error fetching Monarch data for account ${accountId}:`,
-					error,
-				);
-				results[accountId] = [];
+				const errorMsg = `Error fetching Monarch data for account ${accountId}: ${error instanceof Error ? error.message : String(error)}`;
+				console.error(errorMsg);
+				results[accountId] = { rows: [], error: errorMsg };
 			}
 		}),
 	);
