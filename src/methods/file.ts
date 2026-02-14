@@ -62,18 +62,3 @@ export const downloadFile = (file: File): void => {
 	// Clean up the object URL to avoid memory leaks
 	URL.revokeObjectURL(url);
 };
-
-/**
- * Parses CSV text into an array of typed objects using xlsx library.
- *
- * @template R - The expected type of each row object
- * @param csvText - The CSV text to parse
- * @returns Array of parsed row objects
- */
-export const csvTextToRows = <R>(csvText: string): R[] => {
-	const workbook = XLSXread(csvText, { type: "string", cellDates: true });
-	const arr = XLSXutils.sheet_to_json(
-		workbook.Sheets[workbook.SheetNames[0]],
-	) as R[];
-	return arr;
-};

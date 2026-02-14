@@ -144,19 +144,3 @@ chrome.runtime.onMessage.addListener(
 		return true; // Keep channel open for async response
 	},
 );
-
-// ============================================================================
-// Inject page context script for fetch interception
-// ============================================================================
-
-/**
- * The page context script runs in the window context (not extension context).
- * This allows it to wrap window.fetch and capture authorization headers.
- * We inject it as an external script so it runs in the correct context.
- */
-(() => {
-	const script = document.createElement("script");
-	script.src = chrome.runtime.getURL("dist/fetch-interceptor.js");
-	script.onload = () => script.remove(); // Clean up script tag after loading
-	(document.head || document.documentElement).appendChild(script);
-})();

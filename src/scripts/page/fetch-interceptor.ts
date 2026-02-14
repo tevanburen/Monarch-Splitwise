@@ -1,39 +1,56 @@
 import type { PageContextMessage } from "@/types";
 
 /**
- * Page context injection script that intercepts fetch requests to capture auth tokens.
- * This script runs in the page context (not extension context) to access the original fetch API.
- * Wraps window.fetch to extract Authorization headers from Monarch API requests.
+ * Page context injection script that intercepts fetch and XHR requests.
+ *
+ * This script runs in the MAIN world (page context), not the extension's isolated world.
+ * Running in the page context allows us to intercept the original window.fetch and
+ * XMLHttpRequest before any page scripts execute.
+ *
+ * Purpose:
+ * - Capture Monarch API authentication tokens from fetch request headers
+ * - Capture Splitwise user data from XHR response bodies
+ *
+ * Data Flow:
+ * Page Context (this script) → DOM Custom Events → Content Script → Background Worker
  */
 
-// add a fetch wrapper
+// ============================================================================
+// Fetch Interceptor - Captures Monarch Auth Tokens
+// ============================================================================
+
 (() => {
 	const originalFetch = window.fetch;
+
 	window.fetch = async (...args) => {
 		const [target, init] = args;
+		const monarchUrl = "api.monarch.com";
 
-		const targetUrl = "api.monarch.com";
+		// Check if this is a Monarch API request
+		const isMonarchRequest =
+			(target as URL)?.href?.includes(monarchUrl) ||
+			(target as Request)?.url?.includes(monarchUrl) ||
+			(target as string)?.includes(monarchUrl);
 
-		if (
-			(target as URL)?.href?.includes(targetUrl) ||
-			(target as Request)?.url?.includes(targetUrl) ||
-			(target as string)?.includes(targetUrl)
-		) {
+		if (isMonarchRequest) {
+			// Extract headers from the request
 			const headers =
 				init?.headers instanceof Headers
 					? Object.fromEntries(init.headers.entries())
 					: (init?.headers as Record<string, string>) || {};
 
+			// Look for Authorization token
 			const token = headers.Authorization || headers.authorization;
+
 			if (token) {
+				// Dispatch event to content script with the auth token
 				const message: PageContextMessage = {
 					isTvbMessage: true,
 					source: "page-context",
-					type: "authToken",
+					type: "monarchAuthToken",
 					payload: token,
 				};
 
-				// Dispatch custom DOM event for content script to listen to
 				const event = new CustomEvent("monarch-auth-token", {
 					detail: message,
 				});
@@ -41,6 +58,93 @@ import type { PageContextMessage } from "@/types";
 			}
 		}
 
+		// Always call the original fetch to maintain normal behavior
 		return originalFetch(...args);
+	};
+})();
+
+// ============================================================================
+// XMLHttpRequest Interceptor - Captures Splitwise User Data
+// ============================================================================
+
+(() => {
+	const OriginalXHR = window.XMLHttpRequest;
+	const splitwisePath = "/api/v3.0/get_main_data";
+	const splitwiseDomain = "secure.splitwise.com";
+
+	/**
+	 * Extended XMLHttpRequest class that intercepts requests and responses.
+	 * Captures user data from Splitwise's get_main_data endpoint.
+	 */
+	window.XMLHttpRequest = class extends OriginalXHR {
+		private requestUrl = "";
+
+		/**
+		 * Overrides open() to capture the request URL for later inspection.
+		 */
+		open(
+			method: string,
+			url: string | URL,
+			async = true,
+			username: string | null = null,
+			password: string | null = null,
+		): void {
+			this.requestUrl = url.toString();
+			super.open(method, url, async, username, password);
+		}
+
+		/**
+		 * Overrides send() to attach a load listener for capturing response data.
+		 */
+		send(body?: Document | XMLHttpRequestBodyInit | null): void {
+			// Check if this is a Splitwise get_main_data request
+			const isSplitwise =
+				this.requestUrl.includes(splitwisePath) &&
+				// Verify it's either an absolute URL with the domain or a relative URL on the Splitwise domain
+				(this.requestUrl.includes(splitwiseDomain) ||
+					window.location.hostname === splitwiseDomain);
+
+			if (isSplitwise) {
+				// Add listener to capture the response when it arrives
+				this.addEventListener("load", () => {
+					try {
+						if (this.status === 200 && this.responseText) {
+							// Parse the JSON response
+							const data = JSON.parse(this.responseText) as {
+								user: {
+									first_name: string;
+									last_name: string;
+								};
+							};
+
+							// Extract user's full name
+							const userName = data?.user
+								? `${data.user.first_name} ${data.user.last_name}`
+								: null;
+
+							if (userName) {
+								// Dispatch event to content script with the user name
+								const message: PageContextMessage = {
+									isTvbMessage: true,
+									source: "page-context",
+									type: "splitwiseUserName",
+									payload: userName,
+								};
+
+								const event = new CustomEvent("splitwise-main-data", {
+									detail: message,
+								});
+								document.dispatchEvent(event);
+							}
+						}
+					} catch {
+						// Silently ignore JSON parse errors or missing fields
+					}
+				});
+			}
+
+			// Always call the original send to maintain normal behavior
+			super.send(body);
+		}
 	};
 })();

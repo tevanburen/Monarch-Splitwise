@@ -18,10 +18,13 @@
  */
 
 import { csvTextToRows, splitwiseRowsToTvbRows } from "@/methods";
-import type { SplitwiseRow, TvbRow } from "@/types";
+import type { PageContextMessage, SplitwiseRow, TvbRow } from "@/types";
 
 /** Stores the most recently captured auth token from Monarch API requests */
-let authToken: string | null = null;
+let _monarchAuthToken: string | null = null;
+
+/** Stores the Splitwise user name captured from get_main_data response */
+let splitwiseUserName: string | null = null;
 
 /**
  * Interface for API client operations.
@@ -40,25 +43,33 @@ export interface ApiClient {
 export const initAuthTokenListener = () => {
 	// Listen for auth tokens from page context fetch interceptor
 	document.addEventListener("monarch-auth-token", ((event: Event) => {
-		const customEvent = event as CustomEvent;
+		const customEvent = event as CustomEvent<PageContextMessage>;
 		const message = customEvent.detail;
 
 		// Validate message structure before storing
 		if (
 			message?.isTvbMessage &&
 			message?.source === "page-context" &&
-			message?.type === "authToken"
+			message?.type === "monarchAuthToken"
 		) {
-			authToken = message.payload;
+			_monarchAuthToken = message.payload;
 		}
 	}) as EventListener);
-};
 
-/**
- * Logs the current auth token to the console.
- */
-export const printAuthToken = () => {
-	console.log("Current auth token:", authToken);
+	// Listen for Splitwise user data from page context fetch interceptor
+	document.addEventListener("splitwise-main-data", ((event: Event) => {
+		const customEvent = event as CustomEvent<PageContextMessage>;
+		const message = customEvent.detail;
+
+		// Validate message structure before storing
+		if (
+			message?.isTvbMessage &&
+			message?.source === "page-context" &&
+			message?.type === "splitwiseUserName"
+		) {
+			splitwiseUserName = message.payload;
+		}
+	}) as EventListener);
 };
 
 /**
@@ -103,7 +114,12 @@ export const createApiClient = (): ApiClient => {
 	): Promise<Record<string, TvbRow[]>> => {
 		const results: Record<string, TvbRow[]> = {};
 
-		const memberName = "TODO: fetch from page";
+		if (!splitwiseUserName) {
+			console.error(
+				"Splitwise user name not available. Please visit Splitwise first to capture your user name.",
+			);
+			return results;
+		}
 
 		// Fetch data for each account ID in parallel
 		await Promise.all(
@@ -126,10 +142,12 @@ export const createApiClient = (): ApiClient => {
 					}
 
 					const csvText = await response.text();
-					console.log(`CSV data for account ${accountId}:`, csvText);
 
 					// Process and filter the CSV data
-					results[accountId] = ingestSplitwiseCsvText(csvText, memberName);
+					results[accountId] = ingestSplitwiseCsvText(
+						csvText,
+						splitwiseUserName as string,
+					);
 				} catch (error) {
 					console.error(`Error fetching data for account ${accountId}:`, error);
 					results[accountId] = [];
