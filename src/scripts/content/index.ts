@@ -24,9 +24,9 @@ import type {
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
 } from "@/types";
+import { withKeepAlive } from "./content.utils";
 import { fetchMonarchRows, fetchSplitwiseRows } from "./data";
-import { withKeepAlive } from "./lib";
-import * as iframeManager from "./lib/iframe-manager"; // Auto-initializes iframe
+import * as iframeManager from "./iframe-manager";
 
 // ============================================================================
 // Initialize state from background
