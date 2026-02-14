@@ -7,7 +7,7 @@
  */
 
 import type { TvbRow } from "@/types";
-import * as tokenManager from "../auth/token-manager";
+import * as auth from "../auth";
 import * as fetcher from "./fetcher";
 import * as transformers from "./transformers";
 
@@ -21,7 +21,7 @@ export const fetchSplitwiseRows = async (
 	accountIds: string[],
 ): Promise<Record<string, TvbRow[]>> => {
 	const results: Record<string, TvbRow[]> = {};
-	const userName = tokenManager.getSplitwiseUserName();
+	const userName = auth.getSplitwiseUserName();
 
 	if (!userName) {
 		console.error(

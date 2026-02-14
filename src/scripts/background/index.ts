@@ -6,15 +6,12 @@ import type {
 } from "@/types";
 import { getTabType } from "./background.utils";
 import { driver } from "./driver";
-import { createStateManager } from "./state-manager";
+import * as stateManager from "./state-manager";
 
 /**
  * Background service worker that maintains global state for the extension.
  * Handles state synchronization across all extension contexts (iframes, popups, etc).
  */
-
-// Initialize state manager
-const stateManager = createStateManager();
 
 // Handle incoming messages
 chrome.runtime.onMessage.addListener(
@@ -62,7 +59,7 @@ chrome.runtime.onMessage.addListener(
 					}
 				}
 
-				driver(stateManager).finally(() => {
+				driver().finally(() => {
 					// Set state to idle (automatically broadcasts)
 					stateManager.updateState({ tempData: { status: "idle" } });
 				});

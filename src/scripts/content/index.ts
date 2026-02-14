@@ -24,35 +24,9 @@ import type {
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
 } from "@/types";
-import { initAuthTokenListener } from "./auth";
 import { fetchMonarchRows, fetchSplitwiseRows } from "./data";
-import { createIframeManager, withKeepAlive } from "./lib";
-
-// ============================================================================
-// Initialize all managers
-// ============================================================================
-
-/** Manages iframe injection and positioning */
-const iframeManager = createIframeManager();
-
-/** Manages page automation (clicking, file uploads, etc) (TODO: implement) */
-// const pageAutomation = createPageAutomation();
-
-// ============================================================================
-// Helper function for long-running operations
-// ============================================================================
-// Set up auth token listening
-// ============================================================================
-
-// Start listening for auth tokens from page context
-initAuthTokenListener();
-
-// ============================================================================
-// Set up iframe
-// ============================================================================
-
-// Inject iframe into page
-iframeManager.init();
+import { withKeepAlive } from "./lib";
+import * as iframeManager from "./lib/iframe-manager"; // Auto-initializes iframe
 
 // ============================================================================
 // Initialize state from background
