@@ -33,11 +33,18 @@ import type { PageContextMessage } from "@/types";
 			(target as string)?.includes(monarchUrl);
 
 		if (isMonarchRequest) {
-			// Extract headers from the request
-			const headers =
-				init?.headers instanceof Headers
-					? Object.fromEntries(init.headers.entries())
-					: (init?.headers as Record<string, string>) || {};
+			// Extract headers from the request - handle all three formats
+			let headers: Record<string, string> = {};
+			if (init?.headers instanceof Headers) {
+				// Case 1: Headers object
+				headers = Object.fromEntries(init.headers.entries());
+			} else if (Array.isArray(init?.headers)) {
+				// Case 2: Array of arrays [["key", "value"], ...]
+				headers = Object.fromEntries(init.headers);
+			} else if (init?.headers) {
+				// Case 3: Plain object
+				headers = init.headers as Record<string, string>;
+			}
 
 			// Look for Authorization token
 			const token = headers.Authorization || headers.authorization;

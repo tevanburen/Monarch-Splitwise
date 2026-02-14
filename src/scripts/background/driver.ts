@@ -5,7 +5,11 @@ import type {
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 } from "@/types";
-import { sendMessageWithKeepAlive, withLock } from "./background.utils";
+import {
+	createOrGetTab,
+	sendMessageWithKeepAlive,
+	withLock,
+} from "./background.utils";
 import { getState, updateState } from "./state-manager";
 
 // Driver data
@@ -40,11 +44,33 @@ export const driver = withLock(async () => {
 	}
 });
 
+/**
+ * Ensures a Splitwise tab exists and is ready for communication.
+ * If no tab exists or the existing tab is invalid, creates a new one.
+ * Note: The tab ID is automatically set by the message handler when the tab sends GET_STATE_MESSAGE.
+ */
+const ensureSplitwiseTab = async (): Promise<number> => {
+	return await createOrGetTab(
+		driverData.primarySplitwiseTabId,
+		"https://secure.splitwise.com",
+	);
+};
+
+/**
+ * Ensures a Monarch tab exists and is ready for communication.
+ * If no tab exists or the existing tab is invalid, creates a new one.
+ * Note: The tab ID is automatically set by the message handler when the tab sends GET_STATE_MESSAGE.
+ */
+const ensureMonarchTab = async (): Promise<number> => {
+	return await createOrGetTab(
+		driverData.primaryMonarchTabId,
+		"https://app.monarch.com",
+	);
+};
+
 const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
-	const primarySplitwiseTabId = driverData.primarySplitwiseTabId;
-	if (primarySplitwiseTabId === null) {
-		throw new Error("No primary Splitwise tab set");
-	}
+	// Ensure a Splitwise tab exists and is ready
+	const primarySplitwiseTabId = await ensureSplitwiseTab();
 
 	// Send request to content script on the Splitwise tab with keep-alive monitoring
 	const response = await sendMessageWithKeepAlive<SplitwiseRowResponseMessage>(
@@ -62,10 +88,8 @@ const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
 };
 
 const fetchRowsFromMonarch = async (): Promise<Record<string, unknown[]>> => {
-	const primaryMonarchTabId = driverData.primaryMonarchTabId;
-	if (primaryMonarchTabId === null) {
-		throw new Error("No primary Monarch tab set");
-	}
+	// Ensure a Monarch tab exists and is ready
+	const primaryMonarchTabId = await ensureMonarchTab();
 
 	// Send request to content script on the Monarch tab with keep-alive monitoring
 	const response = await sendMessageWithKeepAlive<MonarchRowResponseMessage>(
