@@ -138,14 +138,10 @@ export const withLock = <
 			resolve = r;
 		});
 		locks.set(method, next);
-		console.log(`Acquiring lock for method: ${method.name}`);
 		await prev;
-		console.log(`Lock acquired for method: ${method.name}`);
 		try {
-			console.log(`Executing method: ${method.name} with args:`, args);
 			return await method(...args);
 		} finally {
-			console.log(`Releasing lock for method: ${method.name}`);
 			resolve?.();
 		}
 	};
