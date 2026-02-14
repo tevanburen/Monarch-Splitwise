@@ -123,12 +123,14 @@ chrome.runtime.onMessage.addListener(
 			}
 		} else if (message.type === "SPLITWISE_ROW_REQUEST_MESSAGE") {
 			// Wrap the API call with keep-alive messaging
-			withKeepAlive(() => apiClient.fetchSplitwiseRows()).then((rows) => {
-				sendResponse({
-					type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
-					payload: rows,
-				} satisfies SplitwiseRowResponseMessage);
-			});
+			withKeepAlive(() => apiClient.fetchSplitwiseRows(message.payload)).then(
+				(rows) => {
+					sendResponse({
+						type: "SPLITWISE_ROW_RESPONSE_MESSAGE",
+						payload: rows,
+					} satisfies SplitwiseRowResponseMessage);
+				},
+			);
 		}
 		// TODO: Handle additional message types for API calls and page automation
 		// else if (message.type === "API_CALL_REQUEST") {

@@ -6,28 +6,13 @@ import { sendMessageWithKeepAlive } from "./background.utils";
 import type { StateManager } from "./state-manager";
 
 export const driver = async (stateManager: StateManager) => {
-	// Request auth tokens from all tabs
-	chrome.tabs.query({}, (tabs) => {
-		for (const tab of tabs) {
-			if (tab.id) {
-				chrome.tabs
-					.sendMessage(tab.id, {
-						type: "PRINT_AUTH_TOKEN_MESSAGE",
-					})
-					.catch(() => {
-						// Ignore errors for tabs that don't have listeners
-					});
-			}
-		}
-	});
-
 	const rowsFromSplitwise = await fetchRowsFromSplitwise(stateManager);
 	console.log("Rows from Splitwise:", rowsFromSplitwise);
 };
 
 const fetchRowsFromSplitwise = async (
 	stateManager: StateManager,
-): Promise<string[]> => {
+): Promise<Record<string, unknown[]>> => {
 	const primarySplitwiseTabId =
 		stateManager.getDriverData().primarySplitwiseTabId;
 	if (primarySplitwiseTabId === null) {
@@ -39,6 +24,10 @@ const fetchRowsFromSplitwise = async (
 		primarySplitwiseTabId,
 		{
 			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
+			payload: stateManager
+				.getState()
+				.syncData.accounts.filter((account) => !account.inactive)
+				.map((account) => account.splitwiseId),
 		} satisfies SplitwiseRowRequestMessage,
 	);
 

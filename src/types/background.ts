@@ -61,11 +61,12 @@ export type ExitSettingsMessage = {
 
 export type SplitwiseRowRequestMessage = {
 	type: "SPLITWISE_ROW_REQUEST_MESSAGE";
+	payload: string[];
 };
 
 export type SplitwiseRowResponseMessage = {
 	type: "SPLITWISE_ROW_RESPONSE_MESSAGE";
-	payload: string[];
+	payload: Record<string, unknown[]>;
 };
 
 export type KeepAliveMessage = {

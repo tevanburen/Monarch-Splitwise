@@ -30,7 +30,7 @@ let authToken: string | null = null;
  * Interface for API client operations.
  */
 export interface ApiClient {
-	fetchSplitwiseRows(): Promise<string[]>;
+	fetchSplitwiseRows(accountIds: string[]): Promise<Record<string, unknown[]>>;
 }
 
 /**
@@ -70,11 +70,19 @@ export const printAuthToken = () => {
  * @returns ApiClient instance for making API requests
  */
 export const createApiClient = (): ApiClient => {
-	const fetchSplitwiseRows = async (): Promise<string[]> => {
+	const fetchSplitwiseRows = async (
+		accountIds: string[],
+	): Promise<Record<string, unknown[]>> => {
 		// TODO: Implement API call logic
 		// Wait 10 seconds for testing
 		await new Promise((resolve) => setTimeout(resolve, 10000));
-		return ["row1", "row2", "row3"];
+		return accountIds.reduce(
+			(acc, accountId) => {
+				acc[accountId] = ["row1", "row2", "row3"];
+				return acc;
+			},
+			{} as Record<string, unknown[]>,
+		);
 	};
 
 	return {
