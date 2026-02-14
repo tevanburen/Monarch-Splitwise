@@ -29,6 +29,20 @@ chrome.runtime.onMessage.addListener(
 		sender,
 		sendResponse,
 	) => {
+		// Set tab as primary based on type
+		if (sender.tab) {
+			const tabType = getTabType(sender.tab);
+			if (tabType === "splitwise") {
+				updateDriverData({
+					primarySplitwiseTabId: sender.tab.id || null,
+				});
+			} else if (tabType === "monarch") {
+				updateDriverData({
+					primaryMonarchTabId: sender.tab.id || null,
+				});
+			}
+		}
+
 		switch (message.type) {
 			case "GET_STATE_MESSAGE":
 				sendResponse(getState());
@@ -49,20 +63,6 @@ chrome.runtime.onMessage.addListener(
 
 				// Set state to running (automatically broadcasts)
 				updateState({ tempData: { status: "running" } });
-
-				// Set tab as primary based on type
-				if (sender.tab) {
-					const tabType = getTabType(sender.tab);
-					if (tabType === "splitwise") {
-						updateDriverData({
-							primarySplitwiseTabId: sender.tab.id || null,
-						});
-					} else if (tabType === "monarch") {
-						updateDriverData({
-							primaryMonarchTabId: sender.tab.id || null,
-						});
-					}
-				}
 
 				driver().finally(() => {
 					// Set state to idle (automatically broadcasts)
