@@ -6,7 +6,7 @@ export type SplitwiseRow = {
 	Category: string;
 	Cost: number;
 	Currency: string;
-	Date: Date;
+	Date: string;
 	Description: string;
 } & {
 	[memberName: string]: number;

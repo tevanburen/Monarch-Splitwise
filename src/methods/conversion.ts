@@ -34,19 +34,6 @@ export const tvbRowsToMonarchRows = (rows: TvbRow[]): MonarchRow[] => {
 const dateToString = (date: Date): string => date.toISOString().split("T")[0];
 
 /**
- * Comparison function for sorting transaction rows.
- * Compares by date first, then amount, then description.
- *
- * @param rowA - First row to compare
- * @param rowB - Second row to compare
- * @returns Negative if rowA < rowB, 0 if equal, positive if rowA > rowB
- */
-export const compareTvbRows = (rowA: TvbRow, rowB: TvbRow): number =>
-	rowA.date.getTime() - rowB.date.getTime() ||
-	rowA.delta - rowB.delta ||
-	rowA.description.localeCompare(rowB.description);
-
-/**
  * Converts transaction rows into a running balance history.
  * Sorts transactions chronologically and calculates cumulative balance.
  * Deduplicates consecutive rows with identical balances.

@@ -5,12 +5,15 @@ import type {
 	MonarchRowResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
+	TvbAccount,
+	TvbRow,
 } from "@/types";
 import {
 	createOrGetTab,
 	sendMessageWithKeepAlive,
 	withLock,
 } from "./background.utils";
+import { spliceElementsBS } from "./rows";
 import { getState, updateState } from "./state-manager";
 
 // Driver data
@@ -36,10 +39,82 @@ export const updateDriverData = (
 export const driver = withLock(async () => {
 	updateState({ tempData: { status: "running" } });
 	try {
-		const rowsFromSplitwise = await fetchRowsFromSplitwise();
-		console.log("Rows from Splitwise:", rowsFromSplitwise);
-		const rowsFromMonarch = await fetchRowsFromMonarch();
-		console.log("Rows from Monarch:", rowsFromMonarch);
+		const activeAccountMap = getState()
+			.syncData.accounts.filter((account) => !account.inactive)
+			.reduce(
+				(acc, account) => {
+					acc[account.monarchId] = {
+						...account,
+						error: false,
+						monarchRows: [],
+						splitwiseRows: [],
+					};
+					return acc;
+				},
+				{} as Record<
+					string,
+					TvbAccount & {
+						error: boolean;
+						monarchRows: TvbRow[];
+						splitwiseRows: TvbRow[];
+					}
+				>,
+			);
+
+		// Fetch rows from both Splitwise and Monarch in parallel
+		await Promise.all([
+			(async () => {
+				const splitwiseResult = await fetchRowsFromSplitwise(
+					Object.values(activeAccountMap).map((a) => a.splitwiseId),
+				);
+				Object.values(activeAccountMap).forEach((account) => {
+					if (splitwiseResult[account.splitwiseId]) {
+						account.error ||= Boolean(
+							splitwiseResult[account.splitwiseId].error,
+						);
+						account.splitwiseRows = splitwiseResult[account.splitwiseId].rows;
+					} else {
+						account.error = true;
+					}
+				});
+			})(),
+			(async () => {
+				const monarchResult = await fetchRowsFromMonarch(
+					Object.values(activeAccountMap).map((a) => a.monarchId),
+				);
+				Object.values(activeAccountMap).forEach((account) => {
+					if (monarchResult[account.monarchId]) {
+						account.error ||= Boolean(monarchResult[account.monarchId].error);
+						account.monarchRows = monarchResult[account.monarchId].rows;
+					} else {
+						account.error = true;
+					}
+				});
+			})(),
+		]);
+
+		Object.values(activeAccountMap).forEach((account) => {
+			if (account.error) return;
+			// Process accounts without errors
+
+			// trim rows to startDate
+			if (account.startDate) {
+				spliceElementsBS<TvbRow, Date>(
+					account.splitwiseRows,
+					(row) => row.date,
+					new Date(account.startDate),
+					(a, b) => a.getTime() - b.getTime(),
+				);
+				spliceElementsBS<TvbRow, Date>(
+					account.monarchRows,
+					(row) => row.date,
+					new Date(account.startDate),
+					(a, b) => a.getTime() - b.getTime(),
+				);
+			}
+		});
+
+		console.log(activeAccountMap);
 	} finally {
 		updateState({ tempData: { status: "idle" } });
 	}
@@ -69,9 +144,9 @@ const ensureMonarchTab = async (): Promise<number> => {
 	);
 };
 
-const fetchRowsFromSplitwise = async (): Promise<
-	Record<string, AccountFetchResult>
-> => {
+const fetchRowsFromSplitwise = async (
+	accountIds: string[],
+): Promise<Record<string, AccountFetchResult>> => {
 	// Ensure a Splitwise tab exists and is ready
 	const primarySplitwiseTabId = await ensureSplitwiseTab();
 
@@ -80,19 +155,24 @@ const fetchRowsFromSplitwise = async (): Promise<
 		primarySplitwiseTabId,
 		{
 			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
-			payload: getState()
-				.syncData.accounts.filter((account) => !account.inactive)
-				.map((account) => account.splitwiseId),
+			payload: accountIds,
 		} satisfies SplitwiseRowRequestMessage,
 	);
+
+	// Process the response payload to convert dates to Date objects
+	Object.values(response.payload).forEach((result) => {
+		result.rows.forEach((row) => {
+			row.date = new Date(row.date);
+		});
+	});
 
 	// Extract rows from response payload
 	return response.payload;
 };
 
-const fetchRowsFromMonarch = async (): Promise<
-	Record<string, AccountFetchResult>
-> => {
+const fetchRowsFromMonarch = async (
+	accountIds: string[],
+): Promise<Record<string, AccountFetchResult>> => {
 	// Ensure a Monarch tab exists and is ready
 	const primaryMonarchTabId = await ensureMonarchTab();
 
@@ -101,11 +181,16 @@ const fetchRowsFromMonarch = async (): Promise<
 		primaryMonarchTabId,
 		{
 			type: "MONARCH_ROW_REQUEST_MESSAGE",
-			payload: getState()
-				.syncData.accounts.filter((account) => !account.inactive)
-				.map((account) => account.monarchId),
+			payload: accountIds,
 		} satisfies MonarchRowRequestMessage,
 	);
+
+	// Process the response payload to convert dates to Date objects
+	Object.values(response.payload).forEach((result) => {
+		result.rows.forEach((row) => {
+			row.date = new Date(row.date);
+		});
+	});
 
 	// Extract rows from response payload
 	return response.payload;
