@@ -5,13 +5,8 @@ import type {
 	UpdateStateRequestMessage,
 } from "@/types";
 import { getTabType } from "./background.utils";
-import { driver } from "./driver";
-import {
-	exitSettings,
-	getState,
-	updateDriverData,
-	updateState,
-} from "./state-manager";
+import { driver, updateDriverData } from "./driver";
+import { exitSettings, getState, updateState } from "./state-manager";
 
 /**
  * Background service worker that maintains global state for the extension.

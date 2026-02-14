@@ -1,8 +1,4 @@
-import type {
-	BackgroundDriverData,
-	BackgroundState,
-	UpdateStateMessagePayload,
-} from "@/types";
+import type { BackgroundState, UpdateStateMessagePayload } from "@/types";
 import { broadcastStateUpdate } from "./background.utils";
 
 /**
@@ -24,12 +20,6 @@ const state: BackgroundState = {
 		status: "idle",
 		tempAccounts: [],
 	},
-};
-
-// Driver data
-const driverData: BackgroundDriverData = {
-	primarySplitwiseTabId: null,
-	primaryMonarchTabId: null,
 };
 
 /**
@@ -68,11 +58,6 @@ loadSyncData();
 export const getState = (): BackgroundState => state;
 
 /**
- * Get the current driver data (active tab IDs).
- */
-export const getDriverData = (): BackgroundDriverData => driverData;
-
-/**
  * Update state with partial changes and broadcast to all contexts.
  */
 export const updateState = (
@@ -98,20 +83,6 @@ export const updateState = (
 
 	// Broadcast state update to all extension contexts
 	broadcastStateUpdate(partialNewState);
-};
-
-/**
- * Update driver data with partial changes.
- */
-export const updateDriverData = (
-	partialNewData: Partial<BackgroundDriverData>,
-): void => {
-	if (partialNewData.primarySplitwiseTabId !== undefined) {
-		driverData.primarySplitwiseTabId = partialNewData.primarySplitwiseTabId;
-	}
-	if (partialNewData.primaryMonarchTabId !== undefined) {
-		driverData.primaryMonarchTabId = partialNewData.primaryMonarchTabId;
-	}
 };
 
 /**
