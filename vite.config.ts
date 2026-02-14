@@ -15,9 +15,9 @@ export default {
 		emptyOutDir: true,
 		rollupOptions: {
 			input: {
-				content: "./src/scripts/content/index.ts",
+				content: "./src/scripts/content/content.main.ts",
 				"fetch-interceptor": "./src/scripts/page/fetch-interceptor.ts",
-				background: "./src/scripts/background/index.ts",
+				background: "./src/scripts/background/background.main.ts",
 				ui: "./src/ui.html",
 			},
 			output: {
