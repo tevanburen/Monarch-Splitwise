@@ -15,7 +15,7 @@ import { getMonarchToken } from "../auth";
  * @throws Error if auth token is not available or request fails
  */
 export const fetchMonarchCsv = async (monarchId: string): Promise<string> => {
-	const authToken = getMonarchToken();
+	const authToken = await getMonarchToken();
 
 	if (!authToken) {
 		throw new Error(

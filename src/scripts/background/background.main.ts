@@ -5,13 +5,8 @@ import type {
 	UpdateStateRequestMessage,
 } from "@/types";
 import { getTabType } from "./background.utils";
-import { driver } from "./driver";
-import {
-	exitSettings,
-	getState,
-	updateDriverData,
-	updateState,
-} from "./state-manager";
+import { driver, updateDriverData } from "./driver";
+import { exitSettings, getState, updateState } from "./state-manager";
 
 /**
  * Background service worker that maintains global state for the extension.
@@ -29,6 +24,20 @@ chrome.runtime.onMessage.addListener(
 		sender,
 		sendResponse,
 	) => {
+		// Set tab as primary based on type
+		if (sender.tab) {
+			const tabType = getTabType(sender.tab);
+			if (tabType === "splitwise") {
+				updateDriverData({
+					primarySplitwiseTabId: sender.tab.id || null,
+				});
+			} else if (tabType === "monarch") {
+				updateDriverData({
+					primaryMonarchTabId: sender.tab.id || null,
+				});
+			}
+		}
+
 		switch (message.type) {
 			case "GET_STATE_MESSAGE":
 				sendResponse(getState());
@@ -47,27 +56,7 @@ chrome.runtime.onMessage.addListener(
 			case "RUN_DRIVER_MESSAGE":
 				// The main driver method
 
-				// Set state to running (automatically broadcasts)
-				updateState({ tempData: { status: "running" } });
-
-				// Set tab as primary based on type
-				if (sender.tab) {
-					const tabType = getTabType(sender.tab);
-					if (tabType === "splitwise") {
-						updateDriverData({
-							primarySplitwiseTabId: sender.tab.id || null,
-						});
-					} else if (tabType === "monarch") {
-						updateDriverData({
-							primaryMonarchTabId: sender.tab.id || null,
-						});
-					}
-				}
-
-				driver().finally(() => {
-					// Set state to idle (automatically broadcasts)
-					updateState({ tempData: { status: "idle" } });
-				});
+				driver();
 
 				break;
 

@@ -14,7 +14,7 @@
 			"world": "MAIN"
 		},
 		{
-			"js": ["dist/inject-ui.js"],
+			"js": ["dist/content.js"],
 			"matches": ["*://app.monarch.com/*", "*://secure.splitwise.com/*"]
 		}
 	],

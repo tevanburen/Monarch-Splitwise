@@ -1,24 +1,79 @@
 import type {
+	AccountFetchResult,
+	BackgroundDriverData,
 	MonarchRowRequestMessage,
 	MonarchRowResponseMessage,
 	SplitwiseRowRequestMessage,
 	SplitwiseRowResponseMessage,
 } from "@/types";
-import { sendMessageWithKeepAlive } from "./background.utils";
-import { getDriverData, getState } from "./state-manager";
+import {
+	createOrGetTab,
+	sendMessageWithKeepAlive,
+	withLock,
+} from "./background.utils";
+import { getState, updateState } from "./state-manager";
 
-export const driver = async () => {
-	const rowsFromSplitwise = await fetchRowsFromSplitwise();
-	console.log("Rows from Splitwise:", rowsFromSplitwise);
-	const rowsFromMonarch = await fetchRowsFromMonarch();
-	console.log("Rows from Monarch:", rowsFromMonarch);
+// Driver data
+const driverData: BackgroundDriverData = {
+	primarySplitwiseTabId: null,
+	primaryMonarchTabId: null,
 };
 
-const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
-	const primarySplitwiseTabId = getDriverData().primarySplitwiseTabId;
-	if (primarySplitwiseTabId === null) {
-		throw new Error("No primary Splitwise tab set");
+/**
+ * Update driver data with partial changes.
+ */
+export const updateDriverData = (
+	partialNewData: Partial<BackgroundDriverData>,
+): void => {
+	if (partialNewData.primarySplitwiseTabId !== undefined) {
+		driverData.primarySplitwiseTabId = partialNewData.primarySplitwiseTabId;
 	}
+	if (partialNewData.primaryMonarchTabId !== undefined) {
+		driverData.primaryMonarchTabId = partialNewData.primaryMonarchTabId;
+	}
+};
+
+export const driver = withLock(async () => {
+	updateState({ tempData: { status: "running" } });
+	try {
+		const rowsFromSplitwise = await fetchRowsFromSplitwise();
+		console.log("Rows from Splitwise:", rowsFromSplitwise);
+		const rowsFromMonarch = await fetchRowsFromMonarch();
+		console.log("Rows from Monarch:", rowsFromMonarch);
+	} finally {
+		updateState({ tempData: { status: "idle" } });
+	}
+});
+
+/**
+ * Ensures a Splitwise tab exists and is ready for communication.
+ * If no tab exists or the existing tab is invalid, creates a new one.
+ * Note: The tab ID is automatically set by the message handler when the tab sends GET_STATE_MESSAGE.
+ */
+const ensureSplitwiseTab = async (): Promise<number> => {
+	return await createOrGetTab(
+		driverData.primarySplitwiseTabId,
+		"https://secure.splitwise.com",
+	);
+};
+
+/**
+ * Ensures a Monarch tab exists and is ready for communication.
+ * If no tab exists or the existing tab is invalid, creates a new one.
+ * Note: The tab ID is automatically set by the message handler when the tab sends GET_STATE_MESSAGE.
+ */
+const ensureMonarchTab = async (): Promise<number> => {
+	return await createOrGetTab(
+		driverData.primaryMonarchTabId,
+		"https://app.monarch.com",
+	);
+};
+
+const fetchRowsFromSplitwise = async (): Promise<
+	Record<string, AccountFetchResult>
+> => {
+	// Ensure a Splitwise tab exists and is ready
+	const primarySplitwiseTabId = await ensureSplitwiseTab();
 
 	// Send request to content script on the Splitwise tab with keep-alive monitoring
 	const response = await sendMessageWithKeepAlive<SplitwiseRowResponseMessage>(
@@ -35,11 +90,11 @@ const fetchRowsFromSplitwise = async (): Promise<Record<string, unknown[]>> => {
 	return response.payload;
 };
 
-const fetchRowsFromMonarch = async (): Promise<Record<string, unknown[]>> => {
-	const primaryMonarchTabId = getDriverData().primaryMonarchTabId;
-	if (primaryMonarchTabId === null) {
-		throw new Error("No primary Monarch tab set");
-	}
+const fetchRowsFromMonarch = async (): Promise<
+	Record<string, AccountFetchResult>
+> => {
+	// Ensure a Monarch tab exists and is ready
+	const primaryMonarchTabId = await ensureMonarchTab();
 
 	// Send request to content script on the Monarch tab with keep-alive monitoring
 	const response = await sendMessageWithKeepAlive<MonarchRowResponseMessage>(

@@ -23,6 +23,17 @@ export interface TvbRow {
 }
 
 /**
+ * Result of fetching transaction data for a single account.
+ * Includes both the data and optional error information.
+ */
+export type AccountFetchResult = {
+	/** Transaction rows for this account */
+	rows: TvbRow[];
+	/** Error message if fetch failed, undefined if successful */
+	error?: string;
+};
+
+/**
  * Represents a row in Monarch's transaction CSV format.
  * Contains fixed values for certain fields specific to Splitwise imports.
  */
