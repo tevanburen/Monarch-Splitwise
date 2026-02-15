@@ -5,7 +5,7 @@ import {
 	Settings,
 	XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/scripts/ui/components/shadcn/button";
 import { Card } from "@/scripts/ui/components/shadcn/card";
 import { useRuntimeStateContext } from "@/scripts/ui/providers";
@@ -46,7 +46,10 @@ export const Widget = () => {
 		}
 	};
 
-	console.log(activeAccounts);
+	// Automatically expand the widget if it's running or if there's an error
+	useEffect(() => {
+		setIsExpanded(isRunning || someError);
+	}, [isRunning, someError]);
 
 	return (
 		<Card className="p-2 gap-2">
@@ -111,7 +114,7 @@ export const Widget = () => {
 					onClick={runDriver}
 				>
 					<RefreshCw className={isRunning ? "animate-spin" : ""} />
-					Sync
+					{`${isRunning ? "Syncing..." : `${allSuccessful || someError ? "Re-Sync" : "Sync"}`}`}
 				</Button>
 			</div>
 		</Card>
