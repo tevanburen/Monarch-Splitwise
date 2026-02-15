@@ -26,13 +26,13 @@ import type {
 	SplitwiseRowResponseMessage,
 	UpdateStateBroadcastMessage,
 } from "@/types";
-import { withKeepAlive } from "./content.utils";
 import {
 	fetchMonarchRows,
 	fetchSplitwiseRows,
 	uploadMonarchRows,
-} from "./data";
+} from "./data-service";
 import { setFullscreen, updatePosition } from "./iframe-manager";
+import { withKeepAlive } from "./keep-alive";
 
 // ============================================================================
 // Initialize state from background

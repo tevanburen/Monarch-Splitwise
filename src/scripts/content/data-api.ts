@@ -1,14 +1,85 @@
 /**
- * Data transformation utilities for converting between CSV formats.
+ * Data API utilities.
  *
- * Handles parsing CSV text and transforming between different row formats:
- * - Splitwise CSV → TvbRow (internal format)
- * - Monarch CSV → TvbRow (internal format)
- * - TvbRow → Monarch CSV (for uploading)
+ * Low-level helpers for fetching, parsing, transforming, and exporting transaction data.
+ * These functions are used by data-service.ts to orchestrate data operations.
  */
 
 import { read as XLSXread, utils as XLSXutils } from "xlsx";
 import type { MonarchRow, SplitwiseRow, TvbRow } from "@/types";
+import { getMonarchToken } from "./auth";
+
+// ============================================================================
+// API Fetching
+// ============================================================================
+
+/**
+ * Fetches transaction CSV data from Monarch Money API.
+ *
+ * @param monarchId - The Monarch account ID to fetch transactions for
+ * @returns Promise resolving to CSV text content
+ * @throws Error if auth token is not available or request fails
+ */
+export const fetchMonarchCsv = async (monarchId: string): Promise<string> => {
+	const authToken = await getMonarchToken();
+
+	if (!authToken) {
+		throw new Error(
+			"Monarch auth token not available. Please log in to Monarch first.",
+		);
+	}
+
+	const response = await fetch(
+		"https://api.monarch.com/download-transactions/",
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: authToken,
+			},
+			body: JSON.stringify({ accounts: [monarchId] }),
+			referrerPolicy: "no-referrer",
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error(
+			`Failed to fetch Monarch data: ${response.status} ${response.statusText}`,
+		);
+	}
+
+	return await response.text();
+};
+
+/**
+ * Fetches transaction CSV data from Splitwise API.
+ * Uses cookie-based authentication (automatically included by browser).
+ *
+ * @param accountId - The Splitwise group ID to fetch transactions for
+ * @returns Promise resolving to CSV text content
+ * @throws Error if request fails
+ */
+export const fetchSplitwiseCsv = async (accountId: string): Promise<string> => {
+	const response = await fetch(
+		`https://secure.splitwise.com/api/v3.0/export_group/${accountId}.csv`,
+		{
+			method: "GET",
+			credentials: "include", // Include cookies for Splitwise authentication
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error(
+			`Failed to fetch Splitwise data for account ${accountId}: ${response.status} ${response.statusText}`,
+		);
+	}
+
+	return await response.text();
+};
+
+// ============================================================================
+// CSV Parsing & Ingestion
+// ============================================================================
 
 /**
  * Parses CSV text into an array of typed objects.
@@ -102,6 +173,10 @@ export const ingestMonarchCsvText = (csvText: string): TvbRow[] => {
 
 	return tvbArr;
 };
+
+// ============================================================================
+// Data Export & File Creation
+// ============================================================================
 
 /**
  * Converts internal transaction rows to Monarch CSV format for uploading.

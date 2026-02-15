@@ -1,9 +1,9 @@
 /**
  * Data service orchestrator.
  *
- * Provides high-level API for fetching and transforming transaction data.
- * Coordinates between fetcher and transformer modules to deliver
- * processed transaction data in the internal TvbRow format.
+ * High-level API for fetching, transforming, and uploading transaction data.
+ * This module coordinates between different data operations to provide a
+ * clean interface for the content script main orchestrator.
  */
 
 import type {
@@ -12,19 +12,20 @@ import type {
 	MonarchRow,
 	TvbRow,
 } from "@/types";
-import { getSplitwiseUserName } from "../auth";
+import { getSplitwiseUserName } from "./auth";
 import {
-	clickElement,
-	navigateToAccountPage,
-	uploadFilesToInput,
-} from "../interaction";
-import { fetchMonarchCsv, fetchSplitwiseCsv } from "./fetcher";
-import {
+	fetchMonarchCsv,
+	fetchSplitwiseCsv,
 	ingestMonarchCsvText,
 	ingestSplitwiseCsvText,
 	rowsToCsvFile,
 	tvbRowsToMonarchRows,
-} from "./transformers";
+} from "./data-api";
+import {
+	clickElement,
+	navigateToAccountPage,
+	uploadFilesToInput,
+} from "./interaction";
 
 /**
  * Fetches and transforms Splitwise transaction data for multiple accounts.
@@ -156,6 +157,7 @@ export const uploadMonarchRows = async (
  * Converts transaction rows to Monarch format and uploads them via the UI.
  * Follows the Monarch import flow: Edit → Import → Upload → Steps → Import.
  *
+ * @param accountId - The Monarch account ID being uploaded to
  * @param rows - Array of transaction rows to upload
  * @returns True if upload was successful, false otherwise
  */
