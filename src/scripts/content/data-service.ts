@@ -123,23 +123,9 @@ export const uploadMonarchRows = async (
 				}
 			});
 
-			// Navigate to the account page
-			const navigated = await navigateToAccountPage(accountId);
-			if (!navigated) {
-				results[accountId] = {
-					error: `Failed to navigate to account page for ${accountId}`,
-				};
-				continue;
-			}
-
-			// Upload the rows
-			const uploaded = await uploadRowsForAccount(accountId, rows);
-			if (!uploaded) {
-				results[accountId] = {
-					error: `Failed to upload transactions for account ${accountId}`,
-				};
-				continue;
-			}
+			// Navigate to the account page and upload
+			await navigateToAccountPage(accountId);
+			await uploadRowsForAccount(accountId, rows);
 
 			// Success
 			results[accountId] = {};
@@ -159,12 +145,12 @@ export const uploadMonarchRows = async (
  *
  * @param accountId - The Monarch account ID being uploaded to
  * @param rows - Array of transaction rows to upload
- * @returns True if upload was successful, false otherwise
+ * @throws Error if any step in the upload flow fails
  */
 const uploadRowsForAccount = async (
 	accountId: string,
 	rows: TvbRow[],
-): Promise<boolean> => {
+): Promise<void> => {
 	// Transform tvb to monarch
 	const monarchRows = tvbRowsToMonarchRows(rows);
 
@@ -181,33 +167,30 @@ const uploadRowsForAccount = async (
 	] satisfies (keyof MonarchRow)[]);
 
 	// Navigate through the Monarch import flow (as of January 2026)
-	return Boolean(
-		// Start import flow
-		(await clickElement("button", /^Edit[\s\W]*$/)) &&
-			(await clickElement("div", /^Import transactions$/)) &&
-			// Upload the file
-			(await uploadFilesToInput(newFile)) &&
-			// Go through import steps
-			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Column mapping
-			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Tags
-			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Categories
-			(await clickElement<HTMLButtonElement>("button", /^Next$/)) && // Priorities
-			// Configure import options
-			(await clickElement<HTMLButtonElement>(
-				"span",
-				/^Prioritize Monarch transactions$/,
-			)) &&
-			(await clickElement<HTMLButtonElement>(
-				"input",
-				/^shouldUpdateBalance$/,
-			)) &&
-			// Complete import
-			(await clickElement<HTMLButtonElement>(
-				"button",
-				/^Import \d+ transactions$/,
-			)) &&
-			// Navigate back to accounts overview
-			(await clickElement("button", /^View cash flow report$/)) &&
-			(await navigateToAccountPage(accountId)),
+	// Start import flow
+	await clickElement("button", /^Edit[\s\W]*$/);
+	await clickElement("div", /^Import transactions$/);
+
+	// Upload the file
+	await uploadFilesToInput(newFile);
+
+	// Go through import steps
+	await clickElement<HTMLButtonElement>("button", /^Next$/); // Column mapping
+	await clickElement<HTMLButtonElement>("button", /^Next$/); // Tags
+	await clickElement<HTMLButtonElement>("button", /^Next$/); // Categories
+	await clickElement<HTMLButtonElement>("button", /^Next$/); // Priorities
+
+	// Configure import options
+	await clickElement<HTMLButtonElement>(
+		"span",
+		/^Prioritize Monarch transactions$/,
 	);
+	await clickElement<HTMLButtonElement>("input", /^shouldUpdateBalance$/);
+
+	// Complete import
+	await clickElement<HTMLButtonElement>("button", /^Import \d+ transactions$/);
+
+	// Navigate back to accounts overview
+	await clickElement("button", /^View cash flow report$/);
+	await navigateToAccountPage(accountId);
 };
