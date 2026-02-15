@@ -52,70 +52,85 @@ export const Widget = () => {
 	}, [isRunning, someError]);
 
 	return (
-		<Card className="p-2 gap-2">
-			<div className="text-xl leading-none whitespace-nowrap">
+		<Card className="p-2 gap-2 max-w-48">
+			<div className="text-xl leading-none whitespace-nowrap text-center">
 				<span className="text-primary">Monarch</span>
 				{" - "}
 				<span className="text-secondary">Splitwise</span>
 			</div>
-			{(isExpanded ||
-				activeAccounts.length <= numRowsToShowWithoutExpanding) && (
-				<div className="flex flex-col gap-1">
-					{activeAccounts.map((account) => (
-						<div
-							key={account.monarchId}
-							className="flex items-center gap-1.5 text-sm leading-none"
-						>
-							{getIcon(account.accountStatus)}
-							<span className="flex-1">{account.accountName}</span>
+			{activeAccounts.length > 0 && (
+				<>
+					{(isExpanded ||
+						activeAccounts.length <= numRowsToShowWithoutExpanding) && (
+						<div className="flex flex-col gap-1">
+							{activeAccounts.map((account) => (
+								<div
+									key={account.monarchId}
+									className="flex items-center gap-1.5 text-sm leading-none"
+								>
+									{getIcon(account.accountStatus)}
+									<span className="flex-1">{account.accountName}</span>
+								</div>
+							))}
 						</div>
-					))}
-				</div>
-			)}
-			{activeAccounts.length > numRowsToShowWithoutExpanding && (
-				<button
-					type="button"
-					className="flex items-center gap-1.5 text-sm leading-none w-full text-left"
-					onClick={() => setIsExpanded(!isExpanded)}
-				>
-					<ChevronUp
-						className={`w-4 h-4 transition-transform ${
-							isExpanded ? "" : "rotate-90"
-						}`}
-					/>
-					<span className="flex-1 whitespace-nowrap">
-						{isExpanded
-							? "Collapse accounts"
-							: allSuccessful
-								? "All accounts synced"
-								: someError
-									? "Error during sync"
-									: "Expand accounts"}
-					</span>
-					{(allSuccessful || someError) &&
-						!isExpanded &&
-						getIcon(allSuccessful ? "success" : "error")}
-				</button>
+					)}
+					{activeAccounts.length > numRowsToShowWithoutExpanding && (
+						<button
+							type="button"
+							className="flex items-center gap-1.5 text-sm leading-none w-full text-left"
+							onClick={() => setIsExpanded(!isExpanded)}
+						>
+							<ChevronUp
+								className={`w-4 h-4 transition-transform ${
+									isExpanded ? "" : "rotate-90"
+								}`}
+							/>
+							<span className="flex-1 whitespace-nowrap">
+								{isExpanded
+									? "Collapse accounts"
+									: allSuccessful
+										? "All accounts synced"
+										: someError
+											? "Error during sync"
+											: "Expand accounts"}
+							</span>
+							{(allSuccessful || someError) &&
+								!isExpanded &&
+								getIcon(allSuccessful ? "success" : "error")}
+						</button>
+					)}
+				</>
 			)}
 			<div className="flex gap-2 mt-0.5">
-				<Button
-					size="icon"
-					variant="outline"
-					className="text-secondary"
-					onClick={() =>
-						updateSingleTempState("status", isEditing ? "idle" : "editing")
-					}
-				>
-					<Settings className={isEditing ? "animate-spin" : ""} />
-				</Button>
-				<Button
-					variant="outline"
-					className="gap-2 flex-1 text-primary"
-					onClick={runDriver}
-				>
-					<RefreshCw className={isRunning ? "animate-spin" : ""} />
-					{`${isRunning ? "Syncing..." : `${allSuccessful || someError ? "Re-Sync" : "Sync"}`}`}
-				</Button>
+				{activeAccounts.length > 0 ? (
+					<>
+						<Button
+							size="icon"
+							variant="outline"
+							className="text-secondary"
+							onClick={() => updateSingleTempState("status", "editing")}
+						>
+							<Settings className={isEditing ? "animate-spin" : ""} />
+						</Button>
+						<Button
+							variant="outline"
+							className="gap-2 flex-1 text-primary"
+							onClick={runDriver}
+						>
+							<RefreshCw className={isRunning ? "animate-spin" : ""} />
+							{`${isRunning ? "Syncing..." : `${allSuccessful || someError ? "Re-Sync" : "Sync"}`}`}
+						</Button>
+					</>
+				) : (
+					<Button
+						variant="outline"
+						className="gap-2 flex-1"
+						onClick={() => updateSingleTempState("status", "editing")}
+					>
+						<Settings className={isEditing ? "animate-spin" : ""} />
+						Add accounts
+					</Button>
+				)}
 			</div>
 		</Card>
 	);
