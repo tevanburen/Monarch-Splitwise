@@ -1,4 +1,8 @@
-import type { BackgroundState, UpdateStateMessagePayload } from "@/types";
+import type {
+	AccountStatus,
+	BackgroundState,
+	UpdateStateMessagePayload,
+} from "@/types";
 import { broadcastStateUpdate } from "./background.utils";
 
 /**
@@ -19,6 +23,7 @@ const state: BackgroundState = {
 		tempLocation: "right",
 		status: "idle",
 		tempAccounts: [],
+		accountStatusMap: {},
 	},
 };
 
@@ -110,4 +115,24 @@ export const exitSettings = (save: boolean = false): void => {
 					},
 				},
 	);
+};
+
+/**
+ * Update the status of a specific account in the account status map.
+ */
+export const updateAccountStatus = (
+	...newRows: { monarchId: string; status: AccountStatus }[]
+): void => {
+	if (newRows.length === 0) return;
+	console.log(`Updating account status: ${JSON.stringify(newRows)}`);
+	updateState({
+		tempData: {
+			accountStatusMap: {
+				...state.tempData.accountStatusMap,
+				...Object.fromEntries(
+					newRows.map(({ monarchId, status }) => [monarchId, status]),
+				),
+			},
+		},
+	});
 };
