@@ -21,27 +21,28 @@ export const Widget = () => {
 	const isEditing = status === "editing";
 	const isRunning = status === "running";
 
-	const anyErrors = activeAccounts.some(
+	const someError = activeAccounts.some(
 		(account) => account.accountStatus === "error",
 	);
-	const hasStarted =
-		isRunning ||
-		anyErrors ||
-		activeAccounts.some((account) => account.accountStatus === "success");
+	const allSuccessful =
+		!isRunning &&
+		activeAccounts.length > 0 &&
+		!someError &&
+		activeAccounts.every((account) => account.accountStatus === "success");
 
 	const getIcon = (accountStatus: AccountStatus) => {
-		if (!hasStarted) {
+		if (accountStatus === "success") {
+			return <CheckCircle2 className="w-4 h-4 text-secondary" />;
+		} else if (accountStatus === "error") {
+			return <XCircle className="w-4 h-4 text-primary" />;
+		} else if (isRunning) {
+			return <RefreshCw className="w-4 h-4 animate-spin" />;
+		} else {
 			return (
 				<div className="w-4 h-4 flex items-center justify-center">
 					<div className="w-1.5 h-1.5 rounded-full bg-foreground" />
 				</div>
 			);
-		} else if (accountStatus === "error") {
-			return <XCircle className="w-4 h-4 text-primary" />;
-		} else if (accountStatus === "success") {
-			return <CheckCircle2 className="w-4 h-4 text-secondary" />;
-		} else {
-			return <div>TODO</div>;
 		}
 	};
 
@@ -82,15 +83,15 @@ export const Widget = () => {
 					<span className="flex-1 whitespace-nowrap">
 						{isExpanded
 							? "Collapse accounts"
-							: hasStarted && !isRunning && !anyErrors
+							: allSuccessful
 								? "All accounts synced"
-								: "Expand accounts"}
+								: someError
+									? "Error during sync"
+									: "Expand accounts"}
 					</span>
-					{hasStarted &&
-						!isRunning &&
-						!anyErrors &&
+					{(allSuccessful || someError) &&
 						!isExpanded &&
-						getIcon("success")}
+						getIcon(allSuccessful ? "success" : "error")}
 				</button>
 			)}
 			<div className="flex gap-2 mt-0.5">
