@@ -130,7 +130,7 @@ export const driver = withLock(async () => {
 		// Upload new rows to Monarch
 		await uploadRowsToMonarch(
 			Object.values(activeAccountMap)
-				.filter((account) => !account.error)
+				.filter((account) => !account.error && account.newRows.length)
 				.reduce(
 					(acc, account) => {
 						acc[account.monarchId] = account.newRows;
