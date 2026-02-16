@@ -1,0 +1,342 @@
+/**
+ * Main driver/orchestrator for the sync process.
+ *
+ * This module coordinates the entire transaction sync workflow:
+ * 1. Ensures required tabs (Monarch, Splitwise) are open
+ * 2. Fetches transactions from both platforms in parallel
+ * 3. Compares and filters to find new transactions
+ * 4. Uploads new transactions to Monarch via UI automation
+ *
+ * The driver maintains tab references and handles error recovery for
+ * individual accounts while allowing successful accounts to complete.
+ */
+
+import type {
+	AccountFetchResult,
+	AccountStatus,
+	BackgroundDriverData,
+	MonarchRowRequestMessage,
+	MonarchRowResponseMessage,
+	MonarchRowUploadRequestMessage,
+	MonarchRowUploadResponseMessage,
+	SplitwiseRowRequestMessage,
+	SplitwiseRowResponseMessage,
+	TvbAccount,
+	TvbRow,
+} from "@/types";
+import {
+	createOrGetTab,
+	sendMessageWithKeepAlive,
+	withLock,
+} from "./background.utils";
+import { removeSimilarRows, spliceElementsBS } from "./rows";
+import { getState, updateAccountStatus, updateState } from "./state-manager";
+
+// Driver data
+const driverData: BackgroundDriverData = {
+	primarySplitwiseTabId: null,
+	primaryMonarchTabId: null,
+};
+
+/**
+ * Update driver data with partial changes.
+ *
+ * @param partialNewData - Partial driver data to merge
+ */
+export const updateDriverData = (
+	partialNewData: Partial<BackgroundDriverData>,
+): void => {
+	if (partialNewData.primarySplitwiseTabId !== undefined) {
+		driverData.primarySplitwiseTabId = partialNewData.primarySplitwiseTabId;
+	}
+	if (partialNewData.primaryMonarchTabId !== undefined) {
+		driverData.primaryMonarchTabId = partialNewData.primaryMonarchTabId;
+	}
+};
+
+/**
+ * Main sync driver function.
+ *
+ * Orchestrates the complete sync workflow:
+ * 1. Fetches transaction data from both Splitwise and Monarch
+ * 2. Filters transactions by start date if configured
+ * 3. Removes matching transactions (duplicates)
+ * 4. Uploads remaining new transactions to Monarch
+ *
+ * Uses withLock to prevent concurrent sync operations.
+ */
+export const driver = withLock(async () => {
+	updateState({ tempData: { status: "running", accountStatusMap: {} } });
+	try {
+		const activeAccountMap = getState()
+			.syncData.accounts.filter((account) => !account.inactive)
+			.reduce(
+				(acc, account) => {
+					acc[account.monarchId] = {
+						...account,
+						error: false,
+						oldRows: [],
+						newRows: [],
+					};
+					return acc;
+				},
+				{} as Record<
+					string,
+					TvbAccount & {
+						error: boolean;
+						oldRows: TvbRow[];
+						newRows: TvbRow[];
+					}
+				>,
+			);
+
+		// Update account status map
+		updateState({
+			tempData: {
+				accountStatusMap: Object.values(activeAccountMap).reduce(
+					(acc, account) => {
+						acc[account.monarchId] = "running";
+						return acc;
+					},
+					{} as Record<string, AccountStatus>,
+				),
+			},
+		});
+
+		// Fetch rows from both Splitwise and Monarch in parallel
+		await Promise.all([
+			(async () => {
+				const splitwiseResult = await fetchRowsFromSplitwise(
+					Object.values(activeAccountMap).map((a) => a.splitwiseId),
+				);
+				Object.values(activeAccountMap).forEach((account) => {
+					if (splitwiseResult[account.splitwiseId]) {
+						account.error ||= Boolean(
+							splitwiseResult[account.splitwiseId].error,
+						);
+						account.newRows = splitwiseResult[account.splitwiseId].rows;
+					} else {
+						account.error = true;
+					}
+				});
+			})(),
+			(async () => {
+				const monarchResult = await fetchRowsFromMonarch(
+					Object.values(activeAccountMap).map((a) => a.monarchId),
+				);
+				Object.values(activeAccountMap).forEach((account) => {
+					if (monarchResult[account.monarchId]) {
+						account.error ||= Boolean(monarchResult[account.monarchId].error);
+						account.oldRows = monarchResult[account.monarchId].rows;
+					} else {
+						account.error = true;
+					}
+				});
+			})(),
+		]);
+
+		// Update account status map - mark errors
+		updateAccountStatus(
+			...Object.values(activeAccountMap)
+				.filter((account) => account.error)
+				.map((account) => ({
+					monarchId: account.monarchId,
+					status: "error" as const,
+				})),
+		);
+
+		Object.values(activeAccountMap).forEach((account) => {
+			if (account.error) return;
+			// Process accounts without errors
+
+			// trim rows to startDate
+			if (account.startDate) {
+				spliceElementsBS<TvbRow, Date>(
+					account.newRows,
+					(row) => row.date,
+					new Date(account.startDate),
+					(a, b) => a.getTime() - b.getTime(),
+				);
+				spliceElementsBS<TvbRow, Date>(
+					account.oldRows,
+					(row) => row.date,
+					new Date(account.startDate),
+					(a, b) => a.getTime() - b.getTime(),
+				);
+			}
+
+			// Remove similar rows between Splitwise and Monarch
+			removeSimilarRows(account.newRows, account.oldRows);
+
+			// warn of floating old charges
+			if (account.oldRows.length) {
+				console.warn("The following rows are unmatched:", account.oldRows);
+			}
+		});
+
+		// Log the active account map for debugging
+		console.log(activeAccountMap);
+
+		// Update account status map - mark successes
+		updateAccountStatus(
+			...Object.values(activeAccountMap)
+				.filter((account) => !account.error && account.newRows.length === 0)
+				.map((account) => ({
+					monarchId: account.monarchId,
+					status: "success" as const,
+				})),
+		);
+
+		// Upload new rows to Monarch
+		await uploadRowsToMonarch(
+			Object.values(activeAccountMap)
+				.filter((account) => !account.error && account.newRows.length)
+				.reduce(
+					(acc, account) => {
+						acc[account.monarchId] = account.newRows;
+						return acc;
+					},
+					{} as Record<string, TvbRow[]>,
+				),
+		);
+	} finally {
+		updateState({ tempData: { status: "idle" } });
+	}
+});
+
+/**
+ * Ensures a Splitwise tab exists and is ready for communication.
+ * If no tab exists or the existing tab is invalid, creates a new one.
+ * Note: The tab ID is automatically set by the message handler when the tab sends GET_STATE_MESSAGE.
+ */
+const ensureSplitwiseTab = async (): Promise<number> => {
+	return await createOrGetTab(
+		driverData.primarySplitwiseTabId,
+		"https://secure.splitwise.com",
+	);
+};
+
+/**
+ * Ensures a Monarch tab exists and is ready for communication.
+ * If no tab exists or the existing tab is invalid, creates a new one.
+ * Note: The tab ID is automatically set by the message handler when the tab sends GET_STATE_MESSAGE.
+ */
+const ensureMonarchTab = async (): Promise<number> => {
+	return await createOrGetTab(
+		driverData.primaryMonarchTabId,
+		"https://app.monarch.com",
+	);
+};
+
+/**
+ * Fetches transaction rows from Splitwise for specified accounts.
+ *
+ * @param accountIds - Array of Splitwise group IDs
+ * @returns Map of account ID to fetch result with rows and optional error
+ */
+const fetchRowsFromSplitwise = async (
+	accountIds: string[],
+): Promise<Record<string, AccountFetchResult>> => {
+	// Ensure a Splitwise tab exists and is ready
+	const primarySplitwiseTabId = await ensureSplitwiseTab();
+
+	// Send request to content script on the Splitwise tab with keep-alive monitoring
+	const response = await sendMessageWithKeepAlive<SplitwiseRowResponseMessage>(
+		primarySplitwiseTabId,
+		{
+			type: "SPLITWISE_ROW_REQUEST_MESSAGE",
+			payload: accountIds,
+		} satisfies SplitwiseRowRequestMessage,
+	);
+
+	// Process the response payload to convert dates to Date objects
+	Object.values(response.payload).forEach((result) => {
+		result.rows.forEach((row) => {
+			row.date = new Date(row.date);
+		});
+	});
+
+	// Extract rows from response payload
+	return response.payload;
+};
+
+/**
+ * Fetches transaction rows from Monarch for specified accounts.
+ *
+ * @param accountIds - Array of Monarch account IDs
+ * @returns Map of account ID to fetch result with rows and optional error
+ */
+const fetchRowsFromMonarch = async (
+	accountIds: string[],
+): Promise<Record<string, AccountFetchResult>> => {
+	// Ensure a Monarch tab exists and is ready
+	const primaryMonarchTabId = await ensureMonarchTab();
+
+	// Send request to content script on the Monarch tab with keep-alive monitoring
+	const response = await sendMessageWithKeepAlive<MonarchRowResponseMessage>(
+		primaryMonarchTabId,
+		{
+			type: "MONARCH_ROW_REQUEST_MESSAGE",
+			payload: accountIds,
+		} satisfies MonarchRowRequestMessage,
+	);
+
+	// Process the response payload to convert dates to Date objects
+	Object.values(response.payload).forEach((result) => {
+		result.rows.forEach((row) => {
+			row.date = new Date(row.date);
+		});
+	});
+
+	// Extract rows from response payload
+	return response.payload;
+};
+
+/**
+ * Uploads transaction rows to Monarch for specified accounts.
+ *
+ * @param accountMap - Map of Monarch account IDs to transaction rows to upload
+ */
+const uploadRowsToMonarch = async (accountMap: Record<string, TvbRow[]>) => {
+	// Ensure a Monarch tab exists and is ready
+	const primaryMonarchTabId = await ensureMonarchTab();
+
+	// Send rows to Monarch for upload
+	const response =
+		await sendMessageWithKeepAlive<MonarchRowUploadResponseMessage>(
+			primaryMonarchTabId,
+			{
+				type: "MONARCH_ROW_UPLOAD_REQUEST_MESSAGE",
+				payload: accountMap,
+			} satisfies MonarchRowUploadRequestMessage,
+		);
+
+	const successes: string[] = [];
+	const errors: string[] = [];
+
+	// Process the response payload to confirm upload
+	Object.entries(response.payload).forEach(([accountId, result]) => {
+		if (result.error) {
+			console.error(
+				`Error uploading rows for account ${accountId}`,
+				result.error,
+			);
+			errors.push(accountId);
+		} else {
+			console.log(`Successfully uploaded rows for account ${accountId}`);
+			successes.push(accountId);
+		}
+	});
+
+	// Update account status map with successes and errors
+	updateAccountStatus(
+		...successes.map((accountId) => ({
+			monarchId: accountId,
+			status: "success" as const,
+		})),
+		...errors.map((accountId) => ({
+			monarchId: accountId,
+			status: "error" as const,
+		})),
+	);
+};

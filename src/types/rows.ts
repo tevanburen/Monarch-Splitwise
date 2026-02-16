@@ -6,7 +6,7 @@ export type SplitwiseRow = {
 	Category: string;
 	Cost: number;
 	Currency: string;
-	Date: Date;
+	Date: string;
 	Description: string;
 } & {
 	[memberName: string]: number;
@@ -23,6 +23,22 @@ export interface TvbRow {
 }
 
 /**
+ * Result of fetching transaction data for a single account.
+ * Includes both the data and optional error information.
+ */
+export type AccountFetchResult = {
+	/** Transaction rows for this account */
+	rows: TvbRow[];
+	/** Error message if fetch failed, undefined if successful */
+	error?: string;
+};
+
+export type AccountUploadResult = {
+	/** Error message if upload failed, undefined if successful */
+	error?: string;
+};
+
+/**
  * Represents a row in Monarch's transaction CSV format.
  * Contains fixed values for certain fields specific to Splitwise imports.
  */
@@ -35,22 +51,4 @@ export interface MonarchRow {
 	Notes: string;
 	Amount: number;
 	Tags: "";
-}
-
-/**
- * Internal balance history entry.
- * Represents the account balance at a specific date.
- */
-export interface TvbBalanceRow {
-	date: Date;
-	balance: number;
-}
-
-/**
- * Represents a row in Monarch's balance history CSV format.
- */
-export interface MonarchBalanceRow {
-	Date: string;
-	Balance: number;
-	Account: "";
 }

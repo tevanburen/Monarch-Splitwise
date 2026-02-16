@@ -1,0 +1,34 @@
+import { SettingsModal, Widget } from "./components";
+import { useRuntimeStateContext } from "./providers";
+
+/**
+ * Main application component that composes the widget and settings modal.
+ * Handles fullscreen state for when the sync is running or settings are open.
+ *
+ * @component
+ */
+export const App = () => {
+	const { status, tempLocation } = useRuntimeStateContext();
+
+	const isFullscreen = status !== "idle";
+
+	return (
+		<div className={isFullscreen ? "h-screen w-screen" : ""}>
+			<div
+				className={
+					isFullscreen
+						? `fixed bottom-5 ${tempLocation === "left" ? "left-5" : "right-5"}`
+						: ""
+				}
+			>
+				<Widget />
+			</div>
+			{status === "running" && (
+				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+					<div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white" />
+				</div>
+			)}
+			<SettingsModal />
+		</div>
+	);
+};

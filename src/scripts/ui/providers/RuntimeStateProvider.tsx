@@ -1,0 +1,257 @@
+import {
+	createContext,
+	type Dispatch,
+	type PropsWithChildren,
+	type SetStateAction,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
+import type {
+	AccountStatus,
+	BackgroundState,
+	BackgroundStateTempData,
+	ExitSettingsMessage,
+	GetStateMessage,
+	RunDriverMessage,
+	TvbAccount,
+	UpdateStateBroadcastMessage,
+	UpdateStateMessagePayload,
+	UpdateStateRequestMessage,
+	WidgetLocation,
+	WidgetStatus,
+} from "@/types";
+
+/**
+ * Runtime state synchronized with background service worker
+ */
+interface RuntimeStateContextComponents {
+	initializationError: boolean;
+	tempLocation: WidgetLocation;
+	tempAccounts: TvbAccount[];
+	status: WidgetStatus;
+	updateSingleTempState: <T>(
+		field: keyof BackgroundStateTempData,
+		value: T | ((prev: T) => T),
+	) => void;
+	exitSettings: (save?: boolean) => void;
+	runDriver: () => void;
+	activeAccounts: (Pick<TvbAccount, "monarchId" | "accountName"> & {
+		accountStatus: AccountStatus;
+	})[];
+}
+
+const RuntimeStateContext = createContext<
+	RuntimeStateContextComponents | undefined
+>(undefined);
+
+/**
+ * Hook to access runtime state context
+ *
+ * @throws Error if used outside of RuntimeStateContextProvider
+ * @returns Runtime state context
+ */
+export const useRuntimeStateContext = (): RuntimeStateContextComponents => {
+	const context = useContext(RuntimeStateContext);
+	if (!context) {
+		throw new Error(
+			"useRuntimeStateContext must be used within a RuntimeStateContextProvider",
+		);
+	}
+	return context;
+};
+
+/**
+ * Provider that synchronizes state with background service worker.
+ * Listens for state updates from background and propagates to all consumers.
+ *
+ * @component
+ */
+export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
+	/**
+	 * State - synced with background script
+	 */
+	const [initializationError, setInitializationError] =
+		useState<boolean>(false);
+
+	// syncData
+	const [accounts, setAccounts] = useState<TvbAccount[]>([]);
+
+	// tempData
+	const [tempLocation, setTempLocation] = useState<WidgetLocation>("right");
+	const [tempAccounts, setTempAccounts] = useState<TvbAccount[]>([]);
+	const [status, setStatus] = useState<WidgetStatus>("idle");
+	const [accountStatusMap, setAccountStatusMap] = useState<
+		Record<string, AccountStatus>
+	>({});
+
+	// Derived data
+	const activeAccounts: (Pick<TvbAccount, "monarchId" | "accountName"> & {
+		accountStatus: AccountStatus;
+	})[] = useMemo(
+		() =>
+			accounts
+				.filter((account) => !account.inactive)
+				.map((account) => ({
+					monarchId: account.monarchId,
+					accountName: account.accountName,
+					accountStatus:
+						accountStatusMap[account.monarchId] ||
+						("running" satisfies AccountStatus),
+				})),
+		[accounts, accountStatusMap],
+	);
+
+	/**
+	 * Sync State
+	 */
+	const syncState = useCallback((state: UpdateStateMessagePayload) => {
+		if (state.syncData) {
+			if (state.syncData.accounts !== undefined) {
+				setAccounts(state.syncData.accounts);
+			}
+		}
+		if (state.tempData) {
+			if (state.tempData.tempLocation !== undefined) {
+				setTempLocation(state.tempData.tempLocation);
+			}
+			if (state.tempData.status !== undefined) {
+				setStatus(state.tempData.status);
+			}
+			if (state.tempData.tempAccounts !== undefined) {
+				setTempAccounts(state.tempData.tempAccounts);
+			}
+			if (state.tempData.accountStatusMap !== undefined) {
+				setAccountStatusMap(state.tempData.accountStatusMap);
+			}
+		}
+	}, []);
+
+	/**
+	 * Initialize state from background on mount
+	 */
+	useEffect(() => {
+		const loadData = async () => {
+			try {
+				const state: BackgroundState = await chrome.runtime.sendMessage({
+					type: "GET_STATE_MESSAGE",
+				} satisfies GetStateMessage);
+				if (!state.tempData || !state.syncData)
+					throw new Error("Incomplete state from background");
+
+				syncState(state);
+
+				setInitializationError(false);
+			} catch (error) {
+				setInitializationError(true);
+				console.error("Failed to load runtime state from background:", error);
+			}
+		};
+
+		loadData();
+	}, [syncState]);
+
+	/**
+	 * Listen for state updates from background
+	 */
+	useEffect(() => {
+		const handleMessage = (
+			message: UpdateStateBroadcastMessage,
+			_sender: chrome.runtime.MessageSender,
+		) => {
+			if (message.type === "UPDATE_STATE_BROADCAST_MESSAGE") {
+				syncState(message.payload);
+			}
+		};
+
+		chrome.runtime.onMessage.addListener(handleMessage);
+		return () => chrome.runtime.onMessage.removeListener(handleMessage);
+	}, [syncState]);
+
+	/**
+	 * Update state in background
+	 */
+	const updateSingleTempState = useCallback(
+		<T,>(field: keyof BackgroundStateTempData, value: T | ((prev: T) => T)) => {
+			let setState: Dispatch<SetStateAction<T>>;
+			switch (field) {
+				case "tempLocation":
+					setState = setTempLocation as Dispatch<SetStateAction<T>>;
+					break;
+				case "status":
+					setState = setStatus as Dispatch<SetStateAction<T>>;
+					break;
+				case "tempAccounts":
+					setState = setTempAccounts as Dispatch<SetStateAction<T>>;
+					break;
+				default:
+					throw new Error(`Unknown tempData field: ${field}`);
+			}
+
+			setState((prev) => {
+				const resolvedValue =
+					typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
+
+				if (prev !== resolvedValue) {
+					chrome.runtime
+						.sendMessage({
+							type: "UPDATE_STATE_REQUEST_MESSAGE",
+							payload: {
+								tempData: {
+									[field]: resolvedValue,
+								},
+							},
+						} satisfies UpdateStateRequestMessage)
+						.then(() => null);
+				}
+
+				return resolvedValue;
+			});
+		},
+		[],
+	);
+
+	/**
+	 * Exit the settings modal
+	 */
+	const exitSettings = useCallback((save: boolean = false) => {
+		chrome.runtime
+			.sendMessage({
+				type: "EXIT_SETTINGS_MESSAGE",
+				payload: save || false,
+			} satisfies ExitSettingsMessage)
+			.finally(() => null);
+	}, []);
+
+	/**
+	 * Trigger the driver method in background
+	 */
+	const runDriver = useCallback(() => {
+		chrome.runtime
+			.sendMessage({
+				type: "RUN_DRIVER_MESSAGE",
+			} satisfies RunDriverMessage)
+			.finally(() => null);
+	}, []);
+
+	return (
+		<RuntimeStateContext.Provider
+			value={
+				{
+					initializationError,
+					updateSingleTempState,
+					tempLocation,
+					tempAccounts,
+					status,
+					runDriver,
+					exitSettings,
+					activeAccounts,
+				} satisfies RuntimeStateContextComponents
+			}
+		>
+			{children}
+		</RuntimeStateContext.Provider>
+	);
+};
