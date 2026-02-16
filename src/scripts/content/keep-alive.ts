@@ -14,19 +14,24 @@ import type { KeepAliveMessage } from "@/types";
  *
  * Use this to wrap any operation that might take more than 3 seconds to complete.
  *
+ * @param messageId Unique identifier to correlate keep-alive messages with the operation
  * @param operation The async function to execute
  * @returns Promise resolving to the operation result
  * @throws Re-throws any error thrown by the operation
  *
  * @example
- * const rows = await withKeepAlive(() => apiClient.fetchSplitwiseRows());
+ * const rows = await withKeepAlive(message.messageId, () => apiClient.fetchSplitwiseRows());
  */
 export const withKeepAlive = async <T>(
+	messageId: string,
 	operation: () => Promise<T>,
 ): Promise<T> => {
 	const keepAliveInterval = setInterval(() => {
 		chrome.runtime
-			.sendMessage({ type: "KEEP_ALIVE_MESSAGE" } satisfies KeepAliveMessage)
+			.sendMessage({
+				type: "KEEP_ALIVE_MESSAGE",
+				messageId,
+			} satisfies KeepAliveMessage)
 			.catch(() => {
 				// Ignore errors if background worker is not listening
 			});

@@ -30,11 +30,11 @@ export const getTabType = (
 
 /**
  * Sends a message to a content script with a keep-alive timeout.
- * Expects periodic StayAliveMessages to reset the timeout.
- * If no message is received for 3 seconds, rejects with an error.
+ * Generates a unique message ID and expects periodic keep-alive messages with matching ID.
+ * If no matching keep-alive is received for 3 seconds, rejects with an error.
  *
  * @param tabId The tab ID to send the message to
- * @param message The message to send
+ * @param message The message to send (will be augmented with messageId)
  * @returns Promise resolving to the response from the content script
  * @throws Error if no keep-alive message is received within 3 seconds
  */
@@ -44,6 +44,13 @@ export const sendMessageWithKeepAlive = async <T = unknown>(
 ): Promise<T> => {
 	let keepAliveTimeout: number | null = null;
 	let responseReceived = false;
+
+	// Generate unique message ID
+	const messageId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+	const messageWithId = {
+		...(message as Record<string, unknown>),
+		messageId,
+	};
 
 	return new Promise((resolve, reject) => {
 		// Set up the initial timeout
@@ -62,18 +69,18 @@ export const sendMessageWithKeepAlive = async <T = unknown>(
 			}, 3000);
 		};
 
-		// Listen for keep-alive messages from the tab
+		// Listen for keep-alive messages with matching ID
 		const keepAliveListener = (msg: KeepAliveMessage) => {
-			if (msg?.type === "KEEP_ALIVE_MESSAGE") {
+			if (msg?.type === "KEEP_ALIVE_MESSAGE" && msg.messageId === messageId) {
 				resetTimeout();
 			}
 		};
 
 		chrome.runtime.onMessage.addListener(keepAliveListener);
 
-		// Send the message and handle response
+		// Send the message with messageId and handle response
 		chrome.tabs
-			.sendMessage(tabId, message)
+			.sendMessage(tabId, messageWithId)
 			.then((response: T) => {
 				responseReceived = true;
 				if (keepAliveTimeout) {

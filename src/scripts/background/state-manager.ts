@@ -124,7 +124,6 @@ export const updateAccountStatus = (
 	...newRows: { monarchId: string; status: AccountStatus }[]
 ): void => {
 	if (newRows.length === 0) return;
-	console.log(`Updating account status: ${JSON.stringify(newRows)}`);
 	updateState({
 		tempData: {
 			accountStatusMap: {
