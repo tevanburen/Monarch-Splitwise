@@ -43,7 +43,6 @@ chrome.runtime.onMessage.addListener(
 				sendResponse(getState());
 				break;
 
-			// TODO: Deprecate this in favor of RunDriver and specific update messages for the edit modal
 			case "UPDATE_STATE_REQUEST_MESSAGE":
 				// Update state (automatically broadcasts to all contexts)
 				updateState(message.payload);

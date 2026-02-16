@@ -136,14 +136,6 @@ chrome.runtime.onMessage.addListener(
 				},
 			);
 		}
-		// TODO: Handle additional message types for API calls and page automation
-		// else if (message.type === "API_CALL_REQUEST") {
-		//   apiClient.makeCall(message.payload).then(sendResponse);
-		// } else if (message.type === "CLICK_BUTTON_REQUEST") {
-		//   pageAutomation.clickButton(message.payload.selector).then(sendResponse);
-		// } else if (message.type === "FILE_UPLOAD_REQUEST") {
-		//   pageAutomation.uploadFile(message.payload.selector, message.payload.fileData).then(sendResponse);
-		// }
 
 		return true; // Keep channel open for async response
 	},

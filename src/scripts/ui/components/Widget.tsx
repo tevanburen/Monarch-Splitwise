@@ -1,3 +1,14 @@
+/**
+ * Widget component for the Monarch-Splitwise extension.
+ *
+ * Displays a floating card in the corner of the page showing:
+ * - Sync status for each configured account
+ * - Sync/Re-Sync button to trigger the driver
+ * - Settings button to open the configuration modal
+ *
+ * The widget auto-expands when syncing or when errors occur.
+ */
+
 import {
 	CheckCircle2,
 	ChevronUp,
@@ -11,8 +22,14 @@ import { Card } from "@/scripts/ui/components/shadcn/card";
 import { useRuntimeStateContext } from "@/scripts/ui/providers";
 import type { AccountStatus } from "@/types";
 
-const numRowsToShowWithoutExpanding = 1;
+/** Number of account rows to show before requiring expansion */
+const numRowsToShowWithoutExpanding = 3;
 
+/**
+ * Main widget component rendered in the iframe overlay.
+ *
+ * @component
+ */
 export const Widget = () => {
 	const { status, updateSingleTempState, runDriver, activeAccounts } =
 		useRuntimeStateContext();

@@ -206,8 +206,19 @@ export const createOrGetTab = async (
 	return tab.id;
 };
 
+/**
+ * Lock map for preventing concurrent execution of async functions.
+ */
 const locks = new Map<() => unknown, Promise<void>>();
 
+/**
+ * Higher-order function that prevents concurrent execution of an async method.
+ * If the wrapped method is called while a previous call is still running,
+ * the new call waits for the previous one to complete before starting.
+ *
+ * @param method - The async method to wrap with locking
+ * @returns A new function that enforces sequential execution
+ */
 export const withLock = <
 	TReturn = unknown,
 	TArgs extends unknown[] = unknown[],

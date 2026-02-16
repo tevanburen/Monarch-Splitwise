@@ -1,3 +1,16 @@
+/**
+ * Main driver/orchestrator for the sync process.
+ *
+ * This module coordinates the entire transaction sync workflow:
+ * 1. Ensures required tabs (Monarch, Splitwise) are open
+ * 2. Fetches transactions from both platforms in parallel
+ * 3. Compares and filters to find new transactions
+ * 4. Uploads new transactions to Monarch via UI automation
+ *
+ * The driver maintains tab references and handles error recovery for
+ * individual accounts while allowing successful accounts to complete.
+ */
+
 import type {
 	AccountFetchResult,
 	AccountStatus,
@@ -27,6 +40,8 @@ const driverData: BackgroundDriverData = {
 
 /**
  * Update driver data with partial changes.
+ *
+ * @param partialNewData - Partial driver data to merge
  */
 export const updateDriverData = (
 	partialNewData: Partial<BackgroundDriverData>,
@@ -39,6 +54,17 @@ export const updateDriverData = (
 	}
 };
 
+/**
+ * Main sync driver function.
+ *
+ * Orchestrates the complete sync workflow:
+ * 1. Fetches transaction data from both Splitwise and Monarch
+ * 2. Filters transactions by start date if configured
+ * 3. Removes matching transactions (duplicates)
+ * 4. Uploads remaining new transactions to Monarch
+ *
+ * Uses withLock to prevent concurrent sync operations.
+ */
 export const driver = withLock(async () => {
 	updateState({ tempData: { status: "running", accountStatusMap: {} } });
 	try {
@@ -202,6 +228,12 @@ const ensureMonarchTab = async (): Promise<number> => {
 	);
 };
 
+/**
+ * Fetches transaction rows from Splitwise for specified accounts.
+ *
+ * @param accountIds - Array of Splitwise group IDs
+ * @returns Map of account ID to fetch result with rows and optional error
+ */
 const fetchRowsFromSplitwise = async (
 	accountIds: string[],
 ): Promise<Record<string, AccountFetchResult>> => {
@@ -228,6 +260,12 @@ const fetchRowsFromSplitwise = async (
 	return response.payload;
 };
 
+/**
+ * Fetches transaction rows from Monarch for specified accounts.
+ *
+ * @param accountIds - Array of Monarch account IDs
+ * @returns Map of account ID to fetch result with rows and optional error
+ */
 const fetchRowsFromMonarch = async (
 	accountIds: string[],
 ): Promise<Record<string, AccountFetchResult>> => {
@@ -254,6 +292,11 @@ const fetchRowsFromMonarch = async (
 	return response.payload;
 };
 
+/**
+ * Uploads transaction rows to Monarch for specified accounts.
+ *
+ * @param accountMap - Map of Monarch account IDs to transaction rows to upload
+ */
 const uploadRowsToMonarch = async (accountMap: Record<string, TvbRow[]>) => {
 	// Ensure a Monarch tab exists and is ready
 	const primaryMonarchTabId = await ensureMonarchTab();

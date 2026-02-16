@@ -1,3 +1,13 @@
+/**
+ * Settings modal component for configuring Monarch-Splitwise account mappings.
+ *
+ * Allows users to:
+ * - Add/edit/remove account mappings between Splitwise groups and Monarch accounts
+ * - Toggle accounts active/inactive
+ * - Set start dates for transaction filtering
+ * - Choose widget position (left/right corner)
+ */
+
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/scripts/ui/components/shadcn/button";
 import {
@@ -20,6 +30,11 @@ import {
 import { useRuntimeStateContext } from "@/scripts/ui/providers";
 import type { TvbAccount, WidgetLocation, WidgetStatus } from "@/types";
 
+/**
+ * Modal dialog for managing extension settings and account configurations.
+ *
+ * @component
+ */
 export const SettingsModal = () => {
 	const {
 		status,
