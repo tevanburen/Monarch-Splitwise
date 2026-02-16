@@ -94,27 +94,31 @@ export const updateState = (
  * Exit settings, either reverting or saving the data.
  */
 export const exitSettings = (save: boolean = false): void => {
-	updateState(
-		save
-			? {
-					tempData: {
-						status: "idle",
-					},
-					syncData: {
-						accounts: state.tempData.tempAccounts,
-						location: state.tempData.tempLocation,
-					},
-				}
-			: {
-					tempData: {
-						status: "idle",
-						tempAccounts: state.syncData.accounts,
-					},
-					syncData: {
-						location: state.tempData.tempLocation,
-					},
-				},
-	);
+	if (save) {
+		const sortedAccounts = [...state.tempData.tempAccounts].sort((a, b) =>
+			a.accountName.localeCompare(b.accountName),
+		);
+		updateState({
+			tempData: {
+				status: "idle",
+				tempAccounts: sortedAccounts,
+			},
+			syncData: {
+				accounts: sortedAccounts,
+				location: state.tempData.tempLocation,
+			},
+		});
+	} else {
+		updateState({
+			tempData: {
+				status: "idle",
+				tempAccounts: state.syncData.accounts,
+			},
+			syncData: {
+				location: state.syncData.location,
+			},
+		});
+	}
 };
 
 /**

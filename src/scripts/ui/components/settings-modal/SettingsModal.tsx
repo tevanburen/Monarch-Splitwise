@@ -130,7 +130,8 @@ export const SettingsModal = () => {
 								</div>
 							) : (
 								tempAccounts.map((account, index) => (
-									<div key={account.monarchId}>
+									// biome-ignore lint/suspicious/noArrayIndexKey: Necessary for dynamic list
+									<div key={tempAccounts.length - index}>
 										<div className="p-4 space-y-2">
 											<div className="flex gap-2 items-start">
 												<Field className="flex-1 gap-0.5">
