@@ -1,3 +1,12 @@
+/**
+ * UI entry point for the extension's iframe-embedded React application.
+ *
+ * This module:
+ * - Initializes the React root in the iframe
+ * - Sets up the RuntimeStateProvider for background sync
+ * - Configures a ResizeObserver to notify the parent window of size changes
+ */
+
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { StrictMode } from "react";

@@ -1,6 +1,12 @@
 import { SettingsModal, Widget } from "./components";
 import { useRuntimeStateContext } from "./providers";
 
+/**
+ * Main application component that composes the widget and settings modal.
+ * Handles fullscreen state for when the sync is running or settings are open.
+ *
+ * @component
+ */
 export const App = () => {
 	const { status, tempLocation } = useRuntimeStateContext();
 

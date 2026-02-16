@@ -6,9 +6,11 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 import type {
+	AccountStatus,
 	BackgroundState,
 	BackgroundStateTempData,
 	ExitSettingsMessage,
@@ -27,8 +29,6 @@ import type {
  */
 interface RuntimeStateContextComponents {
 	initializationError: boolean;
-	clickNumber: number;
-	lastSynced: number;
 	tempLocation: WidgetLocation;
 	tempAccounts: TvbAccount[];
 	status: WidgetStatus;
@@ -38,6 +38,9 @@ interface RuntimeStateContextComponents {
 	) => void;
 	exitSettings: (save?: boolean) => void;
 	runDriver: () => void;
+	activeAccounts: (Pick<TvbAccount, "monarchId" | "accountName"> & {
+		accountStatus: AccountStatus;
+	})[];
 }
 
 const RuntimeStateContext = createContext<
@@ -74,21 +77,40 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 		useState<boolean>(false);
 
 	// syncData
-	const [lastSynced, setLastSynced] = useState<number>(0);
+	const [accounts, setAccounts] = useState<TvbAccount[]>([]);
 
 	// tempData
 	const [tempLocation, setTempLocation] = useState<WidgetLocation>("right");
 	const [tempAccounts, setTempAccounts] = useState<TvbAccount[]>([]);
 	const [status, setStatus] = useState<WidgetStatus>("idle");
-	const [clickNumber, setClickNumber] = useState<number>(0);
+	const [accountStatusMap, setAccountStatusMap] = useState<
+		Record<string, AccountStatus>
+	>({});
+
+	// Derived data
+	const activeAccounts: (Pick<TvbAccount, "monarchId" | "accountName"> & {
+		accountStatus: AccountStatus;
+	})[] = useMemo(
+		() =>
+			accounts
+				.filter((account) => !account.inactive)
+				.map((account) => ({
+					monarchId: account.monarchId,
+					accountName: account.accountName,
+					accountStatus:
+						accountStatusMap[account.monarchId] ||
+						("running" satisfies AccountStatus),
+				})),
+		[accounts, accountStatusMap],
+	);
 
 	/**
 	 * Sync State
 	 */
 	const syncState = useCallback((state: UpdateStateMessagePayload) => {
 		if (state.syncData) {
-			if (state.syncData.lastSynced !== undefined) {
-				setLastSynced(state.syncData.lastSynced);
+			if (state.syncData.accounts !== undefined) {
+				setAccounts(state.syncData.accounts);
 			}
 		}
 		if (state.tempData) {
@@ -98,11 +120,11 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 			if (state.tempData.status !== undefined) {
 				setStatus(state.tempData.status);
 			}
-			if (state.tempData.clickNumber !== undefined) {
-				setClickNumber(state.tempData.clickNumber);
-			}
 			if (state.tempData.tempAccounts !== undefined) {
 				setTempAccounts(state.tempData.tempAccounts);
+			}
+			if (state.tempData.accountStatusMap !== undefined) {
+				setAccountStatusMap(state.tempData.accountStatusMap);
 			}
 		}
 	}, []);
@@ -155,9 +177,6 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 		<T,>(field: keyof BackgroundStateTempData, value: T | ((prev: T) => T)) => {
 			let setState: Dispatch<SetStateAction<T>>;
 			switch (field) {
-				case "clickNumber":
-					setState = setClickNumber as Dispatch<SetStateAction<T>>;
-					break;
 				case "tempLocation":
 					setState = setTempLocation as Dispatch<SetStateAction<T>>;
 					break;
@@ -222,14 +241,13 @@ export const RuntimeStateProvider = ({ children }: PropsWithChildren) => {
 			value={
 				{
 					initializationError,
-					clickNumber,
 					updateSingleTempState,
-					lastSynced,
 					tempLocation,
 					tempAccounts,
 					status,
 					runDriver,
 					exitSettings,
+					activeAccounts,
 				} satisfies RuntimeStateContextComponents
 			}
 		>

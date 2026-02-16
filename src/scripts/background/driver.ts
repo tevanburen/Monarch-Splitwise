@@ -1,5 +1,19 @@
+/**
+ * Main driver/orchestrator for the sync process.
+ *
+ * This module coordinates the entire transaction sync workflow:
+ * 1. Ensures required tabs (Monarch, Splitwise) are open
+ * 2. Fetches transactions from both platforms in parallel
+ * 3. Compares and filters to find new transactions
+ * 4. Uploads new transactions to Monarch via UI automation
+ *
+ * The driver maintains tab references and handles error recovery for
+ * individual accounts while allowing successful accounts to complete.
+ */
+
 import type {
 	AccountFetchResult,
+	AccountStatus,
 	BackgroundDriverData,
 	MonarchRowRequestMessage,
 	MonarchRowResponseMessage,
@@ -16,7 +30,7 @@ import {
 	withLock,
 } from "./background.utils";
 import { removeSimilarRows, spliceElementsBS } from "./rows";
-import { getState, updateState } from "./state-manager";
+import { getState, updateAccountStatus, updateState } from "./state-manager";
 
 // Driver data
 const driverData: BackgroundDriverData = {
@@ -26,6 +40,8 @@ const driverData: BackgroundDriverData = {
 
 /**
  * Update driver data with partial changes.
+ *
+ * @param partialNewData - Partial driver data to merge
  */
 export const updateDriverData = (
 	partialNewData: Partial<BackgroundDriverData>,
@@ -38,8 +54,19 @@ export const updateDriverData = (
 	}
 };
 
+/**
+ * Main sync driver function.
+ *
+ * Orchestrates the complete sync workflow:
+ * 1. Fetches transaction data from both Splitwise and Monarch
+ * 2. Filters transactions by start date if configured
+ * 3. Removes matching transactions (duplicates)
+ * 4. Uploads remaining new transactions to Monarch
+ *
+ * Uses withLock to prevent concurrent sync operations.
+ */
 export const driver = withLock(async () => {
-	updateState({ tempData: { status: "running" } });
+	updateState({ tempData: { status: "running", accountStatusMap: {} } });
 	try {
 		const activeAccountMap = getState()
 			.syncData.accounts.filter((account) => !account.inactive)
@@ -62,6 +89,19 @@ export const driver = withLock(async () => {
 					}
 				>,
 			);
+
+		// Update account status map
+		updateState({
+			tempData: {
+				accountStatusMap: Object.values(activeAccountMap).reduce(
+					(acc, account) => {
+						acc[account.monarchId] = "running";
+						return acc;
+					},
+					{} as Record<string, AccountStatus>,
+				),
+			},
+		});
 
 		// Fetch rows from both Splitwise and Monarch in parallel
 		await Promise.all([
@@ -95,6 +135,16 @@ export const driver = withLock(async () => {
 			})(),
 		]);
 
+		// Update account status map - mark errors
+		updateAccountStatus(
+			...Object.values(activeAccountMap)
+				.filter((account) => account.error)
+				.map((account) => ({
+					monarchId: account.monarchId,
+					status: "error" as const,
+				})),
+		);
+
 		Object.values(activeAccountMap).forEach((account) => {
 			if (account.error) return;
 			// Process accounts without errors
@@ -126,6 +176,16 @@ export const driver = withLock(async () => {
 
 		// Log the active account map for debugging
 		console.log(activeAccountMap);
+
+		// Update account status map - mark successes
+		updateAccountStatus(
+			...Object.values(activeAccountMap)
+				.filter((account) => !account.error && account.newRows.length === 0)
+				.map((account) => ({
+					monarchId: account.monarchId,
+					status: "success" as const,
+				})),
+		);
 
 		// Upload new rows to Monarch
 		await uploadRowsToMonarch(
@@ -168,6 +228,12 @@ const ensureMonarchTab = async (): Promise<number> => {
 	);
 };
 
+/**
+ * Fetches transaction rows from Splitwise for specified accounts.
+ *
+ * @param accountIds - Array of Splitwise group IDs
+ * @returns Map of account ID to fetch result with rows and optional error
+ */
 const fetchRowsFromSplitwise = async (
 	accountIds: string[],
 ): Promise<Record<string, AccountFetchResult>> => {
@@ -194,6 +260,12 @@ const fetchRowsFromSplitwise = async (
 	return response.payload;
 };
 
+/**
+ * Fetches transaction rows from Monarch for specified accounts.
+ *
+ * @param accountIds - Array of Monarch account IDs
+ * @returns Map of account ID to fetch result with rows and optional error
+ */
 const fetchRowsFromMonarch = async (
 	accountIds: string[],
 ): Promise<Record<string, AccountFetchResult>> => {
@@ -220,6 +292,11 @@ const fetchRowsFromMonarch = async (
 	return response.payload;
 };
 
+/**
+ * Uploads transaction rows to Monarch for specified accounts.
+ *
+ * @param accountMap - Map of Monarch account IDs to transaction rows to upload
+ */
 const uploadRowsToMonarch = async (accountMap: Record<string, TvbRow[]>) => {
 	// Ensure a Monarch tab exists and is ready
 	const primaryMonarchTabId = await ensureMonarchTab();
@@ -234,6 +311,9 @@ const uploadRowsToMonarch = async (accountMap: Record<string, TvbRow[]>) => {
 			} satisfies MonarchRowUploadRequestMessage,
 		);
 
+	const successes: string[] = [];
+	const errors: string[] = [];
+
 	// Process the response payload to confirm upload
 	Object.entries(response.payload).forEach(([accountId, result]) => {
 		if (result.error) {
@@ -241,8 +321,22 @@ const uploadRowsToMonarch = async (accountMap: Record<string, TvbRow[]>) => {
 				`Error uploading rows for account ${accountId}`,
 				result.error,
 			);
+			errors.push(accountId);
 		} else {
 			console.log(`Successfully uploaded rows for account ${accountId}`);
+			successes.push(accountId);
 		}
 	});
+
+	// Update account status map with successes and errors
+	updateAccountStatus(
+		...successes.map((accountId) => ({
+			monarchId: accountId,
+			status: "success" as const,
+		})),
+		...errors.map((accountId) => ({
+			monarchId: accountId,
+			status: "error" as const,
+		})),
+	);
 };

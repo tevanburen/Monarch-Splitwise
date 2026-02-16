@@ -33,7 +33,10 @@ export interface BackgroundStateTempData {
 	tempLocation: WidgetLocation;
 	status: WidgetStatus;
 	tempAccounts: TvbAccount[];
+	accountStatusMap: Record<string, AccountStatus>;
 }
+
+export type AccountStatus = "running" | "success" | "error";
 
 // ============================================================================
 // UI State Types

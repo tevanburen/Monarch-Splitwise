@@ -69,6 +69,7 @@ export type ExitSettingsMessage = {
 
 export type KeepAliveMessage = {
 	type: "KEEP_ALIVE_MESSAGE";
+	messageId: string;
 };
 
 // ============================================================================
