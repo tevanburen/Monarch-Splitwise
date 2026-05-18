@@ -211,7 +211,14 @@ function FieldError({
 				{uniqueErrors.map(
 					(error, index) =>
 						error?.message && (
-							<li key={`error-${error?.message}-${index}-`}>{error.message}</li>
+							<li
+								key={`error-${error?.message}-${
+									// biome-ignore lint/suspicious/noArrayIndexKey: shadcn
+									index
+								}-`}
+							>
+								{error.message}
+							</li>
 						),
 				)}
 			</ul>
@@ -236,13 +243,13 @@ function FieldError({
 
 export {
 	Field,
-	FieldLabel,
+	FieldContent,
 	FieldDescription,
 	FieldError,
 	FieldGroup,
+	FieldLabel,
 	FieldLegend,
 	FieldSeparator,
 	FieldSet,
-	FieldContent,
 	FieldTitle,
 };
