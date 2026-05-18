@@ -7,7 +7,6 @@
 
 import { read as XLSXread, utils as XLSXutils } from "xlsx";
 import type { MonarchRow, SplitwiseRow, TvbRow } from "@/types";
-import { getMonarchToken } from "./auth";
 
 // ============================================================================
 // API Fetching
@@ -21,11 +20,14 @@ import { getMonarchToken } from "./auth";
  * @throws Error if auth token is not available or request fails
  */
 export const fetchMonarchCsv = async (monarchId: string): Promise<string> => {
-	const authToken = await getMonarchToken();
+	const csrfToken = document.cookie
+		.split("; ")
+		.find((c) => c.startsWith("csrftoken="))
+		?.split("=")[1];
 
-	if (!authToken) {
+	if (!csrfToken) {
 		throw new Error(
-			"Monarch auth token not available. Please log in to Monarch first.",
+			"Monarch CSRF token not available. Please log in to Monarch first.",
 		);
 	}
 
@@ -35,10 +37,10 @@ export const fetchMonarchCsv = async (monarchId: string): Promise<string> => {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: authToken,
+				"X-CSRFToken": csrfToken,
 			},
 			body: JSON.stringify({ accounts: [monarchId] }),
-			referrerPolicy: "no-referrer",
+			credentials: "include",
 		},
 	);
 
