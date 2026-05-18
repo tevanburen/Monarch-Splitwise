@@ -13,4 +13,5 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install
+      - run: pnpm exec biome ci .
       - run: pnpm build
