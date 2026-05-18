@@ -86,12 +86,8 @@ pnpm build
 # Development watch mode
 pnpm dev
 
-# Type checking
-pnpm typecheck
-
 # Lint & format
-pnpm lint
-pnpm format
+pnpm fix
 ```
 
 ## Future Improvements
