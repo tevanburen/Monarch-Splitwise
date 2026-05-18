@@ -62,6 +62,11 @@ This extension adds a widget to both the Monarch and Splitwise web interfaces, e
 └───────────────────┘ └───────────────────┘ └───────────────────┘
 ```
 
+### Auth
+
+- **Monarch**: Uses cookie-based authentication. The session cookie (`session_id`) is sent automatically by the browser via `credentials: include`, and the CSRF token (`csrftoken`) is read from `document.cookie` and passed as an `X-CSRFToken` header on POST requests.
+- **Splitwise**: Uses cookie-based authentication via `credentials: include`. The Splitwise user name (needed to identify your column in the CSV export) is captured by intercepting the XHR response from `/api/v3.0/get_main_data` in the page context (MAIN world script).
+
 ### Sync Process
 
 1. **Fetch Phase**: Parallel requests to Splitwise (CSV export API) and Monarch (download API)
@@ -100,7 +105,7 @@ pnpm format
 - Built with React, TypeScript, Vite, Tailwind CSS, and shadcn/ui
 - Uses Chrome Extension Manifest V3
 - State is synced across tabs via the background service worker
-- Auth tokens are captured via fetch/XHR interception in the page context
+- Both Monarch and Splitwise auth use browser cookies (`credentials: include`); Monarch also requires an `X-CSRFToken` header read from `document.cookie`; Splitwise username is captured via XHR interception in the page context
 - Long-running operations use keep-alive messaging to prevent service worker timeout
 - Much of the code comments and documentation were written with assistance from GitHub Copilot (typically using Claude Sonnet 4.5)
 

@@ -1,74 +1,16 @@
 import type { PageContextMessage } from "@/types";
 
 /**
- * Page context injection script that intercepts fetch and XHR requests.
+ * Page context injection script that intercepts XHR requests.
  *
  * This script runs in the MAIN world (page context), not the extension's isolated world.
- * Running in the page context allows us to intercept the original window.fetch and
- * XMLHttpRequest before any page scripts execute.
  *
  * Purpose:
- * - Capture Monarch API authentication tokens from fetch request headers
  * - Capture Splitwise user data from XHR response bodies
  *
  * Data Flow:
  * Page Context (this script) → DOM Custom Events → Content Script → Background Worker
  */
-
-// ============================================================================
-// Fetch Interceptor - Captures Monarch Auth Tokens
-// ============================================================================
-
-(() => {
-	const originalFetch = window.fetch;
-
-	window.fetch = async (...args) => {
-		const [target, init] = args;
-		const monarchUrl = "api.monarch.com";
-
-		// Check if this is a Monarch API request
-		const isMonarchRequest =
-			(target as URL)?.href?.includes(monarchUrl) ||
-			(target as Request)?.url?.includes(monarchUrl) ||
-			(target as string)?.includes(monarchUrl);
-
-		if (isMonarchRequest) {
-			// Extract headers from the request - handle all three formats
-			let headers: Record<string, string> = {};
-			if (init?.headers instanceof Headers) {
-				// Case 1: Headers object
-				headers = Object.fromEntries(init.headers.entries());
-			} else if (Array.isArray(init?.headers)) {
-				// Case 2: Array of arrays [["key", "value"], ...]
-				headers = Object.fromEntries(init.headers);
-			} else if (init?.headers) {
-				// Case 3: Plain object
-				headers = init.headers as Record<string, string>;
-			}
-
-			// Look for Authorization token
-			const token = headers.Authorization || headers.authorization;
-
-			if (token) {
-				// Dispatch event to content script with the auth token
-				const message: PageContextMessage = {
-					isTvbMessage: true,
-					source: "page-context",
-					type: "monarchAuthToken",
-					payload: token,
-				};
-
-				const event = new CustomEvent("monarch-auth-token", {
-					detail: message,
-				});
-				document.dispatchEvent(event);
-			}
-		}
-
-		// Always call the original fetch to maintain normal behavior
-		return originalFetch(...args);
-	};
-})();
 
 // ============================================================================
 // XMLHttpRequest Interceptor - Captures Splitwise User Data
