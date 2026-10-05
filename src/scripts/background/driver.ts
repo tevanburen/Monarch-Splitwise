@@ -151,6 +151,9 @@ export const driver = withLock(async () => {
 
 			// trim rows to startDate
 			if (account.startDate) {
+				// spliceElementsBS requires ascending order; Monarch returns newest first
+				account.newRows.sort((a, b) => a.date.getTime() - b.date.getTime());
+				account.oldRows.sort((a, b) => a.date.getTime() - b.date.getTime());
 				spliceElementsBS<TvbRow, Date>(
 					account.newRows,
 					(row) => row.date,
