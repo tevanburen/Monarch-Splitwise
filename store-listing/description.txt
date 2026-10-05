@@ -1,0 +1,36 @@
+Splitwise Sync for Monarch keeps your shared expenses in Monarch up to date without manual entry.
+
+If you split costs with roommates, a partner, or friends on Splitwise, those balances are real money you owe or are owed, but they never show up in Monarch on their own. Keeping them in sync usually means exporting CSVs, cleaning them up, and importing them by hand, then checking you didn't double-import anything. This extension does all of that with one click.
+
+HOW IT WORKS
+Link a Splitwise group to a Monarch account, then click Sync. The extension:
+• Pulls your share of every expense in the Splitwise group
+• Pulls the existing transactions from the linked Monarch account
+• Compares the two by date, amount, and description to find what's missing
+• Imports only the new transactions into Monarch and updates the account balance
+
+Expenses you weren't part of are skipped, so only what affects your balance gets imported.
+
+FEATURES
+• One-click sync from a small widget on the Monarch and Splitwise sites
+• Link multiple Splitwise groups to different Monarch accounts and sync them all at once
+• Duplicate detection, so running Sync again never re-imports transactions that are already there
+• Optional start date per account, so you can ignore history from before you started tracking
+• Per-account status, so you can see at a glance which accounts synced and which need attention
+• Mark accounts inactive to skip them without deleting their settings
+• Move the widget to the left or right corner
+
+SETUP
+1. Install the extension and open Splitwise once while logged in. The extension needs this to read your Splitwise display name.
+2. Open the widget's settings and add a link for each group. Enter the Monarch account ID (from the account page URL) and the Splitwise group ID (from the group page URL), plus an optional start date.
+3. Save, then click Sync.
+
+Imported transactions use "Splitwise" as the merchant and the Splitwise expense description as the note, so they're easy to find and categorize in Monarch.
+
+PRIVACY
+Everything runs locally in your browser. The extension uses your existing logged-in sessions on Monarch and Splitwise to read and import data. Your financial data is never sent to the developer or any third party, and there are no analytics or tracking. Your account mappings are stored in Chrome's sync storage.
+
+NOTES
+• You need to be logged in to both Monarch and Splitwise in the same browser.
+• Transactions are imported through Monarch's own CSV import flow. If Monarch changes its website, imports may stop working until the extension is updated.
+• This extension is an independent project and is not affiliated with, endorsed by, or sponsored by Monarch Money or Splitwise.
