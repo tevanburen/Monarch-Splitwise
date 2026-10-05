@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite build --watch",
+		"package": "pnpm build && rm -f extension.zip && zip -r extension.zip manifest.json dist -x \"*.DS_Store\"",
 		"fix": "biome format --write && biome lint --write"
 	},
 	"keywords": [],
