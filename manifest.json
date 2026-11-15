@@ -1,7 +1,7 @@
 {
 	"name": "Splitwise Sync for Monarch",
 	"description": "Syncs Splitwise group expenses into Monarch accounts. All processing happens locally in your browser.",
-	"version": "2.3",
+	"version": "2.4",
 	"manifest_version": 3,
 	"minimum_chrome_version": "111",
 	"icons": {

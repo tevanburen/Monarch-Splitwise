@@ -169,7 +169,7 @@ const uploadRowsForAccount = async (
 	// Navigate through the Monarch import flow (as of January 2026)
 	// Start import flow
 	await clickElement("button", /^Edit[\s\W]*$/);
-	await clickElement("div", /^Import transactions$/);
+	await clickElement("a", /^Import transactions$/);
 
 	// Upload the file
 	await uploadFilesToInput(newFile);
